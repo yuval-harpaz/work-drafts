@@ -1,10 +1,10 @@
 cd /home/yuval/Desktop/tal
 subs=textread('subs3.txt','%s');
 cond='rest';
-pref='gamma';
-SAMTal(subs,'gamma','eyesClosed',cond)
+pref='theta';freq='3-7';
+SAMTal(subs,pref,'eyesClosed',cond)
 %% 
-SVL='gamma,25-45Hz,eyesClosed-NULL,P,Zp.svl';
+SVL=[pref,',',freq,'Hz,eyesClosed-NULL,P,Zp.svl'];
 func2tlrc(subs,cond,SVL,pref)
 %% now run ./func2tlrc.txt
 
