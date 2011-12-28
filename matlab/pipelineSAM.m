@@ -37,4 +37,13 @@ sess2minusSess1(subs1,subs2,fileName1,[pref,'_pre2_pre1']);
 % post2 - post1
 sess2minusSess1(subs1,subs2,fileName2,[pref,'_post2_post1']);
 
-%%
+%% group differences Dislexia - control
+subs1=textread('groupC.txt','%s');
+subs2=textread('groupD.txt','%s');
+%cond='rest';
+pref='theta';
+%freq='3-7';
+fileName1=[pref,'1+tlrc'];
+newName=[pref,'_pre1_D_C'];
+betweenGroups(subs1,subs2,fileName1,newName);
+maskStat([newName,'+tlrc']);
