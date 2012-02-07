@@ -1,4 +1,4 @@
-function [vol,grid]=headmodel(source,MRI,res);
+function [vol,grid,mesh,M1]=headmodel(source,MRI,res);
 %creates Nolte style single shell model.
 % requires source- name of data file (c,rfhp0.1Hz is the default). hs_file
 % has to be there too. uses template MRI unless specify MRI='anat.nii'. MRI

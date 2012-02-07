@@ -30,27 +30,30 @@ data=ft_preprocessing(cfg2);
 cfg4.latency=[-0.1 0.6];
 standard=ft_timelockanalysis(cfg4,data);
 save standard standard
-[vol,grid]=headmodel;
+[vol,grid,mesh,M1]=headmodel;
 sMRI = read_mri(fullfile(spm('dir'), 'canonical', 'single_subj_T1.nii'));
+MRIcr.transform=inv(M1)*sMRI.transform; %cr for corregistered MRI
 cfg5 = [];
 cfg5.latency = [0.035 0.075];  % specify latency window around M50 peak
 cfg5.numdipoles = 1;
 %cfg.symmetry='x';
 cfg5.vol=vol;
 cfg5.feedback = 'textbar';
-%cfg5.gridsearch='no';
+cfg5.gridsearch='yes';
 %cfg5.resolution = 0.1;
 % cfg5.grid.xgrid=-75:-30;
 % cfg5.grid.ygrid=75:-1:-105;
 % cfg5.grid.zgrid=90:-1:-50;
 cfg5.grid=grid;
+cfg5.channel=Lchannel;
 dip = ft_dipolefitting(cfg5, standard);
-
-
 cfg6 = [];
-cfg6.location = dip.dip.pos(1,:) * 10;   % convert from cm to mm
-cfg6.interactive='yes';
-figure; ft_sourceplot(cfg6, sMRI);
+cfg6.location = dip.dip.pos(1,:) %* 10;   % convert from cm to mm
+figure; ft_sourceplot(cfg6, MRIcr);title('L')
+cfg5.channel=Rchannel;
+dip = ft_dipolefitting(cfg5, standard);
+cfg6.location = dip.dip.pos(1,:)
+figure; ft_sourceplot(cfg6, MRIcr);title('R');
 %% LCMV
 cfg7                  = [];
 cfg7.covariance       = 'yes';
@@ -60,15 +63,15 @@ cfg7.channel='MEG';
 covpre=timelockanalysis(cfg7, standard);
 cfg7.covariancewindow = [0.03 0.08];
 covpst=timelockanalysis(cfg7, standard);
-cfg        = [];
-cfg.method = 'lcmv';
-cfg.grid= grid;
-cfg.vol    = vol;
-cfg.lambda = '5%';
-cfg.keepfilter='no';
+cfg8        = [];
+cfg8.method = 'lcmv';
+cfg8.grid= grid;
+cfg8.vol    = vol;
+cfg8.lambda = '5%';
+cfg8.keepfilter='no';
 
-spre = ft_sourceanalysis(cfg, covpre);
-spst = ft_sourceanalysis(cfg, covpst);
+spre = ft_sourceanalysis(cfg8, covpre);
+spst = ft_sourceanalysis(cfg8, covpst);
 spst.avg.nai=(spst.avg.pow-spre.avg.pow)./spre.avg.pow;
 %spstest=spst;
 % cfg = [];
@@ -78,10 +81,10 @@ spst.avg.nai=(spst.avg.pow-spre.avg.pow)./spre.avg.pow;
 % load ~/ft_BIU/matlab/LCMV/pos
 cfg10 = [];
 cfg10.parameter = 'avg.nai';
-spst.pos=pos;
-inai = sourceinterpolate(cfg10, spst,sMRI)
+%spst.pos=pos;
+inai = sourceinterpolate(cfg10, spst,MRIcr)
 cfg10.parameter = 'avg.pow';
-ipow = sourceinterpolate(cfg10, spst,sMRI)
+ipow = sourceinterpolate(cfg10, spst,MRIcr)
 cfg9 = [];
 %cfg9.funcolorlim = [lowlim 1];
 cfg9.interactive = 'yes';
