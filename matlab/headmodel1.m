@@ -1,4 +1,4 @@
-function [vol,grid,mesh,M1]=headmodel(source,MRI,res,volType);
+function [vol,grid,mesh,M1,single]=headmodel1(source,MRI,res,volType,model);
 % creates volume for source localizaton.
 % Nolte models based on 'scalp', 'iskull' (default) or 'ctx' (not
 % recommended).
@@ -6,10 +6,12 @@ function [vol,grid,mesh,M1]=headmodel(source,MRI,res,volType);
 % has to be there too. uses template MRI unless specify MRI='anat.nii'. MRI
 % can be nii or img format. for AFNI files use 3dAFNItoNIFTI for
 % conversion.
-% res- resolution, space between template grid points in mm (default = 10).
+% res- resolution, 5 or 10mm (default).
+% model='singleshell' or localspheres'
 
 
 %setting defaults
+single=[];
 if ~exist('source','var')
     source=[];
 end
@@ -37,16 +39,25 @@ end
 if ~strcmp(volType,'ctx') && ~strcmp(volType,'iskull') && ~strcmp(volType,'scalp')
     error('volType has to be ctx iskull or scalp')
 end
+if ~exist('model','var')
+    model=[];
+end
+if isempty(model)
+    model='singleshell';
+end
 cfg.dataset=source;
 cfg.trialdef.poststim=1;
 cfg.trialfun='trialfun_beg';
 cfg=ft_definetrial(cfg);
 data=ft_preprocessing(cfg);
+hdr=ft_read_headerOLD(source); % to get rid of chans 272:276
+data.grad=ft_convert_units(hdr.grad,'mm');
+
 %data.avg = data.trial;
 if ~isfield(data,'dimord')
     data.dimord = 'chan_time';
 end
-cfg1.model='singleshell';
+cfg1.model=model;
 cfg1.resolution=res;
 headshapefile='hs_file';
 
@@ -83,7 +94,7 @@ D.inv = {struct('mesh', [])};
 D.inv{1}.date    = strvcat(date,datestr(now,15));
 D.inv{1}.comment = {''};
 D.inv{1}.mesh= spm_eeg_inv_mesh(MRI, 2);
-spm_eeg_inv_checkmeshes(D);
+% spm_eeg_inv_checkmeshes(D);
 tmesh=D.inv{1}.mesh;
 %COREGISTRATION WITH TEMPLATE MRI
 meegfid = D.fiducials;
@@ -116,38 +127,57 @@ eval(['tinpoints = export(gifti(tmesh.tess_',volType,'), ','''spm''',');'])
 %mesh=D.inv{1}.mesh;
 eval(['svol=','''mesh.tess_',volType,''';']);
 display(['building ',volType,' volume'])
-vol = [];
-eval(['vol.bnd = export(gifti(',svol,'), ''','ft''',');'])
-vol.type = 'nolte';
-%vol = forwinv_convert_units(vol, 'mm');
-%vol.bnd.pnt=spm_eeg_inv_transform_points(D.inv{1}.datareg.toMNI, vol.bnd.pnt);
-tvol=[];
-tvol.bnd = export(gifti(tinpoints), 'ft');
-tvol.type = 'nolte';
-% Build grid
-template_grad     = [];
-template_grad.pnt = [];
-template_grad.ori = [];
-template_grad.tra = [];
-template_grad.label = {};
-cfg = [];
-cfg.grid.xgrid = -90:cfg1.resolution:90;
-cfg.grid.ygrid = -115:cfg1.resolution:85;
-cfg.grid.zgrid = -60:cfg1.resolution:90;
-cfg.grid.tight = 'yes'; %new way
-cfg.inwardshift = 0;%-1.5;
-template_grid = ft_prepare_sourcemodel(cfg, tvol, template_grad);
-%template_grid = prepare_dipole_grid(cfg, tvol, template_grad);
+switch model
+    case 'singleshell'
+        vol = [];
+        eval(['vol.bnd = export(gifti(',svol,'), ''','ft''',');'])
+        vol.type = 'nolte';
+        %vol = forwinv_convert_units(vol, 'mm');
+        %vol.bnd.pnt=spm_eeg_inv_transform_points(D.inv{1}.datareg.toMNI, vol.bnd.pnt);
+        tvol=[];
+        tvol.bnd = export(gifti(tinpoints), 'ft');
+        tvol.type = 'nolte';
+    case 'localspheres'
+        cfg                        = [];
+        cfg.feedback               = 'yes';
+        %            cfg.grad                   = D.inv{1}.datareg(1).sensors;
+        cfg.grad = data.grad;
+%        mesh.tess_scalp=export(gifti(tmesh.tess_scalp),'spm');
+        cfg.headshape.pnt              = mesh.tess_scalp.vert;
+        cfg.radius                 = 85;
+        cfg.maxradius              = 200;
+        cfg.channel={'MEG'};
+       % vol  = ft_prepare_localspheres(cfg);
+        vol  = ft_prepare_localspheres_mm(cfg);
+        cfg.singlesphere='yes';
+        single=ft_prepare_localspheres_mm(cfg);
+        
+        
+
+%         vol.o=spm_eeg_inv_transform_points(D.inv{1}.datareg.toMNI, vol.o);
+%         cfg.headshape              = tscalp.vert;
+%         tvol  = prepare_localspheres(cfg);
+        
+end
+
+
+%% preparing a grid of dipoles
+% load template grid
+eval (['load ~/ft_BIU/matlab/LCMV/template_grid_',num2str(res),'mm.mat'])
+% changing position of grid point from MNI to individual positions.
 grid         = [];
-%grid.pos=template_grid.pos;
 grid.pos     = spm_eeg_inv_transform_points(inv(M1), template_grid.pos);
-%grid.pos     = spm_eeg_inv_transform_points(D.inv{1}.datareg.toMNI, grid.pos);
-%grid.pos     = spm_eeg_inv_transform_points(D.inv{1}.datareg.toMNI, template_grid.pos);
 grid.inside  = template_grid.inside;
 grid.outside = template_grid.outside;
 grid.dim = template_grid.dim;
-close all;
+close all
+figure
 plot3(meegfid.pnt(:,1),meegfid.pnt(:,2),meegfid.pnt(:,3),'o');
 hold on
-plot3(grid.pos(grid.inside,1),grid.pos(grid.inside,2),grid.pos(grid.inside,3),'xk');
+if strcmp(vol.type,'multisphere');
+    ft_plot_vol(single);
+else
+    ft_plot_vol(vol);
+end
+ft_plot_mesh(grid);
 end

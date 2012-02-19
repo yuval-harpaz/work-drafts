@@ -30,11 +30,15 @@ data=ft_preprocessing(cfg2);
 cfg4.latency=[-0.1 0.6];
 standard=ft_timelockanalysis(cfg4,data);
 save standard standard
-[vol,grid,mesh,M1]=headmodel;
-sMRI = read_mri(fullfile(spm('dir'), 'canonical', 'single_subj_T1.nii'));
+[vol,grid,mesh,M1]=headmodel1; % [vol,grid,mesh,M1]=headmodel1([],[],5);
+% sMRI = read_mri(fullfile(spm('dir'), 'canonical', 'single_subj_T1.nii'));
+load ~/ft_BIU/matlab/files/sMRI.mat
+load modelScalp
+load LRchans
+MRIcr=sMRI;
 MRIcr.transform=inv(M1)*sMRI.transform; %cr for corregistered MRI
 cfg5 = [];
-cfg5.latency = [0.035 0.075];  % specify latency window around M50 peak
+cfg5.latency = [0.055 0.055];  % specify latency window around M50 peak
 cfg5.numdipoles = 1;
 %cfg.symmetry='x';
 cfg5.vol=vol;
@@ -55,13 +59,16 @@ dip = ft_dipolefitting(cfg5, standard);
 cfg6.location = dip.dip.pos(1,:)
 figure; ft_sourceplot(cfg6, MRIcr);title('R');
 %% LCMV
+load modelScalp
+load standard
+t1=0.03;t2=0.08;
 cfg7                  = [];
 cfg7.covariance       = 'yes';
 cfg7.removemean       = 'no';
-cfg7.covariancewindow = [-0.05 0];
+cfg7.covariancewindow = [(t1-t2) 0];
 cfg7.channel='MEG';
 covpre=timelockanalysis(cfg7, standard);
-cfg7.covariancewindow = [0.03 0.08];
+cfg7.covariancewindow = [t1 t2];
 covpst=timelockanalysis(cfg7, standard);
 cfg8        = [];
 cfg8.method = 'lcmv';
@@ -73,31 +80,17 @@ cfg8.keepfilter='no';
 spre = ft_sourceanalysis(cfg8, covpre);
 spst = ft_sourceanalysis(cfg8, covpst);
 spst.avg.nai=(spst.avg.pow-spre.avg.pow)./spre.avg.pow;
-%spstest=spst;
-% cfg = [];
-% cfg.parameter = 'nai'; %'all' 'prob' 'stat' 'mask'
-% ispst = sourceinterpolate(cfg, spst,sMRI)
-%                 
+%% interpolate and plot
 % load ~/ft_BIU/matlab/LCMV/pos
 cfg10 = [];
 cfg10.parameter = 'avg.nai';
-%spst.pos=pos;
 inai = sourceinterpolate(cfg10, spst,MRIcr)
-cfg10.parameter = 'avg.pow';
-ipow = sourceinterpolate(cfg10, spst,MRIcr)
+% cfg10.parameter = 'avg.pow';
+% ipow = sourceinterpolate(cfg10, spst,MRIcr)
 cfg9 = [];
-%cfg9.funcolorlim = [lowlim 1];
 cfg9.interactive = 'yes';
 cfg9.funparameter = 'avg.nai';
-%cfg9.maskparameter= 'mask';
 cfg9.method='ortho';
-%cfg9.inputcoord='mni';
-%cfg9.atlas='aal_MNI_V4.img';
-%cfg9.roi='Frontal_Sup_L'
-%cfg9.location=[-42 -58 -11];% wer= -50 -45 10 , broca= -50 25 0, fussiform = -42 -58 -11(cohen et al 2000), change x to positive for RH.
-%cfg9.crosshair='no';
-figure
-ft_sourceplot(cfg9,inai)
-figure;
-cfg9.funparameter = 'avg.pow';
-ft_sourceplot(cfg9,ipow)
+figure;ft_sourceplot(cfg9,inai)
+% figure;cfg9.funparameter = 'avg.pow';
+% ft_sourceplot(cfg9,ipow)
