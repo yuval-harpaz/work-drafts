@@ -25,11 +25,12 @@ cfg2.demean='yes';
 cfg2.baselinewindow=[-0.2 0];
 cfg2.bpfilter='yes';
 cfg2.bpfreq=[3 30];
-cfg2.channel='MEG';
+cfg2.channel={'MEG','MEGREF'};
 data=ft_preprocessing(cfg2);
 cfg4.latency=[-0.1 0.6];
 standard=ft_timelockanalysis(cfg4,data);
 save standard standard
+
 [vol,grid,mesh,M1]=headmodel1; % [vol,grid,mesh,M1]=headmodel1([],[],5);
 % sMRI = read_mri(fullfile(spm('dir'), 'canonical', 'single_subj_T1.nii'));
 load ~/ft_BIU/matlab/files/sMRI.mat
@@ -61,20 +62,23 @@ figure; ft_sourceplot(cfg6, MRIcr);title('R');
 %% LCMV
 load modelScalp
 load standard
+hdr=ft_read_headerOLD('c,rfhp0.1Hz');
+standard.grad=ft_convert_units(hdr.grad,'mm');
+[vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
 t1=0.03;t2=0.08;
 cfg7                  = [];
 cfg7.covariance       = 'yes';
 cfg7.removemean       = 'no';
 cfg7.covariancewindow = [(t1-t2) 0];
-cfg7.channel='MEG';
-covpre=timelockanalysis(cfg7, standard);
+%cfg7.channel='MEG';
+covpre=ft_timelockanalysis(cfg7, standard);
 cfg7.covariancewindow = [t1 t2];
-covpst=timelockanalysis(cfg7, standard);
+covpst=ft_timelockanalysis(cfg7, standard);
 cfg8        = [];
 cfg8.method = 'lcmv';
 cfg8.grid= grid;
 cfg8.vol    = vol;
-cfg8.lambda = '5%';
+cfg8.lambda = 0.05;
 cfg8.keepfilter='no';
 
 spre = ft_sourceanalysis(cfg8, covpre);
