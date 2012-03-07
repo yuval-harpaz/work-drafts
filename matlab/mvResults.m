@@ -20,6 +20,9 @@ for subi=1:length(subs)
 %             if ~exist(['~/Desktop/talResults/',sub,'/',num2str(condi)],'dir')
 %                 mkdir(['~/Desktop/talResults/',sub,'/',num2str(condi)]);
 %             end
+            if ~exist(['~/Desktop/talResults/',sub],'dir')
+                mkdir (['~/Desktop/talResults/',sub]);
+            end
             eval(['!cp ',pref,num2str(condi),'+tlrc.BRIK ~/Desktop/talResults/',sub,'/'])
             eval(['!cp ',pref,num2str(condi),'+tlrc.HEAD ~/Desktop/talResults/',sub,'/'])
         end

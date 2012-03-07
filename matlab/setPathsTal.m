@@ -9,6 +9,11 @@ for subi=1:length(subs)
     cd ('/home/yuval/Desktop/tal')
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
+    if ~exist([sub,'/',sub,'/0.14d1'])
+        %mkdir ([sub,'/',sub])
+        copyfile(sub,['new/',sub])
+        copyfile(['new/',sub],[sub,'/',sub])
+    end
     cd ([sub,'/',sub,'/0.14d1']);
     %% looking for the session name, saving path in subject directory
     !rm Exp*
