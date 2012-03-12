@@ -1,4 +1,4 @@
-function [cfg1,probplot,cfg2,statplot]=monteT(prefix,condA,condB,lowlim)
+function [cfg1,probplot,cfg2,statplot]=ambMonte(prefix,condA,condB,lowlim)
 
 
 % run as: [cfg1,probplot,cfg2,statplot]=monteT('750','s1p','s2p');
