@@ -47,3 +47,28 @@ save M350domsubN M350domsubN %  I was unable to remove noise field, identical to
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M350_ME','M350domsubp','M350domsubN',0.95,0.01);
 
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M350_ME','M350domsubp','M350domsubN',0.95,0.005);
+
+%% masking
+% create mask by:
+% [source,intsource,grid,mesh]=makeMask('iskull');
+% intsource1=intsource;
+% cfg.keepindividual     = 'yes';
+% cfg.parameter          = 'pow';
+% Msk=ft_sourcegrandaverage(cfg,intsource,intsource1);
+% inside=Msk.inside;outside=Msk.outside;
+% save mask_innerskull inside outside
+load /home/yuval/Data/amb/mask
+% now there are masks for inner skull and cortex in ft_BIU/matlab/files
+load M350domsubp
+M350maskedp=M350domsubp;
+M350maskedp.inside=inside;
+M350maskedp.outside=outside;
+save M350maskedp M350maskedp
+load M350domsubN
+M350maskedN=M350domsubN;
+M350maskedN.inside=inside;
+M350maskedN.outside=outside;
+save M350maskedN M350maskedN
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M350masked_ME','M350maskedp','M350maskedN',0.95,0.005);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M350masked_ME','M350maskedp','M350maskedN',0.95,0.01);
+
