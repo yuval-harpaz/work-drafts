@@ -1,4 +1,4 @@
-function [cfg1,probplot,cfg2,statplot]=ambMonteClust(prefix,condA,condB,lowlim)
+function [cfg1,probplot,cfg2,statplot]=ambMonteClust(prefix,condA,condB,lowlim,clustAlpha)
 
 
 % run as: [cfg1,probplot,cfg2,statplot]=monteT('750','s1p','s2p');
@@ -13,7 +13,14 @@ cfg1=[];probplot=[];cfg2=[];statplot=[];
 %condB='s3p';
 if exist ([prefix,'stat.mat'],'file')
     load ([prefix,'stat.mat'])
+    warning([prefix,'stat.mat exists, not computing new statistics'])
 else
+    if ~exist('clustAlpha','var')
+        clustAlpha=[];
+    end
+    if isempty(clustAlpha)
+        clustAlpha=0.05;
+    end
     eval(['load ',condA])
     eval(['load ',condB])
     cfg=[];
@@ -29,7 +36,8 @@ else
     end
     cfg.correctm    = 'cluster'; %  'no', 'max', 'cluster', 'bonferoni', 'holms', 'fdr'
     cfg.numrandomization = 1000;
-    cfg.alpha       = 0.05; % 0.05
+    cfg.alpha       = 0.05
+    cfg.clusteralpha= clustAlpha;
     cfg.tail        = 0;
     eval(['nsubj=length(',condA,'.trial)']);
     cfg.design(1,:) = [1:nsubj 1:nsubj];
@@ -37,7 +45,7 @@ else
     %cfg.design(1,:) = [ones(1,nsubj) ones(1,nsubj)*2];
     cfg.uvar        = 1; % row of design matrix that contains unit variable (in this case: subjects)
     cfg.ivar        = 2; % row of design matrix that contains independent variable (the conditions)
-    eval(['stat = sourcestatistics(cfg, ',condA,',',condB,');']);
+    eval(['stat = ft_sourcestatistics(cfg, ',condA,',',condB,');']);
     save ([prefix,'stat'],'stat')
 end
 % load ~/ft_BIU/LCMV/pos
@@ -93,7 +101,7 @@ if max(max(max(probplot.prob1>=lowlim)))==1;
     figure
     ft_sourceplot(cfg2,statplot)
 else warning('no significant results')
-    display('change lower p value limit to explore map by running: lowlim=0.9;')
-    display(['[cfg1,probplot,cfg2,statplot]=monteT(''',compt,''',','''',condA,''',','''',condB,''',lowlim);'])
+    %display('change lower p value limit to explore map by running: lowlim=0.9;')
+    %display(['[cfg1,probplot,cfg2,statplot]=monteT(''',compt,''',','''',condA,''',','''',condB,''',lowlim);'])
 end
 end
