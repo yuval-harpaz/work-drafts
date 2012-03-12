@@ -1,14 +1,14 @@
-% here we work with tutorial for begginers. find it in ~/work-drafts/docs
+% here we work with "tutorial for begginers". find it in ~/work-drafts/docs
 % the functions are in ft_BIU repository (fieldtrip)
 
-% take a look at all the channels at the beggining of the file just to see
+% take a look at all the channels at the beginning of the file just to see
 % that it is sane and whether there are bad channels.
 % four figures will open.
 findBadChans('c,rfhp0.1Hz');
 % see the heartbeat artifact and try to find it in the cleaned file
 % xc,hb,lf_c,*
 
-% with this function you don't see all the channels but it squeezes into
+% with the following function you don't see all the channels but it squeezes into
 % one figure. you have to choose the time of interest in seconds.
 % the oddball data has muscle artifact around 30s.
 tracePlot_BIU(20,40,'c,rfhp0.1Hz');
