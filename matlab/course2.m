@@ -1,6 +1,14 @@
+% the purpose of this script is to get you familiared with different
+% artifacts and how to detect them using home made functions and FieldTrip.
+% later we will use fieldtrip to see "evoked" brain signal. for this we
+% have to be aware of different preprocessing tecniques such as filters and
+% base line correction.
+
+
 % here we work with "tutorial for begginers". find it in ~/work-drafts/docs
 % the functions are in ft_BIU repository (fieldtrip)
 
+%% View the raw data
 % cd to oddball data
 
 % take a look at all the channels at the beginning of the file just to see
@@ -9,9 +17,13 @@
 findBadChans('c,rfhp0.1Hz');
 % see the heartbeat artifact and try to find it in the cleaned file
 % xc,hb,lf_c,*
+% do it yourself, copy the script line above (line9) to the command window,
+% change the name of the file and ENTER
 
-% with the following function you don't see all the channels but it squeezes into
-% one figure. you have to choose the time of interest in seconds.
+
+% with the following function you don't see all the channels (shows every
+% fourth channel) 
+% but it squeezes into one figure. you have to choose the time of interest in seconds.
 % the oddball data has muscle artifact around 30s.
 tracePlot_BIU(25,35,'c,rfhp0.1Hz');
 
@@ -19,7 +31,7 @@ tracePlot_BIU(25,35,'c,rfhp0.1Hz');
 % to detect eyeblinks best see the topography. for this we have to read
 % the data with fieldtrip.
 
-%% FieldTrip .
+%% View the raw data with FieldTrip .
 
 % cd to somatosensory data
 
@@ -31,18 +43,23 @@ tracePlot_BIU(25,35,'c,rfhp0.1Hz');
 cfg.dataset='c,rfhp0.1Hz';
 cfg.trialdef.beginning=25;
 cfg.trialdef.end=26;
-cfg.trialfun='trialfun_raw';
+cfg.trialfun='trialfun_raw'; % the other usefull trialfun we have are trialfun_beg and trialfun_BIU
 cfg1=ft_definetrial(cfg);
+
 % take a look at cfg1.trl where the trial is defined in samples rather than
 % seconds. cfg1 will be the configuration structure for the next function
 % which actually reads the data. we add fields to it to specify filters,
 % baseline correction and other options. fist let's just read unprocessed
 % data of one channel, say A70.
 
+
 cfg1.channel='A70'; % 'MEG' for all MEG channels. {'MEG' 'MEGREF' '-A204'} will read meg channels, refference channels but not channel A204.
 data=ft_preprocessing(cfg1);
 % let's plot it
 plot(data.time{1,1},data.trial{1,1});
+
+%% Preprocessing- How filters change the pictures
+
 % we want to overlay more plots on the same figure so we want to hold it
 % on. otherwise new figures will erase the old ones.
 hold on
@@ -71,7 +88,8 @@ plot(data.time{1,1},mid.trial{1,1},'k');
 % add a legend
 legend('all','over 30Hz','below 8Hz','8-30Hz')
 
-%% now we want all the MEG channels between 1 and 40Hz.
+%% Preprocessing - Baseline correction
+% now we want all the MEG channels between 1 and 40Hz.
 
 %close the figures
 close all
@@ -95,7 +113,7 @@ cfg1.blc='yes';
 BLC=ft_preprocessing(cfg1);
 plot(BLC.time{1,1},BLC.trial{1,1}(1,:),'g');
 
-%% two more ways to see the data.
+%% View the epoched data.
 close all
 % a function to visualize data trial by trial
 trialPlot(BLC) % beware, a feature designed for topoplots my get out of hand when clicking on the traces. use alt+F4 on emergencies to close figures.
@@ -105,7 +123,7 @@ close all
 % more suffisticated functions to view the data are ft_multiplotER
 % ft_topoplotER and ft_singleplotER, designed for averaged data. here we
 % will average the data across trials (only one trial) for the functions to
-% work.
+% work, not that it does any averaging.
 data=ft_timelockanalysis([],data);
 
 % here is a time point with a blink
@@ -120,5 +138,56 @@ ft_topoplotER(cfg2,data)
 
 
 
+
+%% real work now
+% 
+% here we work with somatosensory stimulation data
+% read raw data
+fileName='c,rfhp0.1Hz';
+cfg=[];
+cfg.dataset=fileName; % change file name or path+name
+cfg.trialdef.eventtype='TRIGGER';
+cfg.trialdef.prestim=0.1;
+cfg.trialdef.poststim=0.3;
+cfg.trialdef.offset=-0.1;
+cfg.trialfun='BIUtrialfun';
+cfg.trialdef.eventvalue= 104;
+cfg1=definetrial(cfg);
+raw=ft_preprocessing(cfg1);
+% averaging
+rawAvg=ft_timelockanalysis([],raw);
+%% read data with baseline correction
+cfg1.blc='yes';
+cfg1.blcwindow=[-0.1,0];
+blc=ft_preprocessing(cfg1);
+% averaging
+blcAvg=ft_timelockanalysis([],blc);
+% plot one channel to see the blc effect
+cfg3.channel='A70';
+ft_singleplotER(cfg3,blcAvg,rawAvg);
+% now make an interactive multiplot and look for the evoked response
+cfg4.layout='4D248.lay';
+cfg4.interactive='yes';
+ft_multiplotER(cfg4,blcAvg)
+
+
+%% run the following commands to clean the heartbeat of the first 30s of the data
+
+fileName = 'c,rfhp0.1Hz';
+p=pdf4D(fileName);
+cleanCoefs = createCleanFile(p, fileName,'byLF',0,'HeartBeat',[],'CleanPartOnly',[0 30]);  
+
+%% DO NOT RUN IT NOW, this takes time.
+cleanCoefs = createCleanFile(p, fileName,...
+    'byLF',256 ,'Method','Adaptive',...
+    'xClean',[4,5,6],...
+    'byFFT',0,...
+    'HeartBeat',[],...
+    'maskTrigBits', 512);
+
+%% now let's compare averages of cleaned and raw data.
+
+% this is a do it yourself part.
+% copy parts from this script to a new one
 
 
