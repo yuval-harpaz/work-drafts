@@ -34,7 +34,7 @@ tracePlot_BIU(25,35,'c,rfhp0.1Hz');
 %% View the raw data with FieldTrip .
 
 % cd to somatosensory data
-
+cd ../somsens
 % most fieldtrip functions require a configuration structure (cfg) and data
 % as input. we begin by defining trials. for now we just want to read some
 % 10 sec of continuous data. the function ft_definetrial will use for this purpose 
@@ -131,7 +131,7 @@ cfg2=[];
 cfg2.layout='4D248.lay';
 cfg2.interactive='yes';
 cfg2.xlim=[25.7 25.7];
-cfg2.electrodes = 'labels';
+cfg2.marker = 'labels';
 ft_topoplotER(cfg2,data)
 
 % mark an area on the plot and click in the middle

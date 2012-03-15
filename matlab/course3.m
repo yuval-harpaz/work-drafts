@@ -20,13 +20,13 @@ cfg.trialdef.poststim=0.3;
 cfg.trialdef.offset=-0.1;
 cfg.trialfun='BIUtrialfun';
 cfg.trialdef.eventvalue= 104; %left index finger
-cfg1=definetrial(cfg);
+cfg1=ft_definetrial(cfg);
 raw=ft_preprocessing(cfg1);
 % averaging
 rawAvg=ft_timelockanalysis([],raw);
 %% read data with baseline correction
-cfg1.blc='yes';
-cfg1.blcwindow=[-0.1,0];
+cfg1.demean='yes';% old version was: cfg1.blc='yes';
+cfg1.baselinewindow=[-0.1,0];
 blc=ft_preprocessing(cfg1);
 % averaging
 blcAvg=ft_timelockanalysis([],blc);
@@ -36,6 +36,7 @@ ft_singleplotER(cfg3,blcAvg,rawAvg);
 % now make an interactive multiplot and look for the evoked response
 cfg4.layout='4D248.lay';
 cfg4.interactive='yes';
+cfg4.zlim=[-2e-13 2e-13];
 ft_multiplotER(cfg4,blcAvg)
 
 
@@ -43,7 +44,7 @@ ft_multiplotER(cfg4,blcAvg)
 
 fileName = 'c,rfhp0.1Hz';
 p=pdf4D(fileName);
-cleanCoefs = createCleanFile(p, fileName,'byLF',0,'HeartBeat',[],'CleanPartOnly',[0 30]);  
+cleanCoefs = createCleanFile(p, fileName,'byLF',256,'HeartBeat',[],'CleanPartOnly',[0 30]);  
 
 %% DO NOT RUN IT NOW, this takes time.
 cleanCoefs = createCleanFile(p, fileName,...
@@ -53,9 +54,12 @@ cleanCoefs = createCleanFile(p, fileName,...
     'HeartBeat',[],...
     'maskTrigBits', 512);
 
-%% now let's compare averages of cleaned and raw data.
+%% now let's compare averages of cleaned (hb_*) and raw data.
 
 % this is a do it yourself part.
+% open a new script
 % copy parts from this script to a new one
 
+% give up? open answer1 and run it's content.
 
+%%  
