@@ -62,4 +62,25 @@ cleanCoefs = createCleanFile(p, fileName,...
 
 % give up? open answer1 and run it's content.
 
-%%  
+%% component analysis
+% another cleaning method is good for HB and also for blinks, ICA.
+% pca may also work for large artifacts such as HB.
+
+cfgc            = [];
+cfgc.method='pca';
+cfgc.channel = 'MEG';
+PCAcomp           = ft_componentanalysis(cfgc, blc);
+
+% now view the components
+cfgb=[];
+cfgb.layout='4D248.lay';
+cfgb.channel = {comp.label{1:5}};
+comppic=ft_databrowser(cfgb,PCAcomp);
+
+% ICA is more reliable. it could run like this, takes some 15min
+% DON'T RUN, let's downsamplefirst. skip to next piece of script.
+cfgc.method='fastica';
+ICAcomp           = ft_componentanalysis(cfgc, blc);
+comppic=ft_databrowser(cfgb,ICAcomp);
+
+% downsampleing
