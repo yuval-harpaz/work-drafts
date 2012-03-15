@@ -30,8 +30,8 @@ data=ft_preprocessing(cfg2);
 cfg4.latency=[-0.1 0.6];
 standard=ft_timelockanalysis(cfg4,data);
 save standard standard
-
-[vol,grid,mesh,M1]=headmodel1; % [vol,grid,mesh,M1]=headmodel1([],[],5);
+[vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
+% [vol,grid,mesh,M1]=headmodel1; % [vol,grid,mesh,M1]=headmodel1([],[],5);
 % sMRI = read_mri(fullfile(spm('dir'), 'canonical', 'single_subj_T1.nii'));
 load ~/ft_BIU/matlab/files/sMRI.mat
 load modelScalp
@@ -62,8 +62,8 @@ figure; ft_sourceplot(cfg6, MRIcr);title('R');
 %% LCMV
 load modelScalp
 load standard
-hdr=ft_read_headerOLD('c,rfhp0.1Hz');
-standard.grad=ft_convert_units(hdr.grad,'mm');
+%hdr=ft_read_headerOLD('c,rfhp0.1Hz');
+standard.grad=ft_convert_units(standard.grad,'mm');
 [vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
 t1=0.03;t2=0.08;
 cfg7                  = [];
