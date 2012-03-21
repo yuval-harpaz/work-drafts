@@ -72,3 +72,15 @@ save M350maskedN M350maskedN
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M350masked_ME','M350maskedp','M350maskedN',0.95,0.005);
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M350masked_ME','M350maskedp','M350maskedN',0.95,0.01);
 
+load /home/yuval/Data/amb/mask
+load subp %domp
+subMskdp=subp;
+subMskdp.inside=inside;
+subMskdp.outside=outside;
+save subMskdp subMskdp
+load domp %domp
+domMskdp=domp;
+domMskdp.inside=inside;
+domMskdp.outside=outside;
+save domMskdp domMskdp
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M170masked_S_D','subMskdp','domMskdp',0.95,0.01);
