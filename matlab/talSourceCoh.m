@@ -36,6 +36,9 @@ for subi=1:length(subs)
                 strOnset=num2str(trOnset);
                 trl(trli,1)=round(trOnset*1017.25);
                 data.trial{1,trli}=VSbyVox(source,'SAM/alpha,7-13Hz,eyesCloseda',1,[trOnset (trOnset+1)],[],vox);
+                if trli>1
+                    data.time{1,trli}=data.time{1,1};
+                end
                 display (['Really trial ',num2str(trli),' of about ',num2str(round((endTrg-startTrg)/2))])
                 trli=trli+1;
             end
