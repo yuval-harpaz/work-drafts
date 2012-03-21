@@ -63,6 +63,7 @@ newName=[pref,'_pre1_D_C'];
 betweenGroups(subs1,subs2,fileName1,newName);
 maskStat([newName,'+tlrc']);
 
+%% coh on sources
 % virtual sensors
 tlrc=[ -40 -18 -8;40 -18 -8;... %   LR hippo, Wink 2006
     -49 17 17;49 17 17;... %        Broca
