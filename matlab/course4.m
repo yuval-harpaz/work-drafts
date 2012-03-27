@@ -33,13 +33,13 @@ cfgp.interactive='yes';
 cfgp.zlim=[-10^-13 10^-13];
 cfgp.xlim=[0.12 0.12];
 figure;
-ft_topoplotER(cfgp,avg);
+ft_topoplotER(cfgp,allvis);
 figure;
 cfgp.xlim=[0.19 0.19];
-ft_topoplotER(cfgp,avg);
+ft_topoplotER(cfgp,allvis);
 
 cfgp=rmfield(cfgp,'xlim')
-ft_multiplotER(cfgp,avg);
+ft_multiplotER(cfgp,allvis);
 
 
 %% component analysis 
@@ -147,5 +147,5 @@ clnAvg=ft_timelockanalysis([],datacln);
 cfgmp=[]
 cfgmp.layout='4D248.lay';
 cfgmp.interactive='yes';
-ft_multiplotER(cfgmp,clnAvg,avg)
+ft_multiplotER(cfgmp,clnAvg,allvis)
 
