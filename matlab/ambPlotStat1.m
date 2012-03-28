@@ -43,6 +43,7 @@ if max(max(max(probplot.prob1>=lowlim)))==1;
     else % slice
         cfg1.nslices=3;
         cfg1.slicerange=[32 52];
+        cfg1.slicedim=1;
     end
 %    cfg1.atlas='aal_MNI_V4.img';
     %cfg1.roi='Frontal_Sup_L'
@@ -54,7 +55,7 @@ if max(max(max(probplot.prob1>=lowlim)))==1;
     xyz = stat.transform * ijk;
     cfg1.location=[xyz(1), xyz(2), xyz(3)];
     figure
-    ft_sourceplot(cfg1,probplot)
+    ft_sourceplot_alldim(cfg1,probplot)
     %figure; YHsourceplot(cfg1,probplot); % requires roi
     %statplot = sourceinterpolate(cfg, stat,sMRI)
     statplot=stat;

@@ -117,3 +117,6 @@ save teststat stat
 ambPlotStat('test',0.95,'surface'); % 'slice' 'surface' 'ortho';
 ambPlotStat('test',0.95,'slice');
 ambPlotStat('test',0.95,'ortho');
+
+%% plot final
+ambPlotStat1('Cl01_M170masked_S_D',0.95,'ortho');
