@@ -14,7 +14,7 @@ cfg.trialdef.end=endt;
 cfg.trialfun='trialfun_raw'; % the other usefull trialfun we have are trialfun_beg and trialfun_BIU
 cfg1=ft_definetrial(cfg);
 cfg1.demean='yes';% old version was: cfg1.blc='yes';
-cfg1.baselinewindow=[-0.1,0];
+%cfg1.baselinewindow=[-0.1,0];
 cfg1.lpfilter='yes';
 cfg1.lpfreq=40;
 cfg1.channel='MEG';
@@ -26,7 +26,7 @@ cfg.trialdef.beginning=startt;
 cfg.trialdef.end=endt;
 cfg1=ft_definetrial(cfg);
 cfg1.demean='yes';% old version was: cfg1.blc='yes';
-cfg1.baselinewindow=[-0.1,0];
+%cfg1.baselinewindow=[-0.1,0];
 cfg1.lpfilter='yes';
 cfg1.lpfreq=40;
 cfg1.channel='MEG';
