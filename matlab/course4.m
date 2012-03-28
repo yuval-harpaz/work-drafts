@@ -24,12 +24,24 @@ cfg1.channel='MEG';
 dataorig=ft_preprocessing(cfg1);
 % averaging
 
-avg=ft_timelockanalysis([],dataorig);
+allvis=ft_timelockanalysis([],dataorig);
+plot(allvis.time,allvis.avg)
 
-cfgmp=[]
-cfgmp.layout='4D248.lay';
-cfgmp.interactive='yes';
-ft_multiplotER(cfgmp,avg);
+cfgp=[]
+cfgp.layout='4D248.lay';
+cfgp.interactive='yes';
+cfgp.zlim=[-10^-13 10^-13];
+cfgp.xlim=[0.12 0.12];
+figure;
+ft_topoplotER(cfgp,allvis);
+figure;
+cfgp.xlim=[0.19 0.19];
+ft_topoplotER(cfgp,allvis);
+
+cfgp=rmfield(cfgp,'xlim')
+ft_multiplotER(cfgp,allvis);
+
+
 %% component analysis 
 % ICA takes a lot of time. 
 % pca is faster but (ask me in class).
@@ -43,12 +55,28 @@ comp           = ft_componentanalysis(cfgc, dataorig);
 cfgb=[];
 cfgb.layout='4D248.lay';
 cfgb.channel = {comp.label{1:5}};
-comppic=ft_databrowser(cfgb,comp);
+cfgbo=ft_databrowser(cfgb,comp);
 % see the ica components. 
 % look for heartbeat. it repeats almost every trial. remember it's number.
+
+% there are two ways to reject a component. reconstracting the data from
+% the good parts and reducing the bad component from the original data.
+% here is the first way of doing it.
 cfgrc = [];
 cfgrc.component = 1; % change
-dataica = ft_rejectcomponent(cfgrc, comp);
+dataca = ft_rejectcomponent(cfgrc, comp);
+
+% here is the second
+dataca = ft_rejectcomponent(cfgrc, comp, dataorig);
+
+%  the second way is usefull when you only create some 10 or 20 components rather than 248
+%  with cfgc.numcomponent=20;
+%  because you cannot reconstruct the data well with 20 components.
+%  it is also usefull when you calculate the components with one piece of
+%  data (where you have lots of blinks) in order to clean another piece of
+%  data.
+
+
 
 %% component analysis on raw data
 % we have eye movement block in the end of the experiment
@@ -97,7 +125,7 @@ comppic=ft_databrowser(cfgb,compMOG);
 % set the bad comps as the value for cfgrc.component.
 cfgrc = [];
 cfgrc.component = [1 2]; % change
-dataica = ft_rejectcomponent(cfgrc, compMOG,dataorig);
+dataca = ft_rejectcomponent(cfgrc, compMOG,dataorig);
 
 
 %% reject visual trial by trial
@@ -105,19 +133,19 @@ cfg=[];
 cfg.method='trial'; %trial
 cfg.channel='MEG';
 cfg.alim=1e-12;
-datacln=ft_rejectvisual(cfg, dataica);
+datacln=ft_rejectvisual(cfg, dataca);
 
 % reject visual by variance
 cfg=[];
 cfg.method='summary'; %trial
 cfg.channel='MEG';
 cfg.alim=1e-12;
-datacln=ft_rejectvisual(cfg, dataica);
+datacln=ft_rejectvisual(cfg, dataca);
 
 
 clnAvg=ft_timelockanalysis([],datacln);
 cfgmp=[]
 cfgmp.layout='4D248.lay';
 cfgmp.interactive='yes';
-ft_multiplotER(cfgmp,clnAvg,avg)
+ft_multiplotER(cfgmp,clnAvg,allvis)
 
