@@ -84,3 +84,36 @@ domMskdp.inside=inside;
 domMskdp.outside=outside;
 save domMskdp domMskdp
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M170masked_S_D','subMskdp','domMskdp',0.95,0.01);
+% mask out of cortex voxels
+% load /home/yuval/Data/amb/mask_cortex
+% ctxdomp=domp;
+% ctxsubp=subp;
+% ctxdomp.inside=inside;
+% ctxsubp.inside=inside;
+% ctxdomp.outside=outside;
+% ctxsubp.outside=outside;
+% save ctxdomp ctxdomp
+% save ctxsubp ctxsubp
+% [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M170ctx_S_D','ctxsubp','ctxdomp',0.95,0.01);
+
+%% sources not interpolated
+cd /home/yuval/Data/amb
+ambSAMbyTimeWin(1:25,[0.15 0.235],'m170',0)
+ambGrAvg1([1:25],'m170');
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_m170','m170subp','m170domp',0.95,0.01);
+load sMRI
+load Cl01_m170stat
+load template_grid
+stat.pos=template_grid.pos;
+stat=rmfield(stat,'transform');
+stat.unit='mm';
+sMRI.unit='mm';
+cfg10 = [];
+cfg10.parameter = {'prob','stat'};
+%cfg10.interpmethod  = 'spline';%'cubic' 'linear';
+stat=ft_sourceinterpolate(cfg10,stat,sMRI);
+save teststat stat
+%[cfg1,probplot,cfg2,statplot]=ambMonteClust('test','m170subp','m170domp',0.95,0.01);
+ambPlotStat('test',0.95,'surface'); % 'slice' 'surface' 'ortho';
+ambPlotStat('test',0.95,'slice');
+ambPlotStat('test',0.95,'ortho');

@@ -1,9 +1,17 @@
-function ambSAMbyTimeWin(subs,timewin,prefix)
+function ambSAMbyTimeWin(subs,timewin,prefix,interp)
 % I first used ambFT for the M170.
 % ambSAMbyTimeWin([1:25],[0.235 0.39],'M350')
+% interp=1 to interpolate
 cd /home/yuval/Data/amb
 %load 25DM.mat
 %load 25SM.mat
+if ~exist('interp','var')
+    interp=[];
+end
+if isempty(interp)
+    interp=1;
+end
+    
 isdom=0;
 for subi=subs
     substr=num2str(subi);
@@ -21,7 +29,9 @@ for subi=subs
         %% loading the data
         load dataorig
         load sourceGlobal
-        load MRIcr % coregistered MRI from template
+        if interp==1
+            load MRIcr % coregistered MRI from template
+        end
         
         %% reconstructing source trace
         
@@ -62,10 +72,18 @@ for subi=subs
         cfg10 = [];
         cfg10.parameter = 'all';
         if isdom
-            dom = ft_sourceinterpolate(cfg10, source,MRIcr)
+            if interp==1
+                dom = ft_sourceinterpolate(cfg10, source,MRIcr)
+            else
+                dom=source;
+            end
             save(['../',prefix,'dom'],'dom');
         else
-            sub = ft_sourceinterpolate(cfg10, source,MRIcr)
+            if interp==1
+                sub = ft_sourceinterpolate(cfg10, source,MRIcr)
+            else
+                sub=source
+            end
             save  (['../',prefix,'sub'], 'sub');
         end
         cd ..
