@@ -69,8 +69,11 @@ M350maskedN=M350domsubN;
 M350maskedN.inside=inside;
 M350maskedN.outside=outside;
 save M350maskedN M350maskedN
+
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M350masked_ME','M350maskedp','M350maskedN',0.95,0.005);
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M350masked_ME','M350maskedp','M350maskedN',0.95,0.01);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl025_M350masked_ME','M350maskedp','M350maskedN',0.95,0.025);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl05_M350masked_ME','M350maskedp','M350maskedN',0.95,0.05);
 
 load /home/yuval/Data/amb/mask
 load subp %domp
@@ -119,4 +122,9 @@ ambPlotStat('test',0.95,'slice');
 ambPlotStat('test',0.95,'ortho');
 
 %% plot final
-ambPlotStat1('Cl01_M170masked_S_D',0.95,'ortho');
+ambPlotStat1('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
+ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
+ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
+ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
+
+
