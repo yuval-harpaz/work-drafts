@@ -37,7 +37,7 @@ if max(max(max(probplot.prob1>=lims(1))))==1;
     cfg1.inputcoord='mni';
     %cfg1.opacitylim=    [0.998 1];% 'maxabs' 'zeromax' 'minzero' 'auto'
     if strcmp(method,'ortho')
-        % cfg1.interactive = 'yes';
+        cfg1.interactive = 'yes';
         cfg1.crosshair='no';
         % find location of maximum value in the t map
         [maxval, maxindx] = max(stat.stat(:));
@@ -62,7 +62,8 @@ if max(max(max(probplot.prob1>=lims(1))))==1;
         cfg1.slicerange=[32 52];
         % cfg1.slicedim=1; not supported
     end
-%    cfg1.atlas='aal_MNI_V4.img';
+    cfg1.atlas='aal_MNI_V4.img';
+    %cfg1.coordsys      = 'mni';
     %cfg1.roi='Frontal_Sup_L'
     %cfg1.location=[-42 -58 -11];% wer= -50 -45 10 , broca= -50 25 0, fussiform = -42 -58 -11(cohen et al 2000), change x to positive for RH.
     
@@ -80,12 +81,8 @@ if max(max(max(probplot.prob1>=lims(1))))==1;
     cfg2.inputcoord='mni';
     
     %cfg2.atlas='aal_MNI_V4.img';
-    figure
-    ft_sourceplot(cfg2,statplot)
+    %    figure
+    %    ft_sourceplot(cfg2,statplot)
 else warning('no significant results')
 end
 end
-
-
-
-
