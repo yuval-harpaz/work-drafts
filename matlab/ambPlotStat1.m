@@ -62,8 +62,10 @@ if max(max(max(probplot.prob1>=lims(1))))==1;
         cfg1.slicerange=[32 52];
         % cfg1.slicedim=1; not supported
     end
-    cfg1.atlas='aal_MNI_V4.img';
-    %cfg1.coordsys      = 'mni';
+    %[atlas] = ft_prepare_atlas('aal_MNI_V4.img');
+    cfg1.atlas='~/ft_BIU/matlab/files/aal_MNI_V4.nii';
+    %cfg1.atlas='/home/yuval/Data/WFU_PickAtlas_3.0.3/wfu_pickatlas/MNI_atlas_templates/aal_MNI_V4.nii'
+    cfg1.coordsys      = 'mni';
     %cfg1.roi='Frontal_Sup_L'
     %cfg1.location=[-42 -58 -11];% wer= -50 -45 10 , broca= -50 25 0, fussiform = -42 -58 -11(cohen et al 2000), change x to positive for RH.
     
