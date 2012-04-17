@@ -5,7 +5,7 @@
 
 % here we read the data with a 60Hz high pass filter 
 % we take a large window because of the sliding windows for low freqs
-fileName='xc,lf,hb_c,rfhp0.1Hz';
+fileName='hb_c,rfhp0.1Hz';
 cfg=[];
 cfg.dataset=fileName;
 cfg.trialdef.eventtype='TRIGGER';
@@ -174,7 +174,7 @@ cfgtfr.channel='MEG';
 cfgtfr.keeptrials='yes';
 TFrAll = ft_freqanalysis(cfgtfr, datacln);
 cfgp = [];
-cfg.ylim = [3 30];         
+%cfgp.ylim = [3 30];         
 cfgp.layout       = '4D248.lay';
 cfgp.interactive='yes';
 ft_multiplotTFR(cfgp, TFrAll);
