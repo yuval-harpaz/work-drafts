@@ -121,6 +121,25 @@ ambPlotStat('test',0.95,'surface'); % 'slice' 'surface' 'ortho';
 ambPlotStat('test',0.95,'slice');
 ambPlotStat('test',0.95,'ortho');
 
+%% M170 main effect
+ambMergeSources('','pow');
+% get the pretrigger noise value
+ambGrAvg1([1:25],'','noise');
+% merge the two noise conditions
+ambMergeSources('','noise');
+% change noise field to pow
+load domsubN
+for subi=1:25;
+    domsubN.trial(1,subi).pow=domsubN.trial(1,subi).noise;
+    %[M350domsubN.trial(1,subi)]=rmfield(M350domsubN.trial(1,subi),'noise');
+end
+save domsubN domsubN %  I was unable to remove noise field, identical to pow now.
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M170_ME','domsubp','domsubN',0.95,0.01);
+
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M170_ME','domsubp','domsubN',0.95,0.005);
+
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl001_M170_ME','domsubp','domsubN',0.95,0.001);
+
 %% plot final
 ambPlotStat1('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
 ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
