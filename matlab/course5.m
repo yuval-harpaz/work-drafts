@@ -1,61 +1,41 @@
 % somsens data
 
 
-
-%% rejecy high frequency noise trials (muscle artifact)
+%% reject high frequency noise trials (muscle artifact)
 
 % here we read the data with a 60Hz high pass filter 
 % we take a large window because of the sliding windows for low freqs
-fileName='xc,lf,hb_c,rfhp0.1Hz';
+fileName='hb_c,rfhp0.1Hz';
 cfg=[];
 cfg.dataset=fileName;
 cfg.trialdef.eventtype='TRIGGER';
 cfg.trialdef.prestim=0.5;
 cfg.trialdef.poststim=1;
-cfg.trialdef.offset=-0.5;
+cfg.trialdef.offset=-0.5; %NOTE large baseline to measure low freq
 cfg.trialdef.visualtrig= 'visafter';
 cfg.trialfun='BIUtrialfun';
 cfg.trialdef.eventvalue= [222 230 240 250];
-cfg1=ft_definetrial(cfg);
-cfg1.demean='yes';
-cfg1.baselinewindow='all';
-cfg1.hpfilter='yes';
-cfg1.hpfreq=60; %SEE?
-cfg1.channel='MEG';
-cfg1.padding=0.1;
-datahf=ft_preprocessing(cfg1); % data high freq
+cfg=ft_definetrial(cfg);
+
+cfg.demean='yes';
+cfg.baselinewindow=[-0.5 0];
+cfg.channel='MEG';
+cfg.padding=0.1;
+dataorig=ft_preprocessing(cfg);
+
 cfg=[];
 cfg.method='summary';
 cfg.channel='MEG';
 cfg.alim=1e-12;
-datahfrv=ft_rejectvisual(cfg, datahf); % data high freq reject visual
+cfg1.hpfilter='yes';
+cfg1.hpfreq=60; %SEE?
+dataNoMscl=ft_rejectvisual(cfg, dataorig); % data high freq reject visual
 % reject bad trials
-
-% here we take only good trials from cfg1.trl
-trl=[];trlCount=1;
-for trli=1:length(cfg1.trl)
-    if ~ismember(cfg1.trl(trli,1),datahfrv.cfg.artifact)
-        trl(trlCount,1:6)=cfg1.trl(trli,1:6);
-        trlCount=trlCount+1;
-    end
-end
-cfg1.trl=trl;
-%cfg1.trl=reindex(datahf.cfg.trl,datahfrv.cfg.trl); % doesn't work with new FieldTrip
-
-
-
-
-% use the previous cfg1 but now with no filter (so also no padding).
-cfg1.hpfilter='no';
-cfg1.padding=0;
-cfg1.baselinewindow=[-0.5 0];
-save cfg1 cfg1;
-dataorig=ft_preprocessing(cfg1);
 
 
 %% clean MOG by PCA
 % first clear some memory
-clear datahf datahfrv
+clear dataorig
 
 trig=readTrig_BIU(fileName);
 trig=clearTrig(trig);
@@ -67,54 +47,54 @@ cfg2.dataset=fileName;
 cfg2.trialdef.beginning=startt;
 cfg2.trialdef.end=endt;
 cfg2.trialfun='trialfun_raw'; % the other usefull trialfun we have are trialfun_beg and trialfun_BIU
-cfg3=ft_definetrial(cfg2);
-cfg3.demean='yes';% old version was: cfg1.blc='yes';
+cfg=ft_definetrial(cfg2);
+cfg.demean='yes';% old version was: cfg1.blc='yes';
 %cfg1.baselinewindow=[-0.1,0];
-cfg3.lpfilter='yes';
-cfg3.lpfreq=40;
-cfg3.channel='MEG';
-MOGud=ft_preprocessing(cfg3);
+cfg.lpfilter='yes';
+cfg.lpfreq=40;
+cfg.channel='MEG';
+MOGud=ft_preprocessing(cfg);
 % left right eye movement
 startt=find(trig==52,1)/1017.25;
 endt=find(trig==54,1)/1017.25;
 cfg2.trialdef.beginning=startt;
 cfg2.trialdef.end=endt;
-cfg4=ft_definetrial(cfg2);
-cfg4.demean='yes';% old version was: cfg1.blc='yes';
+cfg=ft_definetrial(cfg2);
+cfg.demean='yes';% old version was: cfg1.blc='yes';
 %cfg1.baselinewindow=[-0.1,0];
-cfg4.lpfilter='yes';
-cfg4.lpfreq=40;
-cfg4.channel='MEG';
-MOGlr=ft_preprocessing(cfg4);
+cfg.lpfilter='yes';
+cfg.lpfreq=40;
+cfg.channel='MEG';
+MOGlr=ft_preprocessing(cfg);
 
-cfgc=[];
-cfgc.method='pca';
-compMOGud           = ft_componentanalysis(cfgc, MOGud);
-compMOGlr           = ft_componentanalysis(cfgc, MOGlr);
+cfg=[];
+cfg.method='pca';
+compMOGud           = ft_componentanalysis(cfg, MOGud);
+compMOGlr           = ft_componentanalysis(cfg, MOGlr);
 % see the components and find the HB and MOG artifact
 % remember the numbers of the bad components and close the data browser
-cfgb=[];
-cfgb.layout='4D248.lay';
-cfgb.channel = 1:5;
-cfgb.continuous='yes';
-cfgb.event.type='';
-cfgb.event.sample=1;
-cfgb.blocksize=3;
-ft_databrowser(cfgb,compMOGud);
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.channel = 1:5;
+cfg.continuous='yes';
+cfg.event.type='';
+cfg.event.sample=1;
+cfg.blocksize=3;
+ft_databrowser(cfg,compMOGud);
 
-ft_databrowser(cfgb,compMOGlr);
+ft_databrowser(cfg,compMOGlr);
 % remember the component number for up-down and for left-right MOG. we'll
 % use it later after rejecting high freq noise.
 %% now you clean the data from MOG
 % set the bad comps as the value for cfgrc.component.
-cfgrc = [];
-cfgrc.component = 1; % change
-dataca = ft_rejectcomponent(cfgrc, compMOGud,dataorig);
-cfgrc.component = 1; 
-dataca = ft_rejectcomponent(cfgrc, compMOGlr,dataca);
+cfg = [];
+cfg.component = 1; % change
+dataca = ft_rejectcomponent(cfg, compMOGud,dataNoMscl);
+cfg.component = 1; % change
+dataca = ft_rejectcomponent(cfg, compMOGlr,dataca);
 
 % save dataca dataca
-clear dataorig comp* MOG* trig
+clear dataNoMscl comp* MOG* trig cfg* endt startt
 
 % clear the workspace a little.
 
@@ -147,19 +127,54 @@ ft_topoplotER(cfgp, FrAll);
 % ft_multiplotER(cfg, FrAll);
 
 %% time-frequency analysis
+
+% go to FieldTrip website and search for time frequency tutorial
+
+% we will check frequencies with a moving window of 0.5s. the freq
+% resolution is therefore 2Hz (1/winlength).
+% we set the window size in the field t_ftimwin
+% just to play with it a little we test only trial number 1.
 cfgtfr              = [];
 cfgtfr.output       = 'pow';
 cfgtfr.channel      = 'MEG';
 cfgtfr.method       = 'mtmconvol';
 cfgtfr.taper        = 'hanning';
-cfgtfr.foi          = 3:100;                            % freq of interest 3 to 100Hz
-% cfgtfr.t_ftimwin    = ones(length(cfgtfr.foi),1).*0.5;  % length of time window fixed at 0.5 sec
-cfgtfr.t_ftimwin    = 1./cfgtfr.foi;                       % 1 cycle per window
+cfgtfr.foi          = 1:30;                            % freq of interest 3 to 100Hz
+cfgtfr.t_ftimwin    = ones(length(cfgtfr.foi),1).*0.5;  % length of time window fixed at 0.5 sec
 cfgtfr.toi          = -0.1:0.02:0.5;                    % time window "slides" from -0.1 to 0.5 sec in steps of 0.02 sec (20 ms)
-TFrAll = ft_freqanalysis(cfgtfr, datacln);
+cfgtfr.trials=1;
+cfgtfr.channel='A54';
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+% now plot one channel
+figure;ft_singleplotTFR([], TFtest);
 
+% now a window with smaller size for smaller frequencies
+% we start with a window length of 1 cycle for every frequency
+cfgtfr.t_ftimwin    = 1./cfgtfr.foi;  % 1 cycle per window
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+
+% we now move to 3 cycles per window (10Hz will be tested with a sliding
+% window of 30ms. more cycles - smoother results but you loose low freqs.
+cfgtfr.t_ftimwin    = 3./cfgtfr.foi;  % 1 cycle per window
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+
+% now seven
+
+cfgtfr.t_ftimwin    = 7./cfgtfr.foi;  % 1 cycle per window
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+
+% now we'll do 1 cycle per freq for the whole data and all the channels. it
+% will take a few minutes.
+cfgtfr.t_ftimwin    = 1./cfgtfr.foi;
+cfgtfr.trials='all';
+cfgtfr.channel='MEG';
+cfgtfr.keeptrials='yes';
+TFrAll = ft_freqanalysis(cfgtfr, datacln);
 cfgp = [];
-cfg.ylim = [3 30];         
+%cfgp.ylim = [3 30];         
 cfgp.layout       = '4D248.lay';
 cfgp.interactive='yes';
 ft_multiplotTFR(cfgp, TFrAll);
@@ -168,3 +183,27 @@ figure;
 cfgp.baseline=[-0.5 0];
 cfgp.baselinetype = 'relative'; %or 'absolute'
 ft_multiplotTFR(cfgp, TFrAll);
+
+%% within subject (between trials) statistics.
+% first baseline correction
+baseline=mean(TFrAll.powspctrm(:,:,:,1:6),4);
+for timei=2:31;
+    TFrAll.powspctrm(:,:,:,timei)=TFrAll.powspctrm(:,:,:,timei)-baseline;
+end
+% no compute the statistic
+cfg=[];
+cfg.method='stats';
+nsubj=size(TFrAll.powspctrm,1);
+cfg.design(1,:) = [ones(1,nsubj)];
+cfg.latency     = [0 0.35];
+cfg.frequency   = [1 20];
+cfg.statistic = 'ttest'; % compares the mean to zero
+frstat=ft_freqstatistics(cfg,TFrAll);
+% now plot 1-probability (1 = sig, less than 0.95 not sig)
+cfg=[];
+cfg.layout='4D248.lay';
+frstat.powspctrm=1-frstat.prob;
+cfg.zlim=[0.999 1]
+cfg.interactive='yes';
+ft_multiplotTFR(cfg, frstat);
+
