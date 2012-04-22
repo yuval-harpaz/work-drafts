@@ -84,4 +84,14 @@ figure; ft_sourceplot(cfg6, mri_realign);
 %% plot the timecourse of the dipole 
 dipTimeCourse=dip.dip.pot'*data.trial{1,1}(:,:);
 figure;plot(data.time{1,1},dipTimeCourse);
+dipWts=data1;
+dipWts.avg=dip.dip.pot;
+dipWts.time=dip.time;
+ft_topoplotER([],dipWts);
 
+
+
+% 
+% [~, grad] = ft_prepare_vol_sens(vol, data.grad, 'channel', data.label);
+% lf = ft_compute_leadfield(dip.dip.pos, grad, vol);
+% mom = pinv(lf)*data.trial{1,1};
