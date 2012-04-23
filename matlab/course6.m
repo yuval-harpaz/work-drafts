@@ -136,7 +136,7 @@ cfg4.trials=find(data.trialinfo==128);
 standard=ft_timelockanalysis(cfg4,data);
 cfg4.trials=find(data.trialinfo==64);
 oddball=ft_timelockanalysis(cfg4,data);
-
+save oddball_data oddball standard data
 % now see the fields
 standard.powspctrm=standard.avg;
 
@@ -165,6 +165,7 @@ channelSelection = {'A11', 'A26', 'A27', 'A40', 'A41', 'A42', 'A43', 'A44', 'A45
 
 %% make a local spheres model based on the head shape.
 [vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
+save headmodel vol grid mesh M1
 % note the units, here we work in mm.
 %% fit a dipole
 cfg5 = [];
