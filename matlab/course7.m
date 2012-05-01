@@ -57,7 +57,7 @@ hs_points=hdsh.anatomy>0;
 mri=ft_read_mri('warped+ORIG.BRIK');
 mri.anatomy=mri.anatomy+hs_points;
 cfg=[];cfg.interactive='yes';
-figure, ft_sourceplot(cfg,mritest);
+figure, ft_sourceplot(cfg,mri);
 % see that the headshape fits the MRI with AFNI
 % if you have to nudge this is the time.
 
