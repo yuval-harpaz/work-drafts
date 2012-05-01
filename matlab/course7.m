@@ -1,5 +1,7 @@
 cd oddball
-!cp /home/meg/SAM_BIU/docs/SuDi0811.rtw oddball.rtw
+if ~exist('oddball.rtw','file')
+    !cp /home/meg/SAM_BIU/docs/SuDi0811.rtw oddball.rtw
+end
 
 load trl % this was calculated in course6 (auditory data)
 source='c,rfhp0.1Hz';
@@ -36,7 +38,7 @@ close all
 % for SAM we have to create a text file with the timing of the trials by
 % condition,
 % and we want a list of all the trials pulled together.
-trl=data.cfg.trl;
+% trl=data.cfg.trl;
 trigTime=(trl(:,1)-trl(:,3))./1017.25;
 Trig2mark(...
     'All',trigTime',...
@@ -84,9 +86,13 @@ cd oddball;
 wtsNoSuf='SAM/allTrials,1-40Hz,Alla';
 [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
 save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts'); %save in mat format, quicker to read later.
+% after watching the SAMerf image we choose a voxel of interest
 vox=[1.5,-5.5,5.5];
+% lets visualize the weights used for source loc to this voxel
 plotWeights(wtsNoSuf,vox)
 
+% now we want a virtual sensor created for this voxel to be created for 2
+% conditions
 [voxi,allInd]=voxIndex(vox,100.*[...
     SAMHeader.XStart SAMHeader.XEnd ...
     SAMHeader.YStart SAMHeader.YEnd ...
@@ -99,12 +105,28 @@ plot(oddball.time,vsSt);hold on;
 plot(oddball.time,vsOd,'r');
 legend('standard','oddball')
 
+% now we want the whole brain activity at one time point, beware, messy!
 t=0.2733;
 [vs,timeline,allInd]=VS_slice(oddball,wtsNoSuf,1,[t t]);
 [vs,allInd]=inScalpVS(vs,allInd); % excluding out of the scalp grid points
 vsSlice2afni(allInd,vs,'oddRaw');
+ !~/abin/afni -dset warped+orig &
+ 
+ % let's compute power for toi=[0.26 0.354]; see bias to the middle
+ [vs,timeline,allInd]=VS_slice(oddball,wtsNoSuf,1,[toi(1) toi(2)]);
+ [vs,allInd]=inScalpVS(vs,allInd);
+ pow=mean(vs'.^2);
+ vsSlice2afni(allInd,pow','oddPow');
+ 
+% so we want to normalize
+[vsBL,timeline,allInd]=VS_slice(oddball,wtsNoSuf,1,[toi(1)-toi(2) 0]);
+[vsBL,allInd]=inScalpVS(vsBL,allInd);
+powBL=mean(vsBL'.^2);
+nai=(pow-powBL)./powBL;
+vsSlice2afni(allInd,nai','oddNai');
 
-
-
-
+% or perhapse to show z scores
+vsZ=zScoreVS(vs); %standardize channels to avoid bias to medial vs.
+powZ=mean(vsZ'.^2);
+vsSlice2afni(allInd,powZ','oddZ');
 
