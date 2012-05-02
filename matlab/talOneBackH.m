@@ -1,4 +1,4 @@
-function oneBack(subs)
+function talOneBackH(subs)
 cd ('~/Desktop/tal')
 for subi=1:length(subs)
     cd ('~/Desktop/tal')

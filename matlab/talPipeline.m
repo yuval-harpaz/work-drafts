@@ -1,10 +1,10 @@
-subs={'quad37'};
-setPathsTal(subs)
+subs={'quad38'};
+talSetPathH(subs)
 cond='rest';
-cleanTal(subs,cond)
+talCleanH(subs,cond)
 % if necessary: cleanHBtalForced(subs,cond)
-powerTal(subs)
-oneBack(subs)
+talPowerH(subs)
+talOneBackH(subs)
 
 
 markers94(subs)
