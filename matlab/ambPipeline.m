@@ -145,5 +145,8 @@ ambPlotStat1('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
 ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
 ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
 ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
-
-
+% get mni coordinates, same but with crosshair on
+ambPlotStatCHon('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
+ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
+ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
+ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
