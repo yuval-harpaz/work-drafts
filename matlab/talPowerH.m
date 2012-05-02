@@ -1,7 +1,7 @@
 function talPowerH(subs)
-cd ('~/Desktop/tal')
+cd (/media/Elements/MEG/tal)
 for subi=1:length(subs)
-    cd ('~/Desktop/tal')
+    cd (/media/Elements/MEG/tal)
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     cd ([sub,'/',sub,'/0.14d1']);
@@ -72,7 +72,7 @@ for subi=1:length(subs)
             pow=ft_freqanalysis(cfg2,data);
             %         cfg3.interactive='yes';
             %         ft_topoplotER(cfg3,alpha);
-            save(['~/Desktop/talResults/s',sub,'_pow',num2str(trval),'_',num2str(resti)],'pow');
+            save(['/media/Elements/MEG/tal/s',sub,'_pow',num2str(trval),'_',num2str(resti)],'pow');
         end
         
         

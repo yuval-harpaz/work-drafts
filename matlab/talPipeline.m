@@ -7,7 +7,7 @@ talPowerH(subs)
 talOneBackH(subs)
 
 
-markers94(subs)
+talMarkers94H(subs)
 % NUDGE
-SAMTal(subs,'alpha','eyesClosed',cond)
+talSAM_H(subs,'alpha','eyesClosed',cond)
 

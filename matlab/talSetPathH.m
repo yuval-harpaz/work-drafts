@@ -6,7 +6,7 @@ currPWD=pwd;
 
 % diary(['log ',datestr(now)])
 for subi=1:length(subs)
-    cd ('~/Desktop/tal')
+    cd ('/media/Elements/MEG/tal')
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     if ~exist([sub,'/',sub,'/0.14d1'])
@@ -23,11 +23,11 @@ for subi=1:length(subs)
     for lsi=1:length(txt)
         if ~isempty(findstr('@',txt{lsi}))
             pathsi=pathsi+1;
-            subpathi=['~/Desktop/tal/',sub,'/',sub,'/0.14d1/',txt{lsi}];
+            subpathi=['/media/Elements/MEG/tal/',sub,'/',sub,'/0.14d1/',txt{lsi}];
             subpath(pathsi,1:length(subpathi))=subpathi;
         end
     end
-    save(['~/Desktop/tal/',sub,'/subpath'],'subpath')
+    save(['/media/Elements/MEG/tal/',sub,'/subpath'],'subpath')
     %% listing the runs and scanning triggers in data files
     for pathi=1:size(subpath,1)
         cd(subpath(pathi,:))

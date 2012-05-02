@@ -1,9 +1,9 @@
 function talOneBackH(subs)
-cd ('~/Desktop/tal')
+cd ('/media/Elements/MEG/tal')
 for subi=1:length(subs)
-    cd ('~/Desktop/tal')
+    cd ('/media/Elements/MEG/tal')
     sub=subs{subi};
-    if ~exist(['~/Desktop/talResults/s',sub,'_1bk.mat'],'file')
+    if ~exist(['/media/Elements/MEG/talResults/s',sub,'_1bk.mat'],'file')
         display(['BEGGINING WITH ',sub]);
         cd ([sub,'/',sub,'/0.14d1']);
         conditions=textread('conditions','%s');
@@ -77,7 +77,7 @@ for subi=1:length(subs)
         cfg4.cond=200;
         nonword=splitconds(cfg4,data);
         nonwordAv=ft_timelockanalysis([],nonword);
-        save(['~/Desktop/talResults/s',sub,'_1bk'],'word','wordAv','nonword','nonwordAv');
+        save(['/media/Elements/MEG/talResults/s',sub,'_1bk'],'word','wordAv','nonword','nonwordAv');
         save trl trl
         close all
     end

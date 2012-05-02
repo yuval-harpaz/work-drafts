@@ -3,10 +3,10 @@ function talCleanH(subs,cond)
 %% checking files in directories
 % subs='quad01b' 'quad03'};
 % cond='rest';
-cd ('~/Desktop/tal')
+cd ('/media/Elements/MEG/tal')
 diary(['log ',datestr(now)])
 for subi=1:length(subs)
-    cd ('~/Desktop/tal')
+    cd ('/media/Elements/MEG/tal')
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     cd ([sub,'/',sub,'/0.14d1']);

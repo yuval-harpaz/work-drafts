@@ -1,10 +1,10 @@
 function talSAM_H(subs,PARAM,Active,cond)
 % PARAM='alpha';Active='eyesClosed';
-cd ('~/Desktop/tal')
+cd ('/media/Elements/MEG/tal')
 diary(['logSAM ',datestr(now)])
 display(['SAM ',PARAM,' ',Active]);
 for subi=1:length(subs)
-    cd ('~/Desktop/tal')
+    cd ('/media/Elements/MEG/tal')
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     cd ([sub,'/',sub,'/0.14d1']);
@@ -38,7 +38,7 @@ for subi=1:length(subs)
         end
         cd ..
         if ~exist([PARAM,'.param'],'file')
-            copyfile(['~/Desktop/tal/',PARAM,'.param'],'./')
+            copyfile(['/media/Elements/MEG/tal/',PARAM,'.param'],'./')
         end
         if ~exist([RUN,'/SAM/',PARAM,',SAMspm-Segments'],'file');
             eval(['!SAMcov -r ',RUN,' -d ',source,' -m ',PARAM,' -v']);
