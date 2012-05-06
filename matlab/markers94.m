@@ -1,7 +1,7 @@
 function markers94(subs)
-cd ('/home/yuval/Desktop/tal')
+cd ('~/Desktop/tal')
 for subi=1:length(subs)
-    cd ('/home/yuval/Desktop/tal')
+    cd ('~/Desktop/tal')
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     cd ([sub,'/',sub,'/0.14d1']);
