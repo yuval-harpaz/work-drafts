@@ -141,6 +141,7 @@ save domsubN domsubN %  I was unable to remove noise field, identical to pow now
 [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl001_M170_ME','domsubp','domsubN',0.95,0.001);
 
 %% plot final
+cd /home/yuval/Data/amb
 ambPlotStat1('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
 ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
 ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
@@ -150,3 +151,6 @@ ambPlotStatCHon('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
 ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
 ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
 ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
+
+cd /home/yuval/Dropbox/MEGpaper/files/matlab
+plotFields
