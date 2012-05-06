@@ -1,7 +1,7 @@
 function talPowerH(subs)
-cd (/media/Elements/MEG/tal)
+cd ('/media/Elements/MEG/tal')
 for subi=1:length(subs)
-    cd (/media/Elements/MEG/tal)
+    cd ('/media/Elements/MEG/tal')
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     cd ([sub,'/',sub,'/0.14d1']);
