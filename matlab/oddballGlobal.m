@@ -99,4 +99,39 @@ naigi = ft_sourceinterpolate(cfg10, source,MRIcr)
 figure;ft_sourceplot(cfg9,naigi);
 
 wtsNoSuf='SAM/allTrials,1-40Hz,Alla';
+for i=1:srcN,
+    m = sourceGlobal.inside(i);
+    if ~isempty(filter{m})
+        %                sourceAvg.mom{m} = sourceGlobal.avg.filter{m}(1,ismeg)*EMSEdata;
+        sourceAvg.mom{m} = filter{m}*standard.avg;
+        
+    end
+end
 [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
+cfg=[];cfg.channel='MEG';standard=ft_timelockanalysis(cfg,data); % here we use only 248 chans
+
+timewin=toi;
+samp1=nearest(standard.time,timewin(1));
+sampEnd=nearest(standard.time,timewin(2));
+noise1=nearest(standard.time,timewin(1)-timewin(2));
+noiseEnd=nearest(standard.time,0);
+pow=zeros(1,length(sourceGlobal.pos));
+noise=pow;
+for i=1:srcN,
+    m = sourceGlobal.inside(i);
+    if ~isempty(filter{m})
+        pow(m) = mean((sourceAvg.mom{m}(1,samp1:sampEnd)).^2);
+        noise(m) = mean((sourceAvg.mom{m}(1,noise1:noiseEnd)).^2);
+    end
+end
+nai=(pow-noise)./noise;
+source=sourceGlobal;source.avg.pow=pow;source.avg.nai=nai;source.avg.noise=noise;
+cfg10 = [];
+cfg10.parameter = 'avg.nai';
+
+naigi = ft_sourceinterpolate(cfg10, source,MRIcr)
+cfg9 = [];
+cfg9.interactive = 'yes';
+cfg9.funparameter = 'avg.nai';
+cfg9.method='ortho';
+figure;ft_sourceplot(cfg9,naigi);

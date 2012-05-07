@@ -133,7 +133,8 @@ vsSlice2afni(allInd,powZ','oddZ');
 grid2t(grid);
 cd ..
 !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -t pnt.txt -v
-cd oddball;
+cd oddball/SAM;
 wtsNoSuf='pnt.txt';
 [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
 save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts');
+filter=wts2filter(ActWgts,sourceGlobal.inside,size(sourceGlobal.outside,1));
