@@ -32,7 +32,7 @@ cfg.zlim=[-5e-14 5e-14];
 figure;
 ft_multiplotER(cfg,standard,oddball);
 
-toi=[0.26 0.354];
+toi=[0.043657 0.075163]; % toi=[0.26 0.354];
 close all
 
 % for SAM we have to create a text file with the timing of the trials by
@@ -138,3 +138,7 @@ wtsNoSuf='pnt.txt';
 [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
 save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts');
 filter=wts2filter(ActWgts,sourceGlobal.inside,size(sourceGlobal.outside,1));
+
+sourceTest=OBbeamform(data,timewin,'SAM',MRIcr,filter)
+sourceTest=OBbeamform(data,timewin,'sam',MRIcr)
+sourceTest=OBbeamform(dataavg,timewin,'sam',MRIcr)
