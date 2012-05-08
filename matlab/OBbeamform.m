@@ -36,14 +36,17 @@ else
         cfg.covariance       = 'yes';
         cfg.removemean       = 'yes';
         cfg.keeptrials='yes';
-        cfg.trials=1:100;% memory failed on virtual machine
+        if length(data.trial)>100
+            cfg.trials=1:100;% memory failed on virtual machine
+        end
         cov=timelockanalysis(cfg, data);
         cfg8        = [];
         cfg8.method = method;
         cfg8.grid= grid;
         cfg8.vol    = vol;
         cfg8.lambda = 0.05;
-        %cfg.channel={'MEG','MEGREF'};cfg8.keepfilter='yes';
+        %cfg.channel={'MEG','MEGREF'};
+        cfg8.keepfilter='yes';
         source = ft_sourceanalysis(cfg8, cov);
         data=timelockanalysis([],data);
     end

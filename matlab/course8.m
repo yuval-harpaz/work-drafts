@@ -2,7 +2,7 @@ cd oddball
 
 % first we want a headmodel
 % put debug points here: in headmodel_BIU at lines 119 (D.inv{1}...) and
-% 131 (eval([tinpoints...). in ft_prepare_local_spheres_mm in line 195(end)
+% 131 (eval([tinpoints...). in ft_prepare_localspheres_mm in line 195(end)
 % now run
 [vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
 save headmodel vol grid mesh M1
@@ -25,8 +25,13 @@ cd ..
 createPARAM('allTrials','ERF','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0.5],[],[],'MultiSphere');
 !SAMcov -r oddball -d c,rfhp0.1Hz -m allTrials -v
 !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -v
-!SAMerf -r oddball -d c,rfhp0.1Hz -m allTrials -v
+!SAMerf -r oddball -d c,rfhp0.1Hz -m allTrials -v -z 3
+% view results
+cd oddball
+!cp SAM/*.svl ./
+!~/abin/afni -dset warped+orig &
 
+% make new weights based on individually fit grid (pnt.txt)
 !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -t pnt.txt -v
 
 cd oddball/SAM;
@@ -35,39 +40,7 @@ wtsNoSuf='pnt.txt';
 save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts');
 filter=wts2filter(ActWgts,grid.inside,size(grid.outside,1));
 
-%% now to fieldtrip beamforming
 
-% first we need data
-source='c,rfhp0.1Hz';
-cfg=[];
-cfg.dataset=source;
-cfg.trialfun='trialfun_beg';
-cfg2=ft_definetrial(cfg);
-cfg2.trl=trl;
-cfg2.demean='yes';
-cfg2.baselinewindow=[-0.2 0];
-cfg2.bpfilter='yes';
-cfg2.bpfreq=[3 30];
-cfg2.channel={'MEG'};
-data=ft_preprocessing(cfg2);
-cfg4=[];
-cfg4.trials=find(data.trialinfo==128);
-
-standard=ft_preprocessing(cfg4,data);
-cfg=[];
-cfg.method='summary'; %trial
-cfg.alim=1e-12;
-standard=ft_rejectvisual(cfg, standard);
-
-stdAvg=ft_timelockanalysis([],standard);
-
-toi=[0.043657 0.075163];
-source=OBbeamform(stdAvg,toi,'sam',mri_realign)
-source=OBbeamform(stdAvg,toi,'lcmv',mri_realign)
-load('SAM/pnt.txt.mat')
-sourceTest=OBbeamform(stdAvg,toi,'SAM',mri_realign,filter)
-
-sourceTest=OBbeamform(standard,toi,'sam',mri_realign)
 
 
 %% messy below, don't look

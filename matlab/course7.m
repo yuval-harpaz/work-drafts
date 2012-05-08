@@ -73,7 +73,7 @@ createPARAM('allTrials','ERF','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0
 % to run SAM you have to be one folder above the data
 !SAMcov -r oddball -d c,rfhp0.1Hz -m allTrials -v
 !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -v
-!SAMerf -r oddball -d c,rfhp0.1Hz -m allTrials -v
+!SAMerf -r oddball -d c,rfhp0.1Hz -m allTrials -v -z 3
 !cp oddball/SAM/*svl oddball/
 % now see the image in afni
 createPARAM('allinduced','SPM','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0.5],[],[],'MultiSphere');
