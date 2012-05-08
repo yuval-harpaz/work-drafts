@@ -19,6 +19,8 @@ Trig2mark(...
     'Oddball',trigTime(find(trl(:,4)==64),1)',...
     'Novel',trigTime(find(trl(:,4)==32),1)');
 
+toi=[0.043657 0.075163];
+
 cd ..
 createPARAM('allTrials','ERF','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0.5],[],[],'MultiSphere');
 !SAMcov -r oddball -d c,rfhp0.1Hz -m allTrials -v
