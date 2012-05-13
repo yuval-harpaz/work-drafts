@@ -8,8 +8,10 @@ else
     save headmodel vol grid mesh M1
 end
 
+%% find left and right somatosensory response
+
 % read raw data, eyes open.
-fileName='xc,hb,lf_c,rfhp0.1Hz';
+fileName='hb_c,rfhp0.1Hz';
 cfg=[];
 cfg.dataset=fileName;
 cfg.trialdef.eventtype='TRIGGER';
@@ -21,6 +23,7 @@ cfg.trialdef.eventvalue= 90; %left index finger
 cfg=ft_definetrial(cfg);
 cfg.padding=0.5;
 cfg.bpfilter='yes';
+% cfg.bpfreq=[7 13];
 cfg.bpfreq=[1 90];
 cfg.demean='yes';
 cfg.continuous='yes';
@@ -28,6 +31,40 @@ cfg.channel='MEG';
 eyesOpen=ft_preprocessing(cfg);
 eyesOpen.grad=ft_convert_units(eyesOpen.grad,'mm');
 
+% view the data, see the onset of alpha for A113, A114 and A115
+cfgb=[];
+cfgb.layout='4D248.lay';
+cfgb.continuous='yes';
+cfgb.event.type='';
+cfgb.event.sample=1;
+cfgb.blocksize=10;
+cfgb.viewmode='vertical';
+cfgb.ylim=[-3.5027e-13  3.5027e-13]
+cfgb.channel={'A110','A111','A112','A113','A114','A115','A116','A117','A118','A119','A120','A121','A122','A123','A124','A125','A126','A127','A128','A129','A130','A131','A132','A133','A134','A135','A136','A137','A138','A139','A140'};
+comppic=ft_databrowser(cfgb,eyesOpen);
+
+cfg            = [];
+cfg.resamplefs = 300;
+cfg.detrend    = 'no';
+dummy           = ft_resampledata(cfg, eyesOpen);
+
+%run ica
+cfg            = [];
+comp_dummy           = ft_componentanalysis(cfg, dummy);
+
+%cfg=[];
+%cfg.method='fastica';
+%cfg.numcomponent=20;
+%comp=ft_componentanalysis(cfg,eyesOpen);
+
+cfgb=[];
+cfgb.layout='4D248.lay';
+cfgb.channel = {comp_dummy.label{1:5}};
+cfgb.continuous='yes';
+cfgb.event.type='';
+cfgb.event.sample=1;
+cfgb.blocksize=3;
+comppic=ft_databrowser(cfgb,comp_dummy);
 % eyesOpenIca=ft_componentanalysis([],eyesOpen);
 
 %% compute covariance for the 2min epoch
