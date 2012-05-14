@@ -1,4 +1,4 @@
-function dataHilb=talHilb2(subs,coords,coordType,label,freq,badChans,pat)
+function dataHilb=talHilb2(subs,coordinates,coordType,label,freq,badChans,pat)
 % subs={'quad01'}
 % coordType = 'tlrc'; % 'orig' (in pri) or 'tlrc' (in lpi);
 % label={'Lhip';'Rhip';'Lbr';'Rbr';'L47';'R47';'Litg';'Ritg';'Lstg';'Rstg';'Ltha';'Rtha';'Lins';'Rins';'Lcereb';'Rcereb';'Lmu';'Rmu'}
@@ -56,7 +56,7 @@ for subi=1:length(subs)
             trli=1;
             load ~/Desktop/tal/cohTempData.mat
             if strcmp(coordType,'tlrc')
-                coords=round(0.2*tlrc2orig(coords))/2;
+                coords=round(0.2*tlrc2orig(coordinates))/2;
             end
             for trgi=startTrg:2:endTrg
                 trOnset=str2num(trg{trgi}); %#ok<*ST2NM>
@@ -69,17 +69,18 @@ for subi=1:length(subs)
             cfg.trl(:,2)=trl(:,1)+1016+509;
             cfg.trl(:,3)=-509;
             cfg.dataset=source;
-%            cfg.padding=0.5;
+            %            cfg.padding=0.5;
             cfg.bpfilter='yes';
             cfg.bpfreq=[freqlow freqhigh];
             cfg.demean='yes';
-%            cfg.trl=trl;
+            %            cfg.trl=trl;
             cfg.channel='MEG';
             %cfg.bpfiltord     =2;
             cfg.bpfilttype    = 'fir';
             data=ft_preprocessing(cfg);
             cd SAM;
             wtsNoSuf=[freq,',',num2str(freqlow),'-',num2str(freqhigh),'Hz,eyesCloseda'];
+            display('loading SAM weights');
             if ~exist([wtsNoSuf,'.mat'],'file')
                 [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
                 save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts');
@@ -111,65 +112,69 @@ for subi=1:length(subs)
                 end
                 [~,badind]=ismember(badChannels,data.label);
                 wts(:,badind)=0;
-            for triali=1:length(datavs.trial)
-                datavs.trial{1,triali}=[];
-                datavs.trial{1,triali}(1:size(coords,1),1:end)=wts*data.trial{1,triali};
-            end
-            datavs.label=label;
-            cfg=[];
-            cfg.demean='yes';
-            cfg.hilbert='yes';
-            cfg.bpfilter='yes';
-            cfg.bpfreq=[freqlow freqhigh];
-            cfg.bpfilttype    = 'fir';
-            dataHilb=ft_preprocessing(cfg,datavs);
-            % cut edges
-            dataHilbCut=dataHilb;dataHilbCut.trial={};dataHilbCut.time={};
-            for triali=1:length(dataHilb.trial)
-                dataHilbCut.trial{1,triali}=dataHilb.trial{1,triali}(:,510:1526);
-                dataHilbCut.time{1,triali}=dataHilb.time{1,triali}(:,510:1526);
-            end
-            avgs=[];
-            vs=[];vs1row=[];
-            halfSecCount=0;
-            for vsi=1:size(dataHilb.trial{1,1},1);
+                for triali=1:length(datavs.trial)
+                    datavs.trial{1,triali}=[];
+                    datavs.trial{1,triali}(1:size(coords,1),1:end)=wts*data.trial{1,triali};
+                end
+                datavs.label=label;
+                cfg=[];
+                cfg.demean='yes';
+                cfg.hilbert='yes';
+                cfg.bpfilter='yes';
+                cfg.bpfreq=[freqlow freqhigh];
+                cfg.bpfilttype    = 'fir';
+                dataHilb=ft_preprocessing(cfg,datavs);
+                % cut edges
+                dataHilbCut=dataHilb;dataHilbCut.trial={};dataHilbCut.time={};
                 for triali=1:length(dataHilb.trial)
-                    % concatenating trials
-                    if triali==1
-                        vs1row=dataHilb.trial{1,1}(vsi,:);
-                    else
-%                     for vsi=1:size(dataHilb.trial{1,1},1)
-                        vs1row=[vs1row dataHilb.trial{1,triali}(vsi,:)];
+                    dataHilbCut.trial{1,triali}=dataHilb.trial{1,triali}(:,510:1526);
+                    dataHilbCut.time{1,triali}=dataHilb.time{1,triali}(:,510:1526);
+                end
+                avgs=[];
+                vs=[];vs1row=[];
+                halfSecCount=0;
+                for vsi=1:size(dataHilb.trial{1,1},1);
+                    halfSecCount=0;
+                    for triali=1:length(dataHilb.trial)
+                        % concatenating trials
+                        if triali==1
+                            vs1row=dataHilb.trial{1,1}(vsi,:);
+                        else
+                            %                     for vsi=1:size(dataHilb.trial{1,1},1)
+                            vs1row=[vs1row dataHilb.trial{1,triali}(vsi,:)];
+                        end
+                        halfSecCount=halfSecCount+1;
+                        avgs(halfSecCount,vsi)=mean(dataHilb.trial{1,triali}(vsi,1:509),2);
+                        halfSecCount=halfSecCount+1;
+                        avgs(halfSecCount,vsi)=mean(dataHilb.trial{1,triali}(vsi,509:1017),2);
                     end
-                    halfSecCount=halfSecCount+1;
-                    avgs(halfSecCount,vsi)=mean(dataHilb.trial{1,triali}(vsi,1:509),2);
-                    halfSecCount=halfSecCount+1;
-                    avgs(halfSecCount,vsi)=mean(dataHilb.trial{1,triali}(vsi,509:1017),2);                    
+                    if vsi==1
+                        vs=vs1row;
+                    else
+                        vs(vsi,:)=vs1row;
+                    end
+                    %                 avgs(triali,1:2)=mean(dataHilb.trial{1,triali}(:,1:509),2);
+                    %                 avgs(triali,3:4)=mean(dataHilb.trial{1,triali}(:,509:1017),2);
                 end
-                if vsi==1
-                    vs=vs1row;
-                else
-                    vs(vsi,:)=vs1row;
-                end
-%                 avgs(triali,1:2)=mean(dataHilb.trial{1,triali}(:,1:509),2);
-%                 avgs(triali,3:4)=mean(dataHilb.trial{1,triali}(:,509:1017),2);
+                AEC=corrcoef(vs'); % note here there is no average so it is not realy AEC
+                %            AEC=EC(1,2) %#ok<*NOPRT>
+                rows=size(avgs,1);
+                %             avgs((rows+1):(rows*2),1:2)=avgs(:,3:4);
+                %             avgs=avgs(:,1:2);
+                CAE=corrcoef(avgs);
+                % CAE=cor(1,2) %#ok<*NASGU>
+                eval(['AEC',num2str(i),'=AEC;'])
+                eval(['CAE',num2str(i),'=CAE;'])
             end
-            AEC=corrcoef(vs'); % note here there is no average so it is not realy AEC
-%            AEC=EC(1,2) %#ok<*NOPRT> 
-            rows=size(avgs,1);
-%             avgs((rows+1):(rows*2),1:2)=avgs(:,3:4);
-%             avgs=avgs(:,1:2);
-            CAE=corrcoef(avgs);
-           % CAE=cor(1,2) %#ok<*NASGU>
-            eval(['AEC',num2str(i),'=AEC;'])
-            eval(['CAE',num2str(i),'=CAE;'])
+            if ~exist([pat,'/talResults/Hilbert'],'dir')
+                mkdir([pat,'/talResults/Hilbert'])
+            end
+            eval(['corrWts',num2str(i),'=corrcoef(wts',''');'])
         end
-        if ~exist([pat,'/talResults/Hilbert'],'dir')
-            mkdir([pat,'/talResults/Hilbert'])
-        end
+        
+        save([pat,'/talResults/Hilbert/',sub,'_h2_',freq],'AEC1','AEC2','CAE1','CAE2','label','corrWts1','corrWts2')
     end
-    save([pat,'/talResults/Hilbert/',sub,'_h2_',freq],'AEC1','AEC2','CAE1','CAE2','label')
-end
-cd(PWD);
+    %cd(PWD);
+    cd /home/yuval/Desktop/talResults/Hilbert
 end
 
