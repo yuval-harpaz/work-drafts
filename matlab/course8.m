@@ -32,6 +32,7 @@ cd oddball
 !~/abin/afni -dset warped+orig &
 
 % make new weights based on individually fit grid (pnt.txt)
+!cp pnt.txt SAM/pnt.txt
 !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -t pnt.txt -v
 
 cd oddball/SAM;
