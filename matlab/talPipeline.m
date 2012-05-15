@@ -21,8 +21,13 @@ load subpath; cd(subpath);
 % afni
 %% 
 talMove2tlrcH(subs,cond)
-
-talSAM_H(subs,'alpha','eyesClosed',cond)
+pref='alpha';
+talSAM_H(subs,pref,'eyesClosed',cond)
 
 SVL='alpha,7-13Hz,eyesClosed-NULL,P,Zp.svl';
 talFunc2tlrcH(subs,cond,SVL,pref)
+% in a terminal right: ./func2tlrc.txt
+% view results
+!/home/megadmin/abin/afni -dset warped+tlrc &
+
+talMvResultsH(subs,cond,pref)

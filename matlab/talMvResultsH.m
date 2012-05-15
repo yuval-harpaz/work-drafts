@@ -20,11 +20,11 @@ for subi=1:length(subs)
 %             if ~exist(['~/media/Elements/MEG/talResults/',sub,'/',num2str(condi)],'dir')
 %                 mkdir(['~/media/Elements/MEG/talResults/',sub,'/',num2str(condi)]);
 %             end
-            if ~exist(['~/media/Elements/MEG/tal',sub],'dir')
-                mkdir (['~/media/Elements/MEG/tal',sub]);
+            if ~exist(['/media/Elements/MEG/talResults/',sub],'dir')
+                mkdir (['/media/Elements/MEG/talResults/',sub]);
             end
-            eval(['!cp ',pref,num2str(condi),'+tlrc.BRIK ~/media/Elements/MEG/talResults/',sub,'/'])
-            eval(['!cp ',pref,num2str(condi),'+tlrc.HEAD ~/media/Elements/MEG/talResults/',sub,'/'])
+            eval(['!cp ',pref,num2str(condi),'+tlrc.BRIK /media/Elements/MEG/talResults/',sub,'/'])
+            eval(['!cp ',pref,num2str(condi),'+tlrc.HEAD /media/Elements/MEG/talResults/',sub,'/'])
         end
     end
 end
