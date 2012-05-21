@@ -66,38 +66,55 @@ sourceTest=OBbeamform(stdAvg,toi,'SAM',mri_realign,filter)
 
 source=OBmne(stdAvg,toi,mri_realign)
 
-%% messy below, under construction
+%% below see a brave attempt to use MNE with a single shell.
 
-% plan : make surface from MRI template
-% compute leadfield and mne
-% 
+load ~/ft_BIU/matlab/files/sMRI.mat
+mri_realign=sMRI;
+mri_realign.transform=inv(M1)*sMRI.transform;
 cfg           = [];
 cfg.coordsys  = '4d';
 cfg.output    = {'brain'};
 seg           = ft_volumesegment(cfg, mri_realign);
 
-% let's try to limit the grid point to avoid obvious errors
 hs=ft_convert_units(ft_read_headshape('hs_file'),'mm')
-load ~/ft_BIU/matlab/ft_files/single_subj_T1.mat
-surf=ft_transform_geometry(inv(M1),bnd);
-plot3pnt(hs.pnt,'rx');hold on;ft_plot_mesh(surf);
 
+cfg = [];
+volseg = ft_prepare_singleshell(cfg,seg);
+volseg=ft_convert_units(volseg,'mm');
+plot3pnt(hs.pnt,'rx');hold on;ft_plot_mesh(volseg.bnd);
 
 cfg = [];
 cfg.covariance = 'yes';
 cfg.covariancewindow = [-inf 0];
 cov = ft_timelockanalysis(cfg, stdAvg);
+
 cfg = [];
-cfg.grad = stdAvg.grad;                      % sensor positions
+cfg.grad = ft_convert_units(stdAvg.grad,'mm');                      % sensor positions
 cfg.channel ='MEG';   % the used channels
-cfg.grid.pos = surf.pnt;              % source points
-cfg.grid.inside = 1:size(surf.pnt,1); % all source points are inside of the brain
+cfg.grid.pos = volseg.bnd.pnt;              % source points
+cfg.grid.inside = 1:size(volseg.bnd.pnt,1); % all source points are inside of the brain
 cfg.vol = vol;                               % volume conduction model
 leadfield = ft_prepare_leadfield(cfg);
 cfg=[];
 cfg.method = 'mne';
 cfg.grid = leadfield;
 cfg.vol = vol;
-cfg.lambda = 1e8;
-source = ft_sourceanalysis(cfg,stdAvg);
+cfg.mne.lambda = 1e8;
 
+source = ft_sourceanalysis(cfg,cov);
+
+
+ft_plot_mesh(volseg.bnd, 'vertexcolor', source.avg.pow(:,264));
+
+
+cfg = [];
+cfg.projectmom = 'yes';
+sourced = ft_sourcedescriptives(cfg,source);
+figure;
+ft_plot_mesh(volseg.bnd, 'vertexcolor', sourced.avg.pow(:,264));
+
+cfg = [];
+cfg.funparameter = 'avg.pow';
+sourced.tri=volseg.bnd.tri;
+figure;
+ft_sourcemovie(cfg,sourced);
