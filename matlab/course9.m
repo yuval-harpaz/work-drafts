@@ -62,7 +62,7 @@ source=OBbeamform(standard,toi,'sam',mri_realign)
 
 load('SAM/pnt.txt.mat')
 filter=wts2filter(ActWgts,grid.inside,size(grid.outside,1));
-sourceTest=OBbeamform(stdAvg,toi,'SAM',mri_realign,filter)
+source=OBbeamform(stdAvg,toi,'SAM',mri_realign,filter)
 
 source=OBmne(stdAvg,toi,mri_realign)
 

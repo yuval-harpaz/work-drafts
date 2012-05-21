@@ -25,7 +25,7 @@ end
 
 
 if exist('filter','var')
-    load source
+    source=grid;
     source.avg.filter=filter;
     if ~avg
         data=timelockanalysis([],data);
