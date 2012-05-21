@@ -23,7 +23,11 @@ for subi=1:length(subs)
 %                 && ~exist([funcName,'+tlrc.BRIK'],'file')
             PWD=pwd;
         %    copyfile(['SAM/',SVL],PWD)
+        if exist('~/abin','dir');
             eval(['!~/abin/3dcopy ',SVL,' ',pref,num2str(condi)])
+        elseif exist ('/home/megadmin/abin','dir');
+            eval(['!/home/megadmin/abin/3dcopy ',SVL,' ',pref,num2str(condi)])
+        end
             eval(['!echo "cd "',PWD,' >> ~/func2tlrc.txt']); 
             eval(['!echo @auto_tlrc -apar warped+tlrc -input ',pref,num2str(condi),'+orig -dxyz 5 >> ~/func2tlrc.txt']);
         %end
