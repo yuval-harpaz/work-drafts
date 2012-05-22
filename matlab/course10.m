@@ -110,7 +110,7 @@ cfg5.numdipoles = 1;
 cfg5.vol=vol;
 cfg5.feedback = 'textbar';
 cfg5.gridsearch='yes';
-cfg5.grad=ft_convert_units(somsens.grad,'mm');
+cfg5.grad=ft_convert_units(leftInd.grad,'mm');
 %cfg5.resolution = 0.1;
 % cfg5.grid.xgrid=-75:-30;
 % cfg5.grid.ygrid=75:-1:-105;
@@ -145,14 +145,9 @@ legend('LHdipole','RHdipole');
 
 %% now see the sensor cortex activation in the rest state (Mu).
 cfg=[];cfg.channel=channelLH;
-dataLH=ft_preprocessing(cfg,eyesOpenPCA);
+dataLH=ft_preprocessing(cfg,eyesOpen);
 cfg.channel=channelRH;
-dataRH=ft_preprocessing(cfg,eyesOpenPCA);
-% 
-% cfg=[];cfg.channel=channelLH;
-% dataLH=ft_preprocessing(cfg,eyesOpen);
-% cfg.channel=channelRH;
-% dataRH=ft_preprocessing(cfg,eyesOpen);
+dataRH=ft_preprocessing(cfg,eyesOpen);
 
 % time window with no MOG
 smp1=nearest(dataLH.time{1,1},65);
