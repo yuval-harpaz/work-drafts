@@ -11,8 +11,8 @@ for subi=1:length(subs)
     display(['BEGGINING WITH ',sub]);
     if ~exist([sub,'/',sub,'/0.14d1'])
         %mkdir ([sub,'/',sub])
-        copyfile(sub,['new/',sub])
-        copyfile(['new/',sub],[sub,'/',sub])
+        copyfile(sub,['/',sub])
+        copyfile(['/',sub],[sub,'/',sub])
     end
     cd ([sub,'/',sub,'/0.14d1']);
     %% looking for the session name, saving path in subject directory

@@ -16,7 +16,7 @@ for subi=1:length(subs)
         path2file=conditions{restcell(i)+1};
         fileName= conditions{restcell(i)+2};
         cd(path2file)
-        if ~exist(['xc,lf_',fileName],'file') && ~exist(['hb,lf_',fileName],'file') && ~exist(['xc,hb,lf_',fileName],'file')
+        if ~exist(['./xc,lf_',fileName],'file') && ~exist(['./hb,lf_',fileName],'file') && ~exist(['./xc,hb,lf_',fileName],'file')
             p=pdf4D(fileName);
             cleanCoefs = createCleanFile(p, fileName,...
                 'byLF',256 ,'Method','Adaptive',...

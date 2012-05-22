@@ -23,7 +23,7 @@ for subi=1:length(subs)
             if ~exist('T.nii','file')
                 fitMRI2hs(source);
             end
-            !~/abin/3dWarp -deoblique T.nii
+            % !/home/megadmin/abin/3dWarp -deoblique T.nii
         end
         if ~exist('HS+orig.BRIK','file')
             hs2afni

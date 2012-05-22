@@ -16,7 +16,7 @@ for subi=1:length(subs)
         path2file=conditions{restcell(condi)+1};
         %source= conditions{restcell(condi)+2};
         cd(path2file)
-        if exist('warped+orig.BRIK','file') && ~exist('warped+tlrc.BRIK','file')
+        if exist('./warped+orig.BRIK','file') && ~exist('./warped+tlrc.BRIK','file')
             PWD=pwd;
             eval(['!echo "cd "',PWD,' >> ~/warped2tlrc']);
             eval(['!echo @auto_tlrc -base ~/SAM_BIU/docs/temp+tlrc -input warped+orig -no_ss >> ~/warped2tlrc']);
