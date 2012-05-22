@@ -1,30 +1,30 @@
 cd somsens
 
-%% find left and right somatosensory response
+%% read raw data, eyes open.
+load eyesOpen
 
-% read raw data, eyes open.
-fileName='hb_c,rfhp0.1Hz';
-cfg=[];
-cfg.dataset=fileName;
-cfg.trialdef.eventtype='TRIGGER';
-cfg.trialdef.prestim=0;
-cfg.trialdef.poststim=120;
-cfg.trialdef.offset=0;
-cfg.trialfun='BIUtrialfun';
-cfg.trialdef.eventvalue= 90;
-cfg.channel='MEG';
-cfg=ft_definetrial(cfg);
-cfg.padding=0.5;
-cfg.bpfilter='yes';
-% cfg.bpfreq=[7 13];
-cfg.bpfreq=[1 90];
-cfg.demean='yes';
-cfg.continuous='yes';
-cfg.channel='MEG';
-eyesOpen=ft_preprocessing(cfg);
+% fileName='hb_c,rfhp0.1Hz';
+% cfg=[];
+% cfg.dataset=fileName;
+% cfg.trialdef.eventtype='TRIGGER';
+% cfg.trialdef.prestim=0;
+% cfg.trialdef.poststim=120;
+% cfg.trialdef.offset=0;
+% cfg.trialfun='BIUtrialfun';
+% cfg.trialdef.eventvalue= 90;
+% cfg.channel='MEG';
+% cfg=ft_definetrial(cfg);
+% cfg.padding=0.5;
+% cfg.bpfilter='yes';
+% cfg.bpfreq=[1 90];
+% cfg.demean='yes';
+% cfg.continuous='yes';
+% cfg.channel='MEG';
+% eyesOpen=ft_preprocessing(cfg);
 
 
-% view the data, see the onset of alpha for A113, A114 and A115
+%% view the data
+% see the onset of alpha for A113, A114 and A115
 cfgb=[];
 cfgb.layout='4D248.lay';
 cfgb.continuous='yes';
@@ -37,51 +37,53 @@ cfgb.channel={'A112','A113','A114','A115','A116'};
 %cfgb.channel={'A110','A111','A112','A113','A114','A115','A116','A117','A118','A119','A120','A121','A122','A123','A124','A125','A126','A127','A128','A129','A130','A131','A132','A133','A134','A135','A136','A137','A138','A139','A140'};
 comppic=ft_databrowser(cfgb,eyesOpen);
 
-cfg            = [];
-cfg.method='pca';
-comp           = ft_componentanalysis(cfg, eyesOpen);
-cfgb=[];
-cfgb.layout='4D248.lay';
-cfgb.channel = {comp.label{1:5}};
-cfgb.continuous='yes';
-cfgb.event.type='';
-cfgb.event.sample=1;
-cfgb.blocksize=3;
-comppic=ft_databrowser(cfgb,comp);
-% eyesOpenIca=ft_componentanalysis([],eyesOpen);
-cfg = [];
-cfg.component = 1; % change
-eyesOpenPCA= ft_rejectcomponent(cfg, comp,eyesOpen);
+%% warning! cleaning data with PCA introduced false synchrony to dipoles
+% cfg            = [];
+% cfg.method='pca';
+% comp           = ft_componentanalysis(cfg, eyesOpen);
+% cfgb=[];
+% cfgb.layout='4D248.lay';
+% cfgb.channel = {comp.label{1:5}};
+% cfgb.continuous='yes';
+% cfgb.event.type='';
+% cfgb.event.sample=1;
+% cfgb.blocksize=3;
+% comppic=ft_databrowser(cfgb,comp);
+% cfg = [];
+% cfg.component = 1; % change
+% eyesOpenPCA= ft_rejectcomponent(cfg, comp,eyesOpen);
 
 %% read and average somatosensory responses.
+load LRindex
 
-cfg=[];
-cfg.dataset=fileName;
-cfg.trialdef.eventtype='TRIGGER';
-cfg.trialdef.prestim=0.1;
-cfg.trialdef.poststim=0.3;
-cfg.trialdef.offset=-0.1;
-cfg.trialfun='BIUtrialfun';
-cfg.trialdef.eventvalue= [104,102]; %left index finger
-cfg1=ft_definetrial(cfg);
-cfg1.demean='yes';
-cfg1.baselinewindow=[-0.1 0];
-cfg1.bpfilter='yes';
-cfg1.bpfreq=[3 30];
-cfg1.channel='MEG';
-somsens=ft_preprocessing(cfg1);
+% cfg=[];
+% cfg.dataset=fileName;
+% cfg.trialdef.eventtype='TRIGGER';
+% cfg.trialdef.prestim=0.1;
+% cfg.trialdef.poststim=0.3;
+% cfg.trialdef.offset=-0.1;
+% cfg.trialfun='BIUtrialfun';
+% cfg.trialdef.eventvalue= [104,102]; %left index finger
+% cfg1=ft_definetrial(cfg);
+% cfg1.demean='yes';
+% cfg1.baselinewindow=[-0.1 0];
+% cfg1.bpfilter='yes';
+% cfg1.bpfreq=[3 30];
+% cfg1.channel='MEG';
+% somsens=ft_preprocessing(cfg1);
+% 
+% cfg=[];
+% cfg.method='summary';
+% cfg.channel='MEG';
+% cfg.alim=1e-12;
+% somsensCln=ft_rejectvisual(cfg, somsens);
+% % averaging
+% cfg=[];
+% cfg.trials=find(somsensCln.trialinfo==102);
+% rightInd=ft_timelockanalysis(cfg,somsensCln);
+% cfg.trials=find(somsensCln.trialinfo==104);
+% leftInd=ft_timelockanalysis(cfg,somsensCln);
 
-cfg=[];
-cfg.method='summary';
-cfg.channel='MEG';
-cfg.alim=1e-12;
-somsensCln=ft_rejectvisual(cfg, somsens);
-% averaging
-cfg=[];
-cfg.trials=find(somsensCln.trialinfo==102);
-rightInd=ft_timelockanalysis(cfg,somsensCln);
-cfg.trials=find(somsensCln.trialinfo==104);
-leftInd=ft_timelockanalysis(cfg,somsensCln);
 cfg=[];
 cfg.layout='4D248.lay';
 cfg.interactive='yes';
