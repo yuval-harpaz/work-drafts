@@ -28,6 +28,8 @@ cfgp.interactive='yes';
 cfgp.xlim=[0.1 0.1];
 ft_topoplotER(cfgp,gadom);
 
+statPlot11(gasub,gadom,0.2)
+
 load 1/DOM/dom
 figure;ft_topoplotER(cfgp,dom);
 load 2/DOM/dom
@@ -73,47 +75,48 @@ eval(['gadom_ra=ft_timelockgrandaverage(cfg',domstr,');']);
 eval(['gasub_ra=ft_timelockgrandaverage(cfg',substr,');']);
 clear dom* sub*
 
-cfgp=[];
-cfgp.layout='4D248.lay';
-cfgp.interactive='yes';
-cfgp.xlim=[0.2 0.2];
-ft_topoplotER(cfgp,gadom,gadom_ra);
-
-cfgs=[];
-cfgs.latency=[0.2 0.2];
-cfgs.method='stats';
-cfgs.statistic='paired-ttest';
-cfgs.design = [ones(1,25) ones(1,25)*2];
-[stat] = ft_timelockstatistics(cfgs, gasub, gadom)
-
-ga_sub_dom=gasub;ga_sub_dom.individual=gasub.individual-gadom.individual;
-%ga_sub_dom.avg=squeeze(mean(gasub.individual,1)-mean(gadom.individual,1));
-cfgp = [];   
-cfgp.xlim=[0.2 0.2]; 
-cfgp.highlight = 'on';
-% Get the index of each significant channel
-cfgp.highlightchannel = find(stat.prob<0.05);
-cfgp.comment = 'xlim';
-cfgp.commentpos = 'title';
-cfgp.layout = '4D248.lay';
-ft_topoplotER(cfgp, ga_sub_dom);
-colorbar
-
-[stat] = ft_timelockstatistics(cfgs, gasub_ra, gadom_ra)
-ga_sub_dom_ra=gasub_ra;ga_sub_dom_ra.individual=gasub_ra.individual-gadom_ra.individual;
-cfg.highlightchannel = find(stat.prob<0.05);
-figure;ft_topoplotER(cfg, ga_sub_dom_ra);
+% cfgp=[];
+% cfgp.layout='4D248.lay';
+% cfgp.interactive='yes';
+% cfgp.xlim=[0.2 0.2];
+% ft_topoplotER(cfgp,gadom,gadom_ra);
+% 
+% cfgs=[];
+% cfgs.latency=[0.2 0.2];
+% cfgs.method='stats';
+% cfgs.statistic='paired-ttest';
+% cfgs.design = [ones(1,25) ones(1,25)*2];
+% [stat] = ft_timelockstatistics(cfgs, gasub, gadom)
+% 
+% ga_sub_dom=gasub;ga_sub_dom.individual=gasub.individual-gadom.individual;
+% %ga_sub_dom.avg=squeeze(mean(gasub.individual,1)-mean(gadom.individual,1));
+% cfgp = [];   
+% cfgp.xlim=[0.2 0.2]; 
+% cfgp.highlight = 'on';
+% % Get the index of each significant channel
+% cfgp.highlightchannel = find(stat.prob<0.05);
+% cfgp.comment = 'xlim';
+% cfgp.commentpos = 'title';
+% cfgp.layout = '4D248.lay';
+% ft_topoplotER(cfgp, ga_sub_dom);
+% colorbar
+% 
+% [stat] = ft_timelockstatistics(cfgs, gasub_ra, gadom_ra)
+% ga_sub_dom_ra=gasub_ra;ga_sub_dom_ra.individual=gasub_ra.individual-gadom_ra.individual;
+% cfg.highlightchannel = find(stat.prob<0.05);
+% figure;ft_topoplotER(cfg, ga_sub_dom_ra);
 
 clear *ra
 
-%% cluster based statistics
+%% cluster based permutations statistics
 load '25/DOM/dom.mat';
 cfg=[];
 cfg.method='distance';
 cfg.grad=dom.grad;
+cfg.neighbourdist = 0.04; % default is 0.04m
 neighbours = ft_prepare_neighbours(cfg, dom);
 neighbours=neighbours(1:248);
-
+ % or load ~/work-drafts/matlab/neighbours
 cfg=[];
 cfg.neighbours = neighbours;
 cfg.latency     = [0.2 0.2];
@@ -199,53 +202,103 @@ cfgp.xlim=[0.1 0.1];
 cfgp.layout = '4D248.lay';
 ft_topoplotER(cfgp,gadom_cp,gadom,dom)
 
-
-cfgs=[];
-cfgs.latency=[0.2 0.2];
-cfgs.method='stats';
-cfgs.statistic='paired-ttest';
-cfgs.design = [ones(1,25) ones(1,25)*2];
-[stat] = ft_timelockstatistics(cfgs, gasub_cp,gadom_cp);
-
-
-ga_sub_dom_cp=gasub_cp;ga_sub_dom_cp.individual=gasub_cp.individual-gadom_cp.individual;
-cfgp = [];   
-cfgp.xlim=[0.2 0.2]; 
-cfgp.highlight = 'on';
-% Get the index of each significant channel
-cfgp.highlightchannel = find(stat.prob<0.05);
-cfgp.comment = 'xlim';
-cfgp.commentpos = 'title';
-cfgp.layout = '4D248.lay';
-ft_topoplotER(cfgp, ga_sub_dom_cp);colorbar
+statPlot11(gasub_cp,gadom_cp,0.2)
+% cfgs=[];
+% cfgs.latency=[0.2 0.2];
+% cfgs.method='stats';
+% cfgs.statistic='paired-ttest';
+% cfgs.design = [ones(1,25) ones(1,25)*2];
+% [stat] = ft_timelockstatistics(cfgs, gasub_cp,gadom_cp);
+% 
+% 
+% ga_sub_dom_cp=gasub_cp;ga_sub_dom_cp.individual=gasub_cp.individual-gadom_cp.individual;
+% cfgp = [];   
+% cfgp.xlim=[0.2 0.2]; 
+% cfgp.highlight = 'on';
+% % Get the index of each significant channel
+% cfgp.highlightchannel = find(stat.prob<0.05);
+% cfgp.comment = 'xlim';
+% cfgp.commentpos = 'title';
+% cfgp.layout = '4D248.lay';
+% ft_topoplotER(cfgp, ga_sub_dom_cp);colorbar
 
 % cluster statistics doesn't work
 
 %% RMS
-subRMS=squeeze(sqrt(mean(gasub.individual.^2,2)));
-domRMS=squeeze(sqrt(mean(gadom.individual.^2,2)));
-plot(gasub.time,mean(subRMS),'r')
-hold on
-plot(gasub.time,mean(domRMS),'b')
-legend('SUB','DOM')
+% it is possible to calculate RMS for all the channels with clustData like this:
+cfg=[];
+cfg.method='RMS';
+cfg.neighbours='all';
+gadomRMSall=clustData(cfg,gadom);
+gasubRMSall=clustData(cfg,gasub);
 
-load /home/yuval/ft_BIU/matlab/files/LRpairs;
-[~,Lloc] =ismember(LRpairs(:,1),gasub.label);
-[~,Rloc] =ismember(LRpairs(:,2),gasub.label);
-subRMS_L=squeeze(sqrt(mean(gasub.individual(:,Lloc,:).^2,2)));
-domRMS_L=squeeze(sqrt(mean(gadom.individual(:,Lloc,:).^2,2)));
-subRMS_R=squeeze(sqrt(mean(gasub.individual(:,Rloc,:).^2,2)));
-domRMS_R=squeeze(sqrt(mean(gadom.individual(:,Rloc,:).^2,2)));
+
+cfgs=[];
+% cfgs.latency=[0.1956 0.1956]; ttest for one timepoint
+cfgs.method='stats';
+cfgs.statistic='paired-ttest';
+cfgs.design = [ones(1,25) ones(1,25)*2];
+[stat] = ft_timelockstatistics(cfgs, gasubRMSall, gadomRMSall)
+
+plot(gadomRMSall.time,squeeze(mean(gadomRMSall.individual,1)),'k');
+hold on
+plot(gasubRMSall.time,squeeze(mean(gasubRMSall.individual,1)),'r');
+plot(stat.time(find(stat.prob<0.05)),1.1*squeeze(max(mean(gasubRMSall.individual,1))),'k*');
+legend('Dom','Sub','sig')
+
+% you can also calculate RMS without clustData in less moves:
+% subRMS=squeeze(sqrt(mean(gasub.individual.^2,2)));
+% domRMS=squeeze(sqrt(mean(gadom.individual.^2,2)));
+%% area under curve
+timelim=[0.17 0.2];
+samp1=nearest(gadomRMSall.time,timelim(1));
+samp2=nearest(gadomRMSall.time,timelim(2));
+timeline=gadomRMSall.time(1,samp1:samp2);
+domcurve=squeeze(gadomRMSall.individual(:,1,samp1:samp2))';
+subcurve=squeeze(gasubRMSall.individual(:,1,samp1:samp2))';
+domArea=trapz(timeline,domcurve);
+subArea=trapz(timeline,subcurve);
+[~,b]=ttest(domArea,subArea)
+hsub=area(timeline,mean(subcurve,2));
+set(hsub,'FaceColor','r','EdgeColor','r')
+hdom=area(timeline,mean(domcurve,2));
+set(hdom,'FaceColor','w','EdgeColor','w')
+%% now RMS for left and right sensors
+cfg=[];
+cfg.method='RMS';
+cfg.neighbours='LR';
+gadomRMS_LR=clustData(cfg,gadom);
+gasubRMS_LR=clustData(cfg,gasub);
+
+subRMS_L=squeeze(mean(gasubRMS_LR.individual(:,1,:),1));
+domRMS_L=squeeze(mean(gadomRMS_LR.individual(:,1,:),1));
+subRMS_R=squeeze(mean(gasubRMS_LR.individual(:,2,:),1));
+domRMS_R=squeeze(mean(gadomRMS_LR.individual(:,2,:),1));
 
 figure;
-plot(gasub.time,mean(subRMS_L),'r')
+plot(gasub.time,subRMS_L,'r')
 hold on
-plot(gasub.time,mean(domRMS_L),'b')
+plot(gasub.time,domRMS_L,'b')
 ylim([0 1e-13]);
-plot(gasub.time,mean(subRMS_R),'m')
+plot(gasub.time,subRMS_R,'m')
 hold on
-plot(gasub.time,mean(domRMS_R),'c')
+plot(gasub.time,domRMS_R,'c')
 legend('SUB_L','DOM_L','SUB_R','DOM_R')
 ylim([0 1e-13]);
 
-%% area under curve
+%% RMS for clusters
+cfg=[];
+cfg.neighbours=neighbours;
+cfg.method='RMS';
+gadomRMS=clustData(cfg,gadom);
+gasubRMS=clustData(cfg,gasub);
+statPlot11(gasubRMS,gadomRMS,0.2)
+
+%% mean cluster value
+cfg.method='mean';
+gadomMC=clustData(cfg,gadom);
+gasubMC=clustData(cfg,gasub);
+statPlot11(gasubMC,gadomMC,0.2,[-1e-13 1e-13])
+
+
+
