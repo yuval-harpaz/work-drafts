@@ -55,85 +55,37 @@ dom_ra=ft_megrealign(cfg,dom);
 close all
 
 % grand average all realigned data
-domstr='';
-substr='';
-for subi=1:25
-    subjn=num2str(subi);
-    load ([subjn,'/DOM/dom_ra.mat'])
-    eval(['dom',subjn,'=dom_ra;']);
-    domstr=[domstr,',dom',subjn];
-    load ([subjn,'/SUB/sub_ra.mat'])
-    eval(['sub',subjn,'=sub_ra;']);
-    substr=[substr,',sub',subjn];
-end
-
-cfg=[];
-cfg.channel='MEG';
-cfg.keepindividual = 'yes';
-
-eval(['gadom_ra=ft_timelockgrandaverage(cfg',domstr,');']);
-eval(['gasub_ra=ft_timelockgrandaverage(cfg',substr,');']);
-clear dom* sub*
-
-% cfgp=[];
-% cfgp.layout='4D248.lay';
-% cfgp.interactive='yes';
-% cfgp.xlim=[0.2 0.2];
-% ft_topoplotER(cfgp,gadom,gadom_ra);
-% 
-% cfgs=[];
-% cfgs.latency=[0.2 0.2];
-% cfgs.method='stats';
-% cfgs.statistic='paired-ttest';
-% cfgs.design = [ones(1,25) ones(1,25)*2];
-% [stat] = ft_timelockstatistics(cfgs, gasub, gadom)
-% 
-% ga_sub_dom=gasub;ga_sub_dom.individual=gasub.individual-gadom.individual;
-% %ga_sub_dom.avg=squeeze(mean(gasub.individual,1)-mean(gadom.individual,1));
-% cfgp = [];   
-% cfgp.xlim=[0.2 0.2]; 
-% cfgp.highlight = 'on';
-% % Get the index of each significant channel
-% cfgp.highlightchannel = find(stat.prob<0.05);
-% cfgp.comment = 'xlim';
-% cfgp.commentpos = 'title';
-% cfgp.layout = '4D248.lay';
-% ft_topoplotER(cfgp, ga_sub_dom);
-% colorbar
-% 
-% [stat] = ft_timelockstatistics(cfgs, gasub_ra, gadom_ra)
-% ga_sub_dom_ra=gasub_ra;ga_sub_dom_ra.individual=gasub_ra.individual-gadom_ra.individual;
-% cfg.highlightchannel = find(stat.prob<0.05);
-% figure;ft_topoplotER(cfg, ga_sub_dom_ra);
+% here we load grandaverage files after realignment
+load gadom_ra
+load gasub_ra
+% now statistics for 0.2ms
+statPlot11(gasub_ra,gadom_ra,0.2)
 
 clear *ra
 
 %% cluster based permutations statistics
-load '25/DOM/dom.mat';
-cfg=[];
-cfg.method='distance';
-cfg.grad=dom.grad;
-cfg.neighbourdist = 0.04; % default is 0.04m
-neighbours = ft_prepare_neighbours(cfg, dom);
-neighbours=neighbours(1:248);
- % or load ~/work-drafts/matlab/neighbours
+load ~/work-drafts/matlab/neighbours
+%    I calculated "neighbourhood" like this:
+% load '25/DOM/dom.mat';
+% cfg=[];
+% cfg.method='distance';
+% cfg.grad=dom.grad;
+% cfg.neighbourdist = 0.04; % default is 0.04m
+% neighbours = ft_prepare_neighbours(cfg, dom);
+% neighbours=neighbours(1:248);
+
 cfg=[];
 cfg.neighbours = neighbours;
 cfg.latency     = [0.2 0.2];
 cfg.numrandomization = 1000;
 cfg.correctm         = 'cluster';
-% cfg.alpha            = critical value for rejecting the null-hypothesis per tail (default = 0.05)
-% cfg.tail             = -1, 1 or 0 (default = 0)
-% cfg.correcttail      = correct p-values or alpha-values when doing a two-sided test, 'alpha','prob' or 'no' (default = 'no')
 cfg.uvar        = 1; % row of design matrix that contains unit variable (in this case: subjects)
 cfg.ivar        = 2; %
-%cfg.feedback         = 'gui', 'text', 'textbar' or 'no' (default = 'text')
-% cfg.randomseed       = 'yes', 'no' or a number (default = 'yes')
 cfg.method      = 'montecarlo';
 cfg.statistic   = 'depsamplesT';
 cfg.design = [1:25 1:25];
 cfg.design(2,:) = [ones(1,25) ones(1,25)*2];
-%cfg.design(1,:) = [ones(1,nsubj) ones(1,nsubj)*2];
+
 
 
 [stat] = ft_timelockstatistics(cfg, gasub, gadom);
@@ -148,12 +100,19 @@ pos_cluster_pvals = [stat.posclusters(:).prob]
 % here we select channels of significant clusters for display
 neg_signif_clust = find(neg_cluster_pvals < stat.cfg.alpha);
 neg = ismember(stat.negclusterslabelmat, neg_signif_clust);
-
+%neg=ismember(neg_signif_clust,stat.negclusterslabelmat)
+datadif=gasub;
+datadif.individual=gasub.individual-gadom.individual;
+cfgp=[];
+cfgp.layout='4D248.lay';
+cfgp.interactive='yes';
+cfgp.xlim=[0.2 0.2];
+cfgp.highlight = 'on';
 cfgp.highlightchannel = find(neg);
-ft_topoplotER(cfgp, ga_sub_dom);colorbar;
+ft_topoplotER(cfgp, datadif);colorbar;
 
 %% megplanar
-
+load 1/DOM/dom
 cfg=[];
 cfg.planarmethod   = 'orig';
 cfg.neighbours     = neighbours;
@@ -161,69 +120,20 @@ cfg.neighbours     = neighbours;
 cfg=[];
 cfg.combinegrad  = 'yes';
 dom_cp = ft_combineplanar(cfg, interp)
-
-
-domstr='';
-substr='';
-for subi=1:25
-    subjn=num2str(subi);
-    load ([subjn,'/DOM/dom.mat'])
-    cfgmp=[];
-    cfgmp.planarmethod   = 'orig';
-    cfgmp.neighbours     = neighbours;
-    [interp] = ft_megplanar(cfgmp, dom);
-    cfgcp=[];
-    cfgcp.combinegrad  = 'yes';
-%     cfgcp.demean         = 'yes';
-%     cfgcp.baselinewindow = [-0.2 0]; %didn't work, used correctBL instead
-    dom = ft_combineplanar(cfgcp, interp)
-    dom=correctBL(dom,[-0.2 0]);
-    eval(['dom',subjn,'=dom;']);
-    domstr=[domstr,',dom',subjn];
-    load ([subjn,'/SUB/sub.mat'])
-    [interp] = ft_megplanar(cfgmp, sub);
-    sub = ft_combineplanar(cfgcp, interp)
-    sub=correctBL(sub,[-0.2 0]);
-    eval(['sub',subjn,'=sub;']);
-    substr=[substr,',sub',subjn];
-end
-
-cfg=[];
-cfg.channel='MEG';
-cfg.keepindividual = 'yes';
-
-eval(['gadom_cp=ft_timelockgrandaverage(cfg',domstr,');']);
-eval(['gasub_cp=ft_timelockgrandaverage(cfg',substr,');']);
-clear dom* sub*
-
-load 1/DOM/dom
 cfgp = [];
 cfgp.xlim=[0.1 0.1];
 cfgp.layout = '4D248.lay';
-ft_topoplotER(cfgp,gadom_cp,gadom,dom)
+ft_topoplotER(cfgp,dom_cp,dom)
+
+load gadom_cp
+load gasub_cp
 
 statPlot11(gasub_cp,gadom_cp,0.2)
-% cfgs=[];
-% cfgs.latency=[0.2 0.2];
-% cfgs.method='stats';
-% cfgs.statistic='paired-ttest';
-% cfgs.design = [ones(1,25) ones(1,25)*2];
-% [stat] = ft_timelockstatistics(cfgs, gasub_cp,gadom_cp);
-% 
-% 
-% ga_sub_dom_cp=gasub_cp;ga_sub_dom_cp.individual=gasub_cp.individual-gadom_cp.individual;
-% cfgp = [];   
-% cfgp.xlim=[0.2 0.2]; 
-% cfgp.highlight = 'on';
-% % Get the index of each significant channel
-% cfgp.highlightchannel = find(stat.prob<0.05);
-% cfgp.comment = 'xlim';
-% cfgp.commentpos = 'title';
-% cfgp.layout = '4D248.lay';
-% ft_topoplotER(cfgp, ga_sub_dom_cp);colorbar
 
-% cluster statistics doesn't work
+statPlot11(gasub_cp,gadom_cp,0.1)
 
+% it could make sense to do megrealign after meg planar but It is
+% impossible with fieldtrip now.
 %% RMS
 % it is possible to calculate RMS for all the channels with clustData like this:
 cfg=[];
@@ -234,7 +144,6 @@ gasubRMSall=clustData(cfg,gasub);
 
 
 cfgs=[];
-% cfgs.latency=[0.1956 0.1956]; ttest for one timepoint
 cfgs.method='stats';
 cfgs.statistic='paired-ttest';
 cfgs.design = [ones(1,25) ones(1,25)*2];
@@ -245,6 +154,8 @@ hold on
 plot(gasubRMSall.time,squeeze(mean(gasubRMSall.individual,1)),'r');
 plot(stat.time(find(stat.prob<0.05)),1.1*squeeze(max(mean(gasubRMSall.individual,1))),'k*');
 legend('Dom','Sub','sig')
+% don't close the figure
+
 
 % you can also calculate RMS without clustData in less moves:
 % subRMS=squeeze(sqrt(mean(gasub.individual.^2,2)));
