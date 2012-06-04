@@ -19,14 +19,18 @@ if isempty(cfg.zlim)
     cfg.zlim='maxmin';
 end
 if ischar(data1)
+    title1=data1;title2=data2;
     load(data1)
     eval(['data1=',data1])
     load(data2)
     eval(['data2=',data2])
+else
+    title1=inputname(1);
+    title2=inputname(2);
 end
 cfg.xlim=xlim;
 cfg.layout = '4D248.lay';
-ft_topoplotER(cfg,data1,data2)
+
 
 cfgs=[];
 
@@ -50,7 +54,7 @@ if isfield(data1,'powspctrm')
     if strcmp(ttype,'paired-ttest')
         datadif.powspctrm=data1.powspctrm-data2.powspctrm;
     else
-        datadif.powspctm=mean(data1.powspctrm,1)-mean(data2.powspctrm,1);
+        datadif.powspctrm=mean(data1.powspctrm,1)-mean(data2.powspctrm,1);
     end
 else
     datadif.individual=data1.individual-data2.individual;
@@ -59,6 +63,13 @@ cfg.highlight = 'labels';
 cfg.highlightchannel = find(stat.prob<0.05);
 cfg.zlim='maxmin';
 %cfg.marker='labels';
+figure;ft_topoplotER(cfg,data1)
+colorbar;
+title(strrep(title1,'_',' '));
+figure;ft_topoplotER(cfg,data2)
+colorbar;
+title(strrep(title2,'_',' '));
 figure;ft_topoplotER(cfg, datadif);
 colorbar;
+title(strrep([title1,' - ',title2],'_',' '));
 end

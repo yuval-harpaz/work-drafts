@@ -22,10 +22,10 @@ elseif isempty(lims)
 end
 
 
-if ~exist('aal_MNI_V4.img','file')==2
-    copyfile ~/ft_BIU/matlab/files/aal_MNI_V4.img ./
-    copyfile ~/ft_BIU/matlab/files/aal_MNI_V4.hdr ./
-end
+% if ~exist('aal_MNI_V4.img','file')==2
+%     copyfile ~/ft_BIU/matlab/files/aal_MNI_V4.img ./
+%     copyfile ~/ft_BIU/matlab/files/aal_MNI_V4.hdr ./
+% end
 if max(max(max(probplot.prob1>=lims(1))))==1;
     probplot.mask(probplot.prob1>=lims(1))=0.5;
     probplot.anatomy=sMRI.anatomy;
