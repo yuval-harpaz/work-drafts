@@ -43,14 +43,14 @@ V2pre='';
 V2post='';
 for subi=1:length(subsGv1)
     subv1=subsGv1{subi};
-    %load (subv1)
+    load (subv1)
     %eval(['V1pre',subv1,'=coh1;']);
     V1pre=[V1pre,',V1pre',subv1];
     %eval(['V1post',subv1,'=coh2;']);
     V1post=[V1post,',V1post',subv1];
     %
     subv2=subsGv2{subi};
-    %load (subv2)
+    load (subv2)
     eval(['V2pre',subv2,'=coh1;']);
     V2pre=[V2pre,',V2pre',subv2];
     eval(['V2post',subv2,'=coh2;']);
@@ -75,14 +75,14 @@ V2pre='';
 V2post='';
 for subi=1:length(subsGv1)
     subv1=subsGv1{subi};
-    %load (subv1)
+    load (subv1)
     %eval(['V1pre',subv1,'=coh1;']);
     V1pre=[V1pre,',V1pre',subv1];
     %eval(['V1post',subv1,'=coh2;']);
     V1post=[V1post,',V1post',subv1];
     %
     subv2=subsGv2{subi};
-    %load (subv2)
+    load (subv2)
     eval(['V2pre',subv2,'=coh1;']);
     V2pre=[V2pre,',V2pre',subv2];
     eval(['V2post',subv2,'=coh2;']);
