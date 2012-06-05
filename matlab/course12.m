@@ -40,3 +40,8 @@ clear
 ambPlotStat12('Cl01_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
 ambPlotStat12('Cl01_M170masked_S_D',[0.95 0.98],'surface',60); % RH
 ambPlotStat12('Cl01_M170masked_S_D',[0.95 0.98],'slice',60); % RH
+
+%% afni clustering and simulation
+
+cd ../alpha
+ !~/abin/afni &
