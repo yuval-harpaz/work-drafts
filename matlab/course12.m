@@ -1,15 +1,15 @@
-load domp
-load subp
+load domMskdp
+load subMskdp
 load ~/ft_BIU/matlab/LCMV/sMRI
-subp.anatomy=sMRI.anatomy;
+subMskdp.anatomy=sMRI.anatomy;
 cfg1 = [];
 cfg1.funparameter = 'avg.pow';
 cfg1.method='ortho';
 figure
-ft_sourceplot(cfg1,subp)
+ft_sourceplot(cfg1,subMskdp)
 %% compute subordinate to dominant ratio
-sub_dom=subp;
-sub_dom.avg.nai=(subp.avg.pow-domp.avg.pow)./domp.avg.pow;
+sub_dom=subMskdp;
+sub_dom.avg.nai=(subMskdp.avg.pow-domMskdp.avg.pow)./domMskdp.avg.pow;
 
 cfg1.funparameter = 'avg.nai';
 cfg1.interactive = 'yes';
@@ -20,15 +20,15 @@ ft_sourceplot(cfg1,sub_dom)
 
 voxind=312631; %center of head
 for subji=1:25
-    sub(subji,1)=subp.trial(1,subji).pow(voxind,1);
-    dom(subji,1)=domp.trial(1,subji).pow(voxind,1);   
+    sub(subji,1)=subMskdp.trial(1,subji).pow(voxind,1);
+    dom(subji,1)=domMskdp.trial(1,subji).pow(voxind,1);   
 end
 [h,p]=ttest(sub,dom)
  
 voxind=361828; %right temporal
 for subji=1:25
-    sub(subji,1)=subp.trial(1,subji).pow(voxind,1);
-    dom(subji,1)=domp.trial(1,subji).pow(voxind,1);   
+    sub(subji,1)=subMskdp.trial(1,subji).pow(voxind,1);
+    dom(subji,1)=domMskdp.trial(1,subji).pow(voxind,1);   
 end
 [h,p]=ttest(sub,dom)
 
