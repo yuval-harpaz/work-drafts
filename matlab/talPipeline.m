@@ -50,3 +50,15 @@ talHilb2(subs,coords,coordType,label,'alpha',[74,204],pat);
 !/home/megadmin/abin/afni -dset warped+tlrc &
 
 talMvResultsH(subs,cond,pref)
+
+%% sensor level coherence
+% load subs36;subs=subsV1;subs(30:58,1)=subsV2;
+foi=1:50;
+talCohH(subs,foi)
+
+% L-R coherence, you need to have subs36.mat
+talGAcohLR_H
+
+open talLRstats %run lines to view results.
+
+

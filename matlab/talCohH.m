@@ -45,7 +45,7 @@ for subi=1:length(subs)
         cfg3           = [];
         cfg3.method    = 'mtmfft';
         cfg3.output    = 'fourier';
-        cfg3.tapsmofrq = 4;
+        cfg3.tapsmofrq = 1;
         cfg3.foi=foi;
         freq          = ft_freqanalysis(cfg3, data);
         % Coherence
@@ -60,7 +60,7 @@ for subi=1:length(subs)
         
         cohLR          = ft_connectivityanalysis(cfg4, freq);
         load ([patR,'/tempCoh']);
-        cohspctrm=zeros(246,50);
+        cohspctrm=ones(246,50);
         
         for cmbi=1:113
             chi=find(strcmp(cohLR.labelcmb{cmbi,1},data.label));

@@ -63,13 +63,20 @@ cfg.highlight = 'labels';
 cfg.highlightchannel = find(stat.prob<0.05);
 cfg.zlim='maxmin';
 %cfg.marker='labels';
-figure;ft_topoplotER(cfg,data1)
-colorbar;
+% figure;ft_topoplotER(cfg,data1)
+% colorbar;
+% title(strrep(title1,'_',' '));
+% figure;ft_topoplotER(cfg,data2)
+% colorbar;
+% title(strrep(title2,'_',' '));
+% figure;ft_topoplotER(cfg, datadif);
+% colorbar;
+% title(strrep([title1,' - ',title2],'_',' '));
+figure;
+subplot(1,2,1)
+ft_topoplotER(cfg,data1)
 title(strrep(title1,'_',' '));
-figure;ft_topoplotER(cfg,data2)
-colorbar;
+subplot(1,2,2)
+ft_topoplotER(cfg,data2)
 title(strrep(title2,'_',' '));
-figure;ft_topoplotER(cfg, datadif);
-colorbar;
-title(strrep([title1,' - ',title2],'_',' '));
 end
