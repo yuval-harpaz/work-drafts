@@ -193,7 +193,7 @@ save tempPeakAl tempPeakAl
 
 %temp=zeros(1,401);
 
-half=flipLR(tempPeakAl(1,1:201));
+half=fliplr(tempPeakAl(1,1:201));
 x1=find(half>0,1);
 x1=201-x1;
 x2=find(tempPeakAl(1,201:end)>0,1)+201;
@@ -207,7 +207,8 @@ x=201:x2;y=tempPeakAl(x);%.*10^14;
 p = polyfit(x,y,1);
 f = polyval(p,x);
 figure;plot(x,y,'o',x,f,'-')
-temp=[f1 f];
+% temp=[f1 f];
+temp=[f1(1:end-1) mean([f1(end) f(1)]) f(2:end)];
 temp=temp(temp<0);
 tempPad=zeros(1,length(temp).*2);
 tempPad(length(temp*2)+1:end)=temp;
@@ -219,7 +220,7 @@ save temp temp tempPad
 load temp
 load tempPeakAl
 x=[];x=tempPeakAl;
-tmplt=tempPad;
+tmplt=tempPad./sqrt(sum(tmplt.*tmplt)); % normalize template, sum of squares =0;
 [SNR,SigX]=fitTemp(x,tmplt);
 figure;plot(SNR);
 [SigPeaks, SigIpeaks] = findPeaks(SigX,3, 0, 'MAD');
@@ -239,7 +240,7 @@ cfg.trials=trialinfo;
 cfg.hpfilter='yes';
 cfg.hpfreq=1;
 dataNoMOG=ft_preprocessing(cfg,data);
-tmplt=tempPad;
+% tmplt=tempPad;
 allSigIpeaks={};
 asip=[];
 for triali=1:length(dataNoMOG.trial)
@@ -254,6 +255,10 @@ for triali=1:length(dataNoMOG.trial)
 %     hold on;
 %     plot(SigIpeaks,SNRpeaks,'ok')
 end
+
+% see distribution of peaks
+hist(data.time{1,1}(asip),50)
+
 
 % find peaks in signal and SNR and decide on cutoff limits
 

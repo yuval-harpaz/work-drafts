@@ -28,6 +28,13 @@ else
     title1=inputname(1);
     title2=inputname(2);
 end
+if isfield(data1,'individual')
+    dataMat='individual';
+elseif isfield(data1,'powspctrm')
+    dataMat='powspctrm';
+else
+    error('needs data.individual or data.powspctrm')
+end
 cfg.xlim=xlim;
 cfg.layout = '4D248.lay';
 
@@ -37,9 +44,9 @@ cfgs=[];
 cfgs.method='stats';
 cfgs.statistic=ttype;
 if strcmp(ttype,'paired-ttest')
-    cfgs.design = [ones(1,size(data1.powspctrm,1)) ones(1,size(data1.powspctrm,1))*2];
+    eval(['cfgs.design = [ones(1,size(data1.',dataMat,',1)) ones(1,size(data1.',dataMat,',1))*2];']);
 else
-    cfgs.design = [ones(1,size(data1.powspctrm,1)) ones(1,size(data2.powspctrm,1))*2];
+    eval(['cfgs.design = [ones(1,size(data1.',dataMat,',1)) ones(1,size(data2.',dataMat,',1))*2];'])
 end
 if isfield(data1,'powspctrm')
     cfgs.frequency=xlim;
