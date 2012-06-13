@@ -68,7 +68,7 @@ else
 end
 cfg.highlight = 'labels';
 cfg.highlightchannel = find(stat.prob<0.05);
-cfg.zlim='maxmin';
+%cfg.zlim='maxmin';
 %cfg.marker='labels';
 % figure;ft_topoplotER(cfg,data1)
 % colorbar;
