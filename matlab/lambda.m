@@ -220,7 +220,8 @@ save temp temp tempPad
 load temp
 load tempPeakAl
 x=[];x=tempPeakAl;
-tmpBlc = tempPad-mean(tempPad);
+% tmpBlc = tempPad-mean(tempPad);
+tmpBlc = temp-mean(temp);
 tmplt=tmpBlc./sqrt(sum(tmpBlc.*tmpBlc)); % normalize template, sum of squares =0;
 [SNR,SigX]=fitTemp(x,tmplt);
 figure;plot(SNR);
@@ -242,11 +243,15 @@ cfg.hpfilter='yes';
 cfg.hpfreq=1;
 dataNoMOG=ft_preprocessing(cfg,data);
 % tmplt=tempPad;
-allSigIpeaks={};
-asip=[];
+
 limSNR = 10^0.386;    limSig = (3e-13)^2;
 %figure;hold on;
 
+% tmpBlc = temp-mean(temp);
+tmpBlc = tempPad-mean(tempPad);
+tmplt=tmpBlc./sqrt(sum(tmpBlc.*tmpBlc));
+allSigIpeaks={};
+asip=[];nI=[];pI=[];
 for triali=1:length(dataNoMOG.trial)
     x=[];
     x=dataNoMOG.trial{1,triali}(chi,:);
@@ -258,16 +263,25 @@ for triali=1:length(dataNoMOG.trial)
     SNRpeaks = SNR(SigIpeaks);
     I = SNRpeaks>=limSNR;
     I= SigIpeaks(SigPeaks>limSig & SNRpeaks'>limSNR);
+    Ipos=I(x(I)>0);
+    Ineg=I(x(I)<0);
+    pI=[pI Ipos];nI=[nI Ineg];
     if ~isempty(I)
         display(num2str(triali))
-        
     end
+    
 end
 
 % see distribution of peaks
 hist(data.time{1,1}(asip),50)
 
-
+figure;
+hist(data.time{1,1}(pI),50);
+h = findobj(gca,'Type','patch');
+set(h,'FaceColor','r')
+hold on;
+hist(data.time{1,1}(nI),50)
+legend('positive','negative')
 % find peaks in signal and SNR and decide on cutoff limits
 
 % limSig = 10^0.386

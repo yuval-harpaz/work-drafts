@@ -60,5 +60,6 @@ talCohH(subs,foi)
 talGAcohLR_H
 
 open talLRstats %run lines to view results.
-
+chan='A192';freq=10;
+talStatTables(chan,freq,subsV1,groups)
 
