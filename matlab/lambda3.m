@@ -49,19 +49,47 @@ f1 = polyval(p1,x1:25);
 x=26:x2;y=avgTrace(x);%.*10^14;
 p2 = polyfit(x,y,1);
 f2 = polyval(p2,26:x2);
-figure;plot(avgTrace,'m');hold on; plot(x1:25,f1,'b'); plot(26:x2,f2,'k');
+
+
+%calculate meeting point of the two lines;
+a1=p1(1);b1=p1(2);a2=p2(1);b2=p2(2);
+X=(b2-b1)./(a1-a2);
+Y=a1*X+b1;
+
 
 % move ascending line to begin at x,y = (1,0)
 P1=[p1(1),-p1(1)];
 F1=polyval(P1,1:25);
-plot(1:25,F1)
-% limit line to hight of peak
-mx=avgTrace(26);
-F1=F1(1:find(F1>mx,1));
-plot(1:length(F1),F1,'g')
+F1=F1(F1<Y);
+% find shifted X
+Xsh=(Y-P1(2))/P1(1);
+% find descending line
+P2=[p2(1),Y-(p2(1)*Xsh)];
+F2=polyval(P2,length(F1):length(F1)+20);
+F2=F2(F2<Y);F2=F2(F2>0);
+figure;plot(avgTrace,'m');hold on; % plot(x1:25,f1,'b'); plot(26:x2,f2,'k');
+plot(Xsh,Y,'ro')
+plot(1:length(F1),F1,'.g')
+plot(length(F1)+1:length(F2)+length(F1),F2,'.g')
+legend('averaged trace','meeting point of curves','new template points')
 
-P2=[p1(1),F1(end)-p1(1)*length(F1)];
-F2=
+temp=[F1 F2];
+tempPad=zeros(1,2*length(temp));
+tempPad(length(temp)+1:end)=temp;
+
+save tempAlpha temp tempPad avgTrace
+% % limit line to hight of Y
+% nearest(F1,Y)
+% F1=F1(1:find(F1>mx,1));
+% plot(1:length(F1),F1,'g')
+% 
+% P2=[p2(1),F1(end)-p2(1)*length(F1)];
+% F2=polyval(P2,length(F1):length(F1)+20);
+% F2=F2(find(F2>0));
+% plot(length(F1):length(F2)+length(F1)-1,F2,'g')
+
+
+
 %% find alpha template in data
 [trials,pI,nI,pP,nP,asip,peaks]=findTempInTrials(tempAll,dataNoMOG,chi(1),trialinfo,0.115,0.145,[],[],30);
 
