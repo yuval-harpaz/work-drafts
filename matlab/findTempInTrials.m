@@ -1,4 +1,4 @@
-function [trials,pI,nI,pP,nP,asip,allSigIpeaks]=findTempInTrials(template,data,chani,trialInd,tPos,tNeg,limSNR,limSig,deadT)
+function [trials,pI,nI,pP,nP,asip,allSigIpeaks]=findTempInTrials(template,time0,data,chani,trialInd,tPos,tNeg,limSNR,limSig,deadT)
 
 try
     if isempty(limSig)
@@ -21,6 +21,12 @@ try
 catch
     deadT=0;
 end
+if ~exist('tNeg','var')
+    tNeg=[];
+end
+if ~exist('tPos','var')
+    tPos=[];
+end
 t=data.time{1,1};   
 tmp=template;
 if length(chani)==2
@@ -41,7 +47,7 @@ for triali=1:length(data.trial)
     else
         x=data.trial{1,triali}(chani,:);
     end
-    [SNR,SigX]=fitTemp(x,tmplt);
+    [SNR,SigX]=fitTemp(x,tmplt,time0);
     %plot(SNR);
     [SigPeaks, SigIpeaks] = findPeaks(SigX,3, deadT, 'MAD');
     asip=[asip,SigIpeaks];
@@ -57,12 +63,15 @@ for triali=1:length(data.trial)
     Ineg=I(x(I)<0);
     pI=[pI Ipos];nI=[nI Ineg];
     try
+        
         s=[];
         s=Pneg(nearest(t(Pneg),tNeg));
         trials(3,triali)=t(s);
         trials(4,triali)=x(s);
     catch me
-        display(['no neg peaks on trial:          ',num2str(triali)])
+        if ~isempty(tNeg)
+            display(['no neg peaks on trial:          ',num2str(triali)])
+        end
     end
     try
         s=[];
@@ -70,7 +79,9 @@ for triali=1:length(data.trial)
         trials(5,triali)=t(s);
         trials(6,triali)=x(s);
     catch me
-        display(['no filtered neg peaks on trial: ',num2str(triali)])
+        if ~isempty(tNeg)
+            display(['no fitered neg peaks on trial: ',num2str(triali)])
+        end
     end
     try
         s=[];
@@ -78,7 +89,9 @@ for triali=1:length(data.trial)
         trials(7,triali)=t(s);
         trials(8,triali)=x(s);
     catch me
-        display(['no pos peaks on trial:          ',num2str(triali)])
+        if ~isempty(tPos)
+            display(['no pos peaks on trial:          ',num2str(triali)])
+        end
     end
     try
         s=[];
@@ -86,6 +99,8 @@ for triali=1:length(data.trial)
         trials(9,triali)=t(s);
         trials(10,triali)=x(s);
     catch me
-        display(['no filtered pos peaks on trial: ',num2str(triali)])
+        if ~isempty(tPos)
+            display(['no filtered pos peaks on trial: ',num2str(triali)])
+        end
     end
 end

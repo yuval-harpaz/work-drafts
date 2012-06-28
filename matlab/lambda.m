@@ -146,9 +146,8 @@ for triali=1:length(dA191.trial)
     if isempty(resp);resp=1;else;resp=0;end;
     peak01(triali)=resp;
     close;
-    save peak01 peak01
 end
-
+save peak01 peak01
 
 % average traces of chosen peaks
 tempPeak=zeros(size(dA191.trial{1,1}));
