@@ -39,7 +39,7 @@ cfg=[];
 cfg.hpfilter='yes';
 cfg.hpfreq=1;
 cfg.demean='yes';
-cfg,baselinewindow=[-0.15 0];
+cfg.baselinewindow=[-0.15 0];
 datacln=ft_preprocessing(cfg,datacln)
 save datacln datacln
 trialinfo=datacln.trialinfo;
@@ -197,6 +197,8 @@ save A190 A190pos A190neg winPos winNeg
 load win
 load peaks
 A190posAll=peakSorter('A190',peaks,winPos,ones(length(peaks.chan{1,1}.trial),1),'pos','biggest');
+figure;hist(A190posAll.cond1pos.timewin{1,1}(:,4))
+figure;plot(peaks.wlt{1,4})
 trials=1:length(peaks.chan{1,1}.trial);
 trialsM100=A190posAll.cond1pos.timewin{1,1}(:,1);
 trialsNoM100=trials(setxor(trialsM100,1:length(trials)))';
