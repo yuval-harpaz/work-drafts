@@ -101,7 +101,8 @@ cfg.hpfilter='yes';
 cfg.hpfreq=1;
 dataNoMOG=ft_preprocessing(cfg,data);
 t=dataNoMOG.time{1,1};
-[trials,pI,nI,pP,nP,asip,peaks]=findTempInTrials(temp,dataNoMOG,chi(1),trialinfo,0.115,0.145,[],[],30);
+[~,time0]=max(abs(temp));
+[trials,pI,nI,pP,nP,asip,peaks]=findTempInTrials(temp,time0,dataNoMOG,chi(1),trialinfo,0.115,0.145,[],[],30);
 figure;
 hist(data.time{1,1}(pP),50);
 h = findobj(gca,'Type','patch');
@@ -111,7 +112,8 @@ hist(data.time{1,1}(nP),50)
 legend('positive','negative')
 title('peaks on signal trace')
 
-[trials,pI,nI,pP,nP,asip,peaks]=findTempInTrials(tempPad,dataNoMOG,chi(1),trialinfo,0.115,0.145,[],[],30);
+[~,time0]=max(abs(tempPad));
+[trials,pI,nI,pP,nP,asip,peaks]=findTempInTrials(tempPad,time0,dataNoMOG,chi(1),trialinfo,0.115,0.145,[],[],30);
 figure;
 hist(data.time{1,1}(pP),50);
 h = findobj(gca,'Type','patch');
@@ -190,17 +192,20 @@ save temp195ms temp tempPad
 
 % alpha
 load tempAlpha
-[~,~,~,pP,~,~,alpha]=findTempInTrials(tempPad,dataNoMOG,chi(1),trialinfo,0.115,[],[],[],30);
+[~,time0]=max(abs(tempPad));
+[~,~,~,pP,~,~,alpha]=findTempInTrials(tempPad,time0,dataNoMOG,chi(1),trialinfo,0.115,[],[],[],30);
 figure;hist(data.time{1,1}(pP),50);title('Alpha template')
 h = findobj(gca,'Type','patch');
 set(h,'FaceColor','r')
 
 load tempM150 % equals to load temp
-[~,~,~,~,nP,~,M150]=findTempInTrials(tempPad,dataNoMOG,chi(1),trialinfo,[],0.145,[],[],30);
+[~,time0]=max(abs(tempPad));
+[~,~,~,~,nP,~,M150]=findTempInTrials(tempPad,time0,dataNoMOG,chi(1),trialinfo,[],0.145,[],[],30);
 figure;hist(data.time{1,1}(nP),50);title('M150 template');
 
 load temp195ms
-[~,~,~,pP,~,~,alpha]=findTempInTrials(temp,dataNoMOG,chi(1),trialinfo,0.195,[],[],[],30);
+[~,time0]=max(abs(temp));
+[~,~,~,pP,~,~,alpha]=findTempInTrials(temp,time0,dataNoMOG,chi(1),trialinfo,0.195,[],[],[],30);
 figure;hist(data.time{1,1}(pP),50);title('Alpha template')
 h = findobj(gca,'Type','patch');
 set(h,'FaceColor','r')
