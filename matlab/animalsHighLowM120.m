@@ -205,18 +205,207 @@ for subji= 1:size(peakM100,1)
     tbeg=t100-1.5*cycle;
     timewindow=[tbeg tend];
     posPre=peakSorter(chP,peaks,timewindow,ones(length(peaks.chan{1,chani}.trial),1),'pos','biggest','noWlts');
-    trcount=0;
+    
+    trcount=0;M100dist=[];
     for triali=1:length(posPre.cond1pos.timewin{1,1})
         trnum=posPre.cond1pos.timewin{1,1}(triali,1);
         if ~trfreq(trnum,1)==0
             trcount=trcount+1;
             M100dist(trcount,1)=trnum; %trial number
             M100dist(trcount,2)=t100-posPre.cond1pos.timewin{1,1}(triali,2); % distance
-            M100dist(trcount,2)/1/trfreq(trnum,1)/360; %angle  FIXME
+            Angle=M100dist(trcount,2)/(1/trfreq(trnum,1)/360);
+            Angle=Angle-360*floor(Angle/360); % in case there is more than 360
+            M100dist(trcount,3)=Angle; % angle
         end
     end
+    load datacln
+    halfWin=2; % how many samples left and right for M100 to take
+    s100=round(1017.25*t100);
+    for triali=1:size(M100dist,1);
+        data=smooth(datacln.trial{1,M100dist(triali,1)}(chani,:),20)';
+        M100dist(triali,4)=max(data(1,s100-halfWin:s100+halfWin)); % amplitude of M100
+    end
+%    figure;plot(M100dist(:,3),M100dist(:,4),'.')
+%    title([num2str(halfWin*2+1),' samples'])
+    save(['../M100dist',sub], 'M100dist')
+%     alpha=circ_ang2rad(M100dist(:,3));
+%     y=M100dist(:,4);
+%     cftool(alpha,y);
+%     pause
+%     display('aha');
 %             
 %         tBest=t100-trfreq(triali,1);
 %     0.1;tWorst=tBest-0.05;
 %     distFromWorst=abs(posPre.cond1pos.timewin{1,1}(:,2)-tWorst);
 end
+cd /home/yuval/Data/Amyg
+for subji= 1:size(peakM100,1)
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    load(['M100dist',sub])
+    subplot(2,10,subji)
+    plot(M100dist(:,3),M100dist(:,4),'.')
+    ylim([-1.5e-12,1.5e-12])
+    title([num2str(peakM100(subji,3)),' ',num2str(peakM100(subji,4))])
+end
+avg=ft_timelockanalysis([],datacln);
+avg.time=0;
+avg.avg=zeros(246,1);
+for subji= 1:size(peakM100,1)
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    %load(['M100dist',sub])
+    subplot(2,10,10+subji)
+%     plot(M100dist(:,3),M100dist(:,4),'.')
+%     ylim([-1.5e-12,1.5e-12])
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.marker='off';
+cfg.highlight='on';
+cfg.highlightchannel=avg.label(peakM100(subji,2));
+cfg.comment='no';
+    ft_topoplotER(cfg,avg)
+end
+
+
+%% trying one chan for all
+load peakM100allTrialsSmooth5
+gAvg=zeros(246,1);
+for subji= 1:size(peakM100,1)
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    subCount=subCount+1;
+    sub=num2str(subi);
+    cd(['/home/yuval/Data/Amyg/',sub]);
+%     load win
+%     load peaks
+%     [~,chani]=ismember(chP,peaks.label);
+    load datacln
+    avg=ft_timelockanalysis([],datacln);
+    gAvg=gAvg+avg.avg(:,nearest(avg.time,peakM100(subji,3)))
+%     cfg=[];
+%     cfg.channel=chP;
+%     cfg.ylim=[-5e-13 5e-13];
+% %     figure;ft_singleplotER(cfg,avg);
+% %     xlabel(['SUB ',sub]);
+% %     hold on;
+%     [maxv,maxi]=max(smooth(avg.avg(chani,255:430),5)');
+% %     plot(avg.time(maxi+255-1),maxv,'rx');
+% %     pause
+% %     close all
+%     peakM100(subCount,1:4)=[subi,chani,avg.time(maxi+255-1),maxv];
+end
+gAvg=gAvg./subji;
+avg.time=0;
+avg.avg=gAvg;
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.marker='labels';
+% cfg.highlight='on';
+% cfg.highlightchannel=avg.label(peakM100(subji,2));
+cfg.comment='no';
+cfg.interactive='yes';
+ft_topoplotER(cfg,avg);
+% chose 'A191'; chani=22
+chani=22;chP='A191';
+%
+cd /home/yuval/Data/Amyg
+load peakM100allTrialsSmooth5
+for subji= 1:size(peakM100,1)
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    cd(['/home/yuval/Data/Amyg/',sub]);
+    load trfreq
+    load peaks
+    %chani=peakM100(subji,2);
+    %chP=peaks.label{chani};
+    t100=peakM100(subji,3);
+    cycle=1/9;
+    tend=t100-cycle./2;
+    tbeg=t100-1.5*cycle;
+    timewindow=[tbeg tend];
+    posPre=peakSorter(chP,peaks,timewindow,ones(length(peaks.chan{1,chani}.trial),1),'pos','biggest','noWlts');
+    
+    trcount=0;M100dist=[];
+    for triali=1:length(posPre.cond1pos.timewin{1,1})
+        trnum=posPre.cond1pos.timewin{1,1}(triali,1);
+        if ~trfreq(trnum,1)==0
+            trcount=trcount+1;
+            M100dist(trcount,1)=trnum; %trial number
+            M100dist(trcount,2)=t100-posPre.cond1pos.timewin{1,1}(triali,2); % distance
+            Angle=M100dist(trcount,2)/(1/trfreq(trnum,1)/360);
+            Angle=Angle-360*floor(Angle/360); % in case there is more than 360
+            M100dist(trcount,3)=Angle; % angle
+        end
+    end
+    load datacln
+    halfWin=2; % how many samples left and right for M100 to take
+    s100=round(1017.25*t100);
+    for triali=1:size(M100dist,1);
+        data=smooth(datacln.trial{1,M100dist(triali,1)}(chani,:),20)';
+        M100dist(triali,4)=max(data(1,s100-halfWin:s100+halfWin)); % amplitude of M100
+    end
+%    figure;plot(M100dist(:,3),M100dist(:,4),'.')
+%    title([num2str(halfWin*2+1),' samples'])
+    save(['../M100A191dist',sub], 'M100dist')
+%     alpha=circ_ang2rad(M100dist(:,3));
+%     y=M100dist(:,4);
+%     cftool(alpha,y);
+%     pause
+%     display('aha');
+%             
+%         tBest=t100-trfreq(triali,1);
+%     0.1;tWorst=tBest-0.05;
+%     distFromWorst=abs(posPre.cond1pos.timewin{1,1}(:,2)-tWorst);
+end
+cd /home/yuval/Data/Amyg
+for subji= 1:size(peakM100,1)
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    load(['M100A191dist',sub])
+    subplot(2,10,subji)
+    plot(M100dist(:,3),M100dist(:,4),'.')
+    ylim([-1.5e-12,1.5e-12])
+    title([num2str(peakM100(subji,3)),' ',num2str(peakM100(subji,4))])
+end
+
+ subji=1 %1:10
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    load(['M100A191dist',sub])
+    alpha=circ_ang2rad(M100dist(:,3));
+    y=M100dist(:,4);
+    cftool(alpha,y);
+for subi=1:10
+    eval(['Phase(subi)=fittedmodel',num2str(subi),'.c1;']);
+end
+save Phase Phase
+circ_mean(Phase')
+% tests wheather the mean angle is sig'ly different than 270
+[h mu ul ll]=circ_mtest(Phase',circ_ang2rad(270));
+
+% testing circular-linear correlation
+cd /home/yuval/Data/Amyg
+load peakM100allTrialsSmooth5
+alpha=[];x=[];
+for subji= 1:size(peakM100,1)
+    subi=peakM100(subji,1);
+    sub=num2str(subi);
+    load(['M100A191dist',sub])
+    [rho pval]=circ_corrcl(M100dist(:,3),M100dist(:,4));
+	sd=std(M100dist(:,4));
+    mn=mean(M100dist(:,4));
+    zs=(M100dist(:,4)-mn)./sd;
+    alpha=[alpha M100dist(:,3)'];
+    x=[x zs'];
+    r(subji)=rho;
+end
+plot(alpha,x,'.')
+[rho pval]=circ_corrcl(alpha,x)
+cftool(circ_ang2rad(alpha),x);
+
+%     display('aha');
+%             
+%         tBest=t100-trfreq(triali,1);
+%     0.1;tWorst=tBest-0.05;
+%     distFromWorst=abs(posPre.cond1pos.timewin{1,1}(:,2)-tWorst);
