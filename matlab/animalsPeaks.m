@@ -6,7 +6,7 @@ for subi=1:12
     cd(sub)
     load TF100
     SNR=[];
-    SNR(1:length(TF.label),1:length(t))=squeeze(mean(TF.powspctrm,1)); %avg SNR trace over trials
+    SNR(1:length(TF.label),1:length(TF.time))=squeeze(mean(TF.powspctrm,1)); %avg SNR trace over trials
     avgSNR=mean(abs(SNR),1);
     AVG(subi,:)=avgSNR;
     cd ..

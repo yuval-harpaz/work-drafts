@@ -7,3 +7,4 @@ animalsPeaks
 animalsConds
 animalsHighLowM120
 animalsPhase2 % here alpha is reduced from single trials
+animalsPrevPeakAvg
