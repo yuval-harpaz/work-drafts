@@ -58,42 +58,45 @@ proj = sum(y.*tmplt);
 sigSign(ii)=proj/abs(proj);
 SigX(ii) = proj*proj;
 err = TotX(ii)-SigX(ii);
-SNR(ii) = SigX(ii)/err;
-
+SNRbl = SigX(ii)/err;
+snr=round(100.*SNRbl)/100;
 figure;
 subplot(3,2,1) % data and template
 plot(x);hold on;
 plot(temp,'r');
 title('data and template')
-ylim([-1 10])
+ylim([-1 16])
 subplot(3,2,2) % normalized data and template
 plot(y.*tmplt,'k');
 title('data x temp')
-ylim([-1 3])
+ylim([-1 4.5])
+textbox(10,3,['SNR = ',num2str(snr)])
 
 
 ii = 15; %time0:(length(x)-time1);
-y = 2.*x((ii-time0+1):ii+time1);
+x3=3.*x1+r;
+y = x3((ii-time0+1):ii+time1);
 y = y-mean(y); % baseline correction
 TotX(ii) = sum(y.*y);
 proj = sum(y.*tmplt);
 sigSign(ii)=proj/abs(proj);
 SigX(ii) = proj*proj;
 err = TotX(ii)-SigX(ii);
-SNR(ii) = SigX(ii)/err;
+SNRbig = SigX(ii)/err;
+snr=round(100.*SNRbig)/100;
 
 
 subplot(3,2,5) % data and template
-plot(2.*x);hold on;
+plot(x3);hold on;
 plot(10:20,temp,'r');
 %title('data and template')
-ylim([-1 10])
+ylim([-1 16])
 
 subplot(3,2,6) % normalized data and template
 plot(y.*tmplt,'k');
 %title('data x temp')
-ylim([-1 3])
-
+ylim([-1 4.5])
+textbox(10,3,['SNR = ',num2str(snr)])
 ii = 15; %time0:(length(x)-time1);
 y = x((ii-time0+1):ii+time1);
 y = y-mean(y); % baseline correction
@@ -102,17 +105,19 @@ proj = sum(y.*tmplt);
 sigSign(ii)=proj/abs(proj);
 SigX(ii) = proj*proj;
 err = TotX(ii)-SigX(ii);
-SNR(ii) = SigX(ii)/err;
-
+SNR = SigX(ii)/err;
+snr=round(100.*SNR)/100;
 subplot(3,2,3) % data and template
 plot(x);hold on;
 plot(10:20,temp,'r');
 %title('data and template')
-ylim([-1 10])
+ylim([-1 16])
 subplot(3,2,4) % normalized data and template
 plot(y.*tmplt,'k');
 %title('data x temp')
-ylim([-1 3])
+ylim([-1 4.5])
+textbox(10,3,['SNR = ',num2str(snr)])
+
 
 figure;
 plot(y)
