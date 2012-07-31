@@ -1,5 +1,14 @@
-function [cohLR,coh,freq,data]=talCohH(subs,foi,pat)
+function [cohLR,coh,freq,data]=talCohH(subs,foi,pat,chCmb)
+% chCmb can be 'LR' or 'AntPost'
 % [cohLR,freq,data]=cohTal({'quad01'},[1:50]);
+try
+    if isempty(chCmb)
+        chCmb='LR';
+    end
+catch
+    chCmb='LR';
+end
+
 if ~exist('pat','var')
     pat=[];
 end
@@ -53,38 +62,63 @@ for subi=1:length(subs)
         %chansR={'A248' 'A245' 'A225' 'A241' 'A151' 'A148' 'A145' 'A142' 'A139' 'A59' 'A55' 'A51'};
         %chanCmbLR=chansL';
         %chanCmbLR(:,2)=chansR';
-        load ~/ft_BIU/matlab/files/LRpairs
+        
         cfg4           = [];
         cfg4.method    = 'coh';
-        cfg4.channelcmb=LRpairs;
-        
-        cohLR          = ft_connectivityanalysis(cfg4, freq);
-        load ([patR,'/tempCoh']);
-        cohspctrm=ones(246,50);
-        
-        for cmbi=1:113
-            chi=find(strcmp(cohLR.labelcmb{cmbi,1},data.label));
-            cohspctrm(chi,:)=cohLR.cohspctrm(cmbi,1:50);
-            chi=find(strcmp(cohLR.labelcmb{cmbi,2},data.label));
-            cohspctrm(chi,:)=cohLR.cohspctrm(cmbi,1:50);
+        if strcmp(chCmb,'LR')
+            load ~/ft_BIU/matlab/files/LRpairs
+            cfg4.channelcmb=LRpairs;
+            cohLR          = ft_connectivityanalysis(cfg4, freq);
+            load ([patR,'/tempCoh']);
+            cohspctrm=ones(246,50);
+            
+            for cmbi=1:113
+                chi=find(strcmp(cohLR.labelcmb{cmbi,1},data.label));
+                cohspctrm(chi,:)=cohLR.cohspctrm(cmbi,1:50);
+                chi=find(strcmp(cohLR.labelcmb{cmbi,2},data.label));
+                cohspctrm(chi,:)=cohLR.cohspctrm(cmbi,1:50);
+            end
+            coh=tempCoh;
+            coh.powspctrm=cohspctrm;
+            coh.freq=1:50;
+            sufix='';
+        else
+            sufix='AP';
+            load /media/Elements/MEG/tal/chansAntPost
+            %cfg4.channelcmb=AntPostPairs;
+            for listi=1:5
+                chan4ft={};
+                eval(['chan=chan',num2str(listi),';']);
+                for chani=1:length(chan)
+                    chan4ft{chani,1}=['A',num2str(chan(chani))];
+                end
+                eval(['ch4ft',num2str(listi),'=chan4ft;'])
+            end
+            cfg4.channel=ch4ft1;
+            coh.cohLL = ft_connectivityanalysis(cfg4, freq);
+            cfg4.channel=ch4ft2;
+            coh.cohL = ft_connectivityanalysis(cfg4, freq);
+            cfg4.channel=ch4ft3;
+            coh.cohC = ft_connectivityanalysis(cfg4, freq);
+            cfg4.channel=ch4ft4;
+            coh.cohR = ft_connectivityanalysis(cfg4, freq);
+            cfg4.channel=ch4ft5;
+            coh.cohRR = ft_connectivityanalysis(cfg4, freq);
         end
-        coh=tempCoh;    
-        coh.powspctrm=cohspctrm;
-        coh.freq=1:50;
         eval(['coh',num2str(i),'=coh;'])
-        
-        
-%         cfg.channelcmb={'all' 'all'};
-%         cfg.channel=chansL;
-%         cohL           = ft_connectivityanalysis(cfg, freq);
-%         cfg.channel=chansR;
-%         cohR           = ft_connectivityanalysis(cfg, freq);
-%         figure;
-%         plot(round(cohLR.freq),cohLR.cohspctrm(6:9,:));
-%         legend('A126','A129','A132','A135')
-%         title(sub)
     end
-    save([patR,'/Coh/',sub],'coh1','coh2')
+    
+    
+    %         cfg.channelcmb={'all' 'all'};
+    %         cfg.channel=chansL;
+    %         cohL           = ft_connectivityanalysis(cfg, freq);
+    %         cfg.channel=chansR;
+    %         cohR           = ft_connectivityanalysis(cfg, freq);
+    %         figure;
+    %         plot(round(cohLR.freq),cohLR.cohspctrm(6:9,:));
+    %         legend('A126','A129','A132','A135')
+    %         title(sub)
+    save([patR,'/Coh/',sub,sufix],'coh1','coh2')
 end
 cd(PWD);
 end

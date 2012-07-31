@@ -63,3 +63,7 @@ open talLRstats %run lines to view results.
 chan='A192';freq=10;
 talStatTables(chan,freq,subsV1,groups)
 
+%% anterior posterior coherence
+load /media/Elements/MEG/tal/subs4
+talCohH(subs,foi,[],'AntPost')
+talGAcohAntPost_H
