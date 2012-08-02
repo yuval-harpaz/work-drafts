@@ -15,6 +15,6 @@ for listi=1:2
         eval('chan4=chans;');
     end
 end
-save /media/Elements/MEG/tal chan*
+save /media/Elements/MEG/tal/chansAntPost chan*
 
 

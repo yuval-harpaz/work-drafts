@@ -90,19 +90,22 @@ for subi=1:length(subs)
                 chan4ft={};
                 eval(['chan=chan',num2str(listi),';']);
                 for chani=1:length(chan)
-                    chan4ft{chani,1}=['A',num2str(chan(chani))];
+                    for chanj=1:length(chan);
+                        chan4ft{(chani-1).*length(chan)+chanj,1}=['A',num2str(chan(chani))];
+                        chan4ft{(chani-1).*length(chan)+chanj,2}=['A',num2str(chan(chanj))];
+                    end
                 end
                 eval(['ch4ft',num2str(listi),'=chan4ft;'])
             end
-            cfg4.channel=ch4ft1;
+            cfg4.channelcmb=ch4ft1;
             coh.cohLL = ft_connectivityanalysis(cfg4, freq);
-            cfg4.channel=ch4ft2;
+            cfg4.channelcmb=ch4ft2;
             coh.cohL = ft_connectivityanalysis(cfg4, freq);
-            cfg4.channel=ch4ft3;
+            cfg4.channelcmb=ch4ft3;
             coh.cohC = ft_connectivityanalysis(cfg4, freq);
-            cfg4.channel=ch4ft4;
+            cfg4.channelcmb=ch4ft4;
             coh.cohR = ft_connectivityanalysis(cfg4, freq);
-            cfg4.channel=ch4ft5;
+            cfg4.channelcmb=ch4ft5;
             coh.cohRR = ft_connectivityanalysis(cfg4, freq);
         end
         eval(['coh',num2str(i),'=coh;'])

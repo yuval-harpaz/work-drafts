@@ -64,6 +64,21 @@ chan='A192';freq=10;
 talStatTables(chan,freq,subsV1,groups)
 
 %% anterior posterior coherence
+% I used talAntPostChans to make lists of channels
 load /media/Elements/MEG/tal/subs4
+foi=1:50;
 talCohH(subs,foi,[],'AntPost')
 talGAcohAntPost_H
+load /media/Elements/MEG/talResults/Coh/cohCv1post_DM
+condA=V1post;
+load /media/Elements/MEG/talResults/Coh/cohCv1post_CM
+condB=V1post;
+freq=10;
+talCohAPstats(condA,condB,freq,0)
+
+load /media/Elements/MEG/talResults/Coh/cohLv1pre_DM
+condA=V1pre;
+load /media/Elements/MEG/talResults/Coh/cohRv1pre_CM
+condB=V1pre;
+freq=10;
+talCohAPstats(condA,condB,freq,1)
