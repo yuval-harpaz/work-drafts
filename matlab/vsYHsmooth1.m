@@ -147,3 +147,17 @@ vsRMS=vs./RMS;
 vsSlice2afni(allInd,vsRMS,'rms'); % abs
 !~/abin/3dTcat -prefix catRms rms*.HEAD
 eval(['!~/abin/3drefit -TR ',TR,' catRms+orig']);
+kur=g2(vs);
+vsSlice2afni(allInd,kur,'KurMask');
+% rescale for AFNI graphs to work
+!~/abin/3dcalc -a catRms+orig -expr 'a*1e+13' -prefix catRmsSc 
+% apply g2 masks
+!~/abin/3dcalc -a catRmsSc+orig -b KurMask001+orig -expr 'a*ispositive(b-3)+0.0001*ispositive(a)' -float -prefix catRmsKmsk3
+
+!~/abin/3dcalc -a catRmsSc+orig -b KurMask001+orig -expr 'a*ispositive(b-3.5)+0.0001*ispositive(a)' -float -prefix catRmsKmsk3.5
+
+!~/abin/3dcalc -a catRmsSc+orig -b KurMask001+orig -expr 'a*ispositive(b-4)+0.0001*ispositive(a)' -float -prefix catRmsKmsk4
+
+
+
+!~/abin/3dcalc -a catRmsSc+orig -b KurMask001+orig -expr 'a*ispositive(a-3)*ispositive(b-3.5)+3*ispositive(a)*ispositive(3-a)' -prefix catRms_Kur3Amp3
