@@ -10,6 +10,7 @@ cfg.func='KurMask001+orig';
 cfg.TR=TR;
 cfg.step=0.5;
 cfg.boxSize=[-12 12 -9 9 -2 15];
+cfg.prefix='test';
 vs2brik(cfg,VS)
 
 RMS=rmsWts(find(rmsWts>0));
