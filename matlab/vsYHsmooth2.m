@@ -1,18 +1,20 @@
 cd /home/yuval/Dropbox/poster2012
 load ~/Data/tel_hashomer/yuval/VG
 load rmsWts
-timeStep=2;
-[VS,timeline,AllInd]=VS_slice(VG,'~/Data/tel_hashomer/yuval/SAM/VGerf,1-35Hz,VerbAa.wts',timeStep,[0 0.5]);
+timeStep=1;
+torig=-0.1;
+[VS,timeline,AllInd]=VS_slice(VG,'~/Data/tel_hashomer/yuval/SAM/VGerf,1-35Hz,VerbAa.wts',timeStep,[torig 0.5]);
 % [vs,allInd]=inScalpVS(VS,AllInd);
-TR=num2str(timeStep/1017.25)
+TR=num2str(1000*timeStep/1017.25);
 cfg=[];
 cfg.func='KurMask001+orig';
 cfg.TR=TR;
+cfg.torig=torig*1000;
 cfg.step=0.5;
 cfg.boxSize=[-12 12 -9 9 -2 15];
-cfg.prefix='test';
-vs2brik(cfg,VS)
-
+cfg.prefix='raw';
+vs2brik4D(cfg,VS)
+%!~/abin/3dcalc -a test1+orig -expr 'a*1e+08' -prefix test2
 RMS=rmsWts(find(rmsWts>0));
 RMS=RMS';
 RMS=vec2mat(RMS,size(vs,2));
