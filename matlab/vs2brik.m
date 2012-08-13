@@ -1,6 +1,5 @@
 function vs2brik(cfg,vs)
-% cfg should include func field with a name of functional data in BRIK
-% format.
+% cfg.func  a name of functional data in BRIK format.
 % cfg.TR (time of requisition) is the difference between two samples in S or ms.
 % cfg.boxSize is [xmin xmax ymin ymax zmin zmax] in PRI order
 % cfg.step is the spatial resolution in cm (0.5 ?)
@@ -34,10 +33,7 @@ ijkMax=ijkMax+1;ijkMin=ijkMin+1; % because first ijk index is zero
 % ijk order in Vfunc is (small values for ) Ant Sup Left (ASL)
 Vfunc=zeros(size(Vfunc));
 Vfunc(ijkMax(3):ijkMin(3),(ijkMax(2)):(ijkMin(2)),ijkMin(1):ijkMax(1))=pmt;
-%Vfunc(Vfunc~=0)=1;
-%Vfunc(:,:,1)=100;
-% BrikNameFunc=cfg.func;
-% [err, Vfunc, Infofunc, ErrMessage] = BrikLoad (BrikNameFunc);
+
 InfoNewTSOut = Infofunc;
 InfoNewTSOut.RootName = '';
 InfoNewTSOut.BRICK_STATS = []; %automatically set
@@ -53,15 +49,3 @@ if exist([cfg.prefix,'+orig.BRIK'],'file')
 end
 %write it
 [err, ErrMessage, InfoNewTSOut] = WriteBrik (Vfunc, InfoNewTSOut, OptTSOut);
-
-% InfoNewTSOut = Infofunc;
-% InfoNewTSOut.RootName = '';
-% InfoNewTSOut.BRICK_STATS = []; %automatically set
-% InfoNewTSOut.BRICK_FLOAT_FACS = []; %automatically set
-% InfoNewTSOut.IDCODE_STRING = '';%automatically set
-% OptTSOut.Scale = 1;
-% OptTSOut.Prefix = cfg.prefix;
-% OptTSOut.verbose = 1;
-% %write it
-% % dim APL
-% [err, ErrMessage, InfoNewTSOut] = WriteBrik (vs, InfoNewTSOut, OptTSOut);
