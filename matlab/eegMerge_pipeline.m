@@ -1,5 +1,6 @@
 eegFile='/home/yuval/Data/eeg/20120802_0954.cnt';
-megFile='/home/yuval/Data/eeg/3/c,rfhp1.0Hz';
+megFile='/home/yuval/Data/eeg/2/c,rfhp1.0Hz';
+% consider using srMeg=1017.277
 %% read eeg data
 cfg=[];
 cfg.dataset=eegFile;
