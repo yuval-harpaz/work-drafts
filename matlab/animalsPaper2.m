@@ -55,7 +55,7 @@ ylabel('Trial Number')
 xlabel ('Latency')
 
 %% realign
-clear
+
 cd /home/yuval/Data/Amyg/1
 load datacln
 cfg=[];
@@ -75,16 +75,16 @@ posPeaks=peaks(thi);posIpeaks=Ipeaks(thi);posTpeaks=A191avg.time(posIpeaks)
 thi=find(peaks>th);
 negPeaks=peaks(thi);negIpeaks=Ipeaks(thi);negTpeaks=A191avg.time(negIpeaks)
 
-% M100 template
-mi=nearest(posTpeaks,0.1)
-upToPeak=smooth(A191avg.avg(1:posIpeaks(mi)),20)';
-begi=find(fliplr(upToPeak)<0,1);
-begi=length(upToPeak)-begi+2;
-fromPeak=smooth(A191avg.avg(posIpeaks(mi):end),20)';
-endi=find(fromPeak<0,1);
-endi=posIpeaks(mi)+endi-2;
-template100=A191avg.avg(begi:endi);
-plot(template100)
+% % M100 template
+% mi=nearest(posTpeaks,0.1)
+% upToPeak=smooth(A191avg.avg(1:posIpeaks(mi)),20)';
+% begi=find(fliplr(upToPeak)<0,1);
+% begi=length(upToPeak)-begi+2;
+% fromPeak=smooth(A191avg.avg(posIpeaks(mi):end),20)';
+% endi=find(fromPeak<0,1);
+% endi=posIpeaks(mi)+endi-2;
+% template100=A191avg.avg(begi:endi);
+% plot(template100)
 
 % M170 template
 mi=nearest(negTpeaks,0.17)
@@ -97,17 +97,17 @@ endi=negIpeaks(mi)+endi-2;
 template170=A191avg.avg(begi:endi);
 plot(template170)
 
-% M250 template
-mi=nearest(posTpeaks,0.25)
-upToPeak=smooth(A191avg.avg(1:posIpeaks(mi)),20)';
-begi=find(fliplr(upToPeak)<0,1);
-begi=length(upToPeak)-begi+2;
-fromPeak=smooth(A191avg.avg(posIpeaks(mi):end),20)';
-endi=find(fromPeak<0,1);
-endi=posIpeaks(mi)+endi-2;
-template250=A191avg.avg(begi:endi);
-plot(template250)
-M250win=[A191avg.time(begi) A191avg.time(endi)];
+% % M250 template
+% mi=nearest(posTpeaks,0.25)
+% upToPeak=smooth(A191avg.avg(1:posIpeaks(mi)),20)';
+% begi=find(fliplr(upToPeak)<0,1);
+% begi=length(upToPeak)-begi+2;
+% fromPeak=smooth(A191avg.avg(posIpeaks(mi):end),20)';
+% endi=find(fromPeak<0,1);
+% endi=posIpeaks(mi)+endi-2;
+% template250=A191avg.avg(begi:endi);
+% plot(template250)
+% M250win=[A191avg.time(begi) A191avg.time(endi)];
 
 %% look for M170 temp in data
 Peaks=struct;
@@ -157,7 +157,7 @@ end
 post=[];negt=[];
 posTri=[];negTri=[];
 chani=1;
-for ti=1:length(peaks.chan{1,chani}.trial)
+for ti=1:length(Peaks.chan{1,chani}.trial)
     try
         p=Peaks.chan{1,chani}.trial{1,ti}.time(1,Peaks.chan{1,chani}.trial{1,ti}.SNR>0);
         post=[post,p];
@@ -193,13 +193,14 @@ xlabel ('Latency')
 
 
 % FIXME change M250win to M170win
-A191M170=peakSorter('A191',Peaks,M250win,A191.trialinfo,'pos','biggest','noWlts');
+M170win=[A191avg.time(begi+20) A191avg.time(endi-20)];
+A191M170=peakSorter('A191',Peaks,M170win,A191.trialinfo,'neg','biggest','noWlts');
 RAdata=zeros(size(Peaks.wlt{1,1}));
 [~,samp0]=max(smooth(Peaks.wlt{1,1},20)); % the peak in the template
 trCount=0;
 for condi=[100:2:106]
     pks=[];
-    eval(['pks=A191M170.cond',num2str(condi),'pos.timewin{1,1};'])
+    eval(['pks=A191M170.cond',num2str(condi),'neg.timewin{1,1};'])
     for triali=1:size(pks,1)
         trCount=trCount+1;
         samp=find(A191.time{1,1}==pks(triali,2)); % the peak in the trial
@@ -213,119 +214,119 @@ end
 
 [~, score] = princomp(RAdata');
 RAtemp=score(:,1)';
-endsamp=samp0+find(RAtemp(samp0:end)<RAtemp(1),1)-1; % cut smeared end
-RAtemp=RAtemp(1:endsamp);
+% endsamp=samp0+find(RAtemp(samp0:end)<RAtemp(1),1)-1; % cut smeared end
+% RAtemp=RAtemp(1:endsamp);
 
-% second realignmet
-Peaks2=struct;
-Peaks2.label{1,1}='A191';
-Peaks2.wlt{1,1}=RAtemp;
-% baseline correction for the template
-tapBlc = Peaks2.wlt{1,1}-mean(Peaks2.wlt{1,1});
-% normalizing the template
-tmplt=tapBlc./sqrt(sum(tapBlc.*tapBlc));
-% find max point for the template
-[~,time0]=max(tmplt);
-t=A191avg.time;
-
-for triali=1:length(A191.trial)
-    x=A191.trial{1,triali};
-    % do the fit
-    [SNR,SigX,sigSign]=fitTemp(x,tmplt,time0);
-    %             sx=smooth(x,10);
-    %             pos=sx>0;neg=-(sx<0);posneg=pos+neg;
-    %             SNRn=SNR.*posneg';
-    SNRn=SNR.*sigSign;
-    
-    %         firstSamp=true;
-    %         lastSamp=false;
-    ispeak=false;
-    %pkCount=0;
-    Peaks2.chan{1,1}.trial{1,triali}.time=[];
-    Peaks2.chan{1,1}.trial{1,triali}.SNR=[];
-    Peaks2.chan{1,1}.trial{1,triali}.wlti=1;
-%     SNR=squeeze(data.powspctrm(triali,1,1,:));
-    try
-        [SigPeaks, SigIpeaks] = findPeaks(abs(SNRn),1,deadSamples, 'MAD');
-        if ~isempty(SigIpeaks)
-            Peaks2.chan{1,1}.trial{1,triali}.time=t(SigIpeaks);
-            Peaks2.chan{1,1}.trial{1,triali}.SNR=SNRn(SigIpeaks);
-            %peaks.chan{1,chani}.trial{1,triali}.wlti=[peaks.chan{1,chani}.trial{1,triali}.wlti,maxi];
-        end
-    end
-    if isempty(Peaks2.chan{1,1}.trial{1,triali}.time)
-        display(['nothoing for trial ',num2str(triali)]);
-    else
-        % spectrum(triali,1,1:length(SNRn),1) = SNRn;
-        display(num2str(triali))
-    end
-end
-
-A191RA=peakSorter('A191',Peaks2,M250win,A191.trialinfo,'pos','biggest','noWlts');
-RAdata2=zeros(size(RAtemp));
-[~,samp0]=max(smooth(RAtemp,20)); % the peak in the template
-trCount=0;
-for condi=[100:2:106]
-    pks=[];
-    eval(['pks=A191RA.cond',num2str(condi),'pos.timewin{1,1};'])
-    for triali=1:size(pks,1)
-        trCount=trCount+1;
-        samp=find(A191.time{1,1}==pks(triali,2)); % the peak in the trial
-        samp1=samp-samp0+1; % first sample to take from the trial to make the new template
-        samp2=samp+(length(RAtemp)-samp0);
-        RAdata2(trCount,1:length(RAtemp))=A191.trial{1,pks(triali,1)}(1,samp1:samp2);
-    end
-end
-        
-% Peaks=mean(RAdata,1);
-avg2=mean(RAdata2,1);
-[~, score] = princomp(RAdata2');
-RAtemp2=score(:,1)';
-figure;plot(RAtemp2)
-endsamp=samp0+find(RAtemp(samp0:end)<RAtemp(1),1)-1; % cut smeared end
-RAtemp=RAtemp(1:endsamp);
-
-
-% plot Peaks (looking for avg M250 temp)
-
-
-% plot Peaks (looking for avg M250 temp)
-post=[];negt=[];
-posTri=[];negTri=[];
-chani=1;
-for ti=1:length(peaks.chan{1,chani}.trial)
-    try
-        p=Peaks2.chan{1,chani}.trial{1,ti}.time(1,Peaks2.chan{1,chani}.trial{1,ti}.SNR>0);
-        post=[post,p];
-        posTri=[posTri,ti.*ones(size(p))];
-    end
-    
-    try
-        n=Peaks2.chan{1,chani}.trial{1,ti}.time(1,Peaks2.chan{1,chani}.trial{1,ti}.SNR<0);
-        negt=[negt,n];
-        negTri=[negTri,ti.*ones(size(n))];
-    end
-end
-
-[n1,x1]=hist(post,50);
-[n2,x2]=hist(negt,50);
-figure;
-h1=bar(x1,n1,'hist');
-hold on
-h2=bar(x2,n2,'hist');
-set(h2,'facecolor','k')
-set(h2,'edgecolor','k')
-set(h1,'facecolor','w')
-whitebg([0.5 0.5 0.5]);
-legend ('pos','neg')
-title('Count of Peaks2 by time bins')
-
-figure;
-plot(post,posTri,'w.')
-hold on
-plot(negt,negTri,'k.')
-ylabel('Trial Number')
-xlabel ('Latency')
+% % second realignmet
+% Peaks2=struct;
+% Peaks2.label{1,1}='A191';
+% Peaks2.wlt{1,1}=RAtemp;
+% % baseline correction for the template
+% tapBlc = Peaks2.wlt{1,1}-mean(Peaks2.wlt{1,1});
+% % normalizing the template
+% tmplt=tapBlc./sqrt(sum(tapBlc.*tapBlc));
+% % find max point for the template
+% [~,time0]=max(tmplt);
+% t=A191avg.time;
+% 
+% for triali=1:length(A191.trial)
+%     x=A191.trial{1,triali};
+%     % do the fit
+%     [SNR,SigX,sigSign]=fitTemp(x,tmplt,time0);
+%     %             sx=smooth(x,10);
+%     %             pos=sx>0;neg=-(sx<0);posneg=pos+neg;
+%     %             SNRn=SNR.*posneg';
+%     SNRn=SNR.*sigSign;
+%     
+%     %         firstSamp=true;
+%     %         lastSamp=false;
+%     ispeak=false;
+%     %pkCount=0;
+%     Peaks2.chan{1,1}.trial{1,triali}.time=[];
+%     Peaks2.chan{1,1}.trial{1,triali}.SNR=[];
+%     Peaks2.chan{1,1}.trial{1,triali}.wlti=1;
+% %     SNR=squeeze(data.powspctrm(triali,1,1,:));
+%     try
+%         [SigPeaks, SigIpeaks] = findPeaks(abs(SNRn),1,deadSamples, 'MAD');
+%         if ~isempty(SigIpeaks)
+%             Peaks2.chan{1,1}.trial{1,triali}.time=t(SigIpeaks);
+%             Peaks2.chan{1,1}.trial{1,triali}.SNR=SNRn(SigIpeaks);
+%             %peaks.chan{1,chani}.trial{1,triali}.wlti=[peaks.chan{1,chani}.trial{1,triali}.wlti,maxi];
+%         end
+%     end
+%     if isempty(Peaks2.chan{1,1}.trial{1,triali}.time)
+%         display(['nothoing for trial ',num2str(triali)]);
+%     else
+%         % spectrum(triali,1,1:length(SNRn),1) = SNRn;
+%         display(num2str(triali))
+%     end
+% end
+% 
+% A191RA=peakSorter('A191',Peaks2,M250win,A191.trialinfo,'pos','biggest','noWlts');
+% RAdata2=zeros(size(RAtemp));
+% [~,samp0]=max(smooth(RAtemp,20)); % the peak in the template
+% trCount=0;
+% for condi=[100:2:106]
+%     pks=[];
+%     eval(['pks=A191RA.cond',num2str(condi),'pos.timewin{1,1};'])
+%     for triali=1:size(pks,1)
+%         trCount=trCount+1;
+%         samp=find(A191.time{1,1}==pks(triali,2)); % the peak in the trial
+%         samp1=samp-samp0+1; % first sample to take from the trial to make the new template
+%         samp2=samp+(length(RAtemp)-samp0);
+%         RAdata2(trCount,1:length(RAtemp))=A191.trial{1,pks(triali,1)}(1,samp1:samp2);
+%     end
+% end
+%         
+% % Peaks=mean(RAdata,1);
+% avg2=mean(RAdata2,1);
+% [~, score] = princomp(RAdata2');
+% RAtemp2=score(:,1)';
+% figure;plot(RAtemp2)
+% endsamp=samp0+find(RAtemp(samp0:end)<RAtemp(1),1)-1; % cut smeared end
+% RAtemp=RAtemp(1:endsamp);
+% 
+% 
+% % plot Peaks (looking for avg M250 temp)
+% 
+% 
+% % plot Peaks (looking for avg M250 temp)
+% post=[];negt=[];
+% posTri=[];negTri=[];
+% chani=1;
+% for ti=1:length(peaks.chan{1,chani}.trial)
+%     try
+%         p=Peaks2.chan{1,chani}.trial{1,ti}.time(1,Peaks2.chan{1,chani}.trial{1,ti}.SNR>0);
+%         post=[post,p];
+%         posTri=[posTri,ti.*ones(size(p))];
+%     end
+%     
+%     try
+%         n=Peaks2.chan{1,chani}.trial{1,ti}.time(1,Peaks2.chan{1,chani}.trial{1,ti}.SNR<0);
+%         negt=[negt,n];
+%         negTri=[negTri,ti.*ones(size(n))];
+%     end
+% end
+% 
+% [n1,x1]=hist(post,50);
+% [n2,x2]=hist(negt,50);
+% figure;
+% h1=bar(x1,n1,'hist');
+% hold on
+% h2=bar(x2,n2,'hist');
+% set(h2,'facecolor','k')
+% set(h2,'edgecolor','k')
+% set(h1,'facecolor','w')
+% whitebg([0.5 0.5 0.5]);
+% legend ('pos','neg')
+% title('Count of Peaks2 by time bins')
+% 
+% figure;
+% plot(post,posTri,'w.')
+% hold on
+% plot(negt,negTri,'k.')
+% ylabel('Trial Number')
+% xlabel ('Latency')
 
 
 %% look for through to through M170 temp in data
@@ -343,7 +344,7 @@ figure;plot(sm);
 hold on
 plot([begi endi],sm([begi endi]),'r.')
 template170=A191avg.avg(begi:endi);
-plot([begi:endi],-template170,'b')
+plot([begi:endi],-template170,'k')
 
 Peaks=struct;
 Peaks.label{1,1}='A191';
@@ -392,7 +393,7 @@ end
 post=[];negt=[];
 posTri=[];negTri=[];
 chani=1;
-for ti=1:length(peaks.chan{1,chani}.trial)
+for ti=1:length(Peaks.chan{1,chani}.trial)
     try
         p=Peaks.chan{1,chani}.trial{1,ti}.time(1,Peaks.chan{1,chani}.trial{1,ti}.SNR>0);
         post=[post,p];
@@ -498,7 +499,7 @@ end
 
 A191RA=peakSorter('A191',Peaks2,M170win,A191.trialinfo,'neg','biggest','noWlts');
 RAdata2=zeros(size(RAtemp));
-[~,samp0]=max(smooth(RAtemp,20)); % the peak in the template
+[~,samp0]=max(smooth(-RAtemp,20)); % the peak in the template
 trCount=0;
 for condi=[100:2:106]
     pks=[];
@@ -517,18 +518,14 @@ avg2=mean(RAdata2,1);
 [~, score] = princomp(RAdata2');
 RAtemp2=score(:,1)';
 figure;plot(RAtemp2)
-endsamp=samp0+find(RAtemp(samp0:end)<RAtemp(1),1)-1; % cut smeared end
-RAtemp=RAtemp(1:endsamp);
+% endsamp=samp0+find(RAtemp(samp0:end)<RAtemp(1),1)-1; % cut smeared end
+% RAtemp=RAtemp(1:endsamp);
 
 
-% plot Peaks (looking for avg M250 temp)
-
-
-% plot Peaks (looking for avg M250 temp)
 post=[];negt=[];
 posTri=[];negTri=[];
 chani=1;
-for ti=1:length(peaks.chan{1,chani}.trial)
+for ti=1:length(Peaks2.chan{1,chani}.trial)
     try
         p=Peaks2.chan{1,chani}.trial{1,ti}.time(1,Peaks2.chan{1,chani}.trial{1,ti}.SNR>0);
         post=[post,p];
