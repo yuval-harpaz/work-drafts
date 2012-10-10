@@ -73,7 +73,9 @@ plot(A191avg.time((endi+1):end),femto*sm((endi+1):end),'k-','LineWidth',3)
 ylabel('Amplitude (fT)')
 xlabel ('Latency')
 legend ('whole trace','template')
-save template170 template170
+if ~exist('template170','file')
+    save template170 template170
+end
 %% Look for M170 template in the data
 load A191
 load template170
@@ -137,8 +139,9 @@ plot(A191avg.time((endi+1):end),femto*sm((endi+1):end),'k-','LineWidth',3)
 ylabel('Amplitude (fT)')
 xlabel ('Latency')
 legend ('whole trace','template')
-
-save template170TtoT template170
+if ~exist('template170TtoT','file')
+    save template170TtoT template170
+end
 %% Look for through to through M170 in the data
 load A191
 load template170TtoT
@@ -199,11 +202,11 @@ if ~exist('TF.mat','file')
 else
     load TF
 end
-cfg=[];
-cfg.layout='4D248.lay';
-cfg.interactive='yes';
-cfg.xlim=[0 0.5];
-ft_multiplotTFR(cfg,TF)
+% cfg=[];
+% cfg.layout='4D248.lay';
+% cfg.interactive='yes';
+% cfg.xlim=[0 0.5];
+% ft_multiplotTFR(cfg,TF)
 figure;
 plot(TF.time,squeeze(mean(TF.powspctrm(:,22,5,:),1)))
 title('average SNR trace for A191 100ms (10Hz) template')
