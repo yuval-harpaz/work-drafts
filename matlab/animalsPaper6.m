@@ -1,46 +1,20 @@
-%% plot peaks distribution
-%   A '^' shaped template 100ms wide (10Hz) is fitted to unaveraged trials
-% (one channel only). Signed SNR curves are created for each trial. SNR 
-% peaks and throughs represent timing of transient activity in the raw
-% data. The timing of these events is displayed for each trial and as a
-% histogram for all the trials
-
-% First calculate an SNR trace for each trial (channel A191 only)
-cd /home/yuval/Data/Amyg/1
-load datacln;
-cfg              = [];
-cfg.keeptrials   = 'yes';
-cfg.output       = 'pow';
-cfg.channel      = 'A191';
-cfg.method       = 'mtmconvol';
-cfg.foi          = 10;    % freq of interest
-cfg.t_ftimwin    = 1./cfg.foi;
-cfg.toi          = -0.2:0.001:0.5;
-cfg.tapsmofrq    = 1;
-cfg.trials       = 'all';
-cfg.tail         = []; % pad the template with zeros, 'beg' 'end' 'both' or [] for no padding
-cfg.feedback     = 'no';
-[TF,wlt] = freqanalysis_triang_temp(cfg, datacln);
-% Find peaks in the SNR traces
-Peaks=peaksInTrials1freq(TF,wlt);
-[post,negt,posTri,negTri]=peakPosNeg1c(Peaks,'A191');
-% Plot the peaks distribution
-plotPeakDist(post,posTri,negt,negTri)
 
 %% Make a template based on the averaged data
-
 cd /home/yuval/Data/Amyg/1
-load datacln
-cfg=[];
-cfg.trials=1:100;
-cfg.channel='A191';
-cfg.feedback='no';
-A191=ft_preprocessing(cfg,datacln);
-cfg=[];
-cfg.feedback='no';
-A191avg=ft_timelockanalysis(cfg,A191);
-save A191 A191 A191avg
-
+if ~exist('A191.mat','file')
+    load datacln
+    cfg=[];
+    cfg.trials=1:100;
+    cfg.channel='A191';
+    cfg.feedback='no';
+    A191=ft_preprocessing(cfg,datacln);
+    cfg=[];
+    cfg.feedback='no';
+    A191avg=ft_timelockanalysis(cfg,A191);
+    save A191 A191 A191avg
+else
+    load A191
+end
 th=2*max(abs(A191avg.avg(1:nearest(A191avg.time,0))));
 deadSamples=round(0.06*A191.fsample); % 0.06 for 60ms dead time
 % find positive peaks on average curves
@@ -230,17 +204,17 @@ x=[-0.2:0.015:0.7];
 Npos=zeros(size(x));
 Nneg=Npos;
 wltCount=0;
-freqs=2:2:60;
+freqs=[3.4 60];
+% setting window widths as odd numbers for templates to have a peak in the
+% middle, and 10 sample diff between windows covering the freq range of
+% interest
+widths=[10*floor(sr/freqs(2)/10)+1:10:10*ceil(sr/freqs(1)/10)+1];
+
 cfg=[];
 cfg.channel = 'A191';
-
-for wlti=freqs
+for wlti=widths
     wltCount=wltCount+1;
-    N=round(sr/wlti);
-    if iseven(N);
-        N=N+1;
-    end
-    cfg.template=window(@triang,N)';
+    cfg.template=window(@triang,wlti)';
     %cfg.deadSamples = round(N*6/10);
     cfg.deadSamples = 60;
     Peaks=peaks1c1f(cfg,A191);
@@ -249,23 +223,68 @@ for wlti=freqs
     n2=hist(negt,x);
     Npos(wltCount,:)=n1;
     Nneg(wltCount,:)=n2;
-%    display([num2str(wlti),'Hz'])
+    display([num2str(wlti),' samples template'])
 end
 
-Y=freqs;
-Y=round(1000.*ones(size(Y))./Y);
+% Y=freqs;
+% Y=round(1000.*ones(size(Y))./Y);
 figure('OuterPosition',[500 500 400 300]);
-imagesc(x,Y,Nneg);
+imagesc(x,widths,Nneg);
 xlabel ('Latency')
 ylabel('template width (ms)')
 title('count of NEGATIVE peaks per latency time bin and template width')
 figure('OuterPosition',[500 500 400 300]);
-imagesc(x,Y,Npos);
+imagesc(x,widths,Npos);
 xlabel ('Latency')
 ylabel('template width (ms)')
 title('count of POSITIVE peaks per latency time bin and template width')
 
 figure;
-imagesc(x,Y,Npos-Nneg);
+imagesc(x,widths,Npos-Nneg);
 title('Npos - Nneg')
 
+%% deterend to detect higher frequencies
+load A191
+sr=A191.fsample;
+x=[-0.2:0.015:0.7];
+Npos=zeros(size(x));
+Nneg=Npos;
+wltCount=0;
+freqs=[3.4 60];
+% setting window widths as odd numbers for templates to have a peak in the
+% middle, and 10 sample diff between windows covering the freq range of
+% interest
+widths=[10*floor(sr/freqs(2)/10)+1:10:10*ceil(sr/freqs(1)/10)+1];
+
+cfg=[];
+cfg.channel = 'A191';
+for wlti=widths
+    wltCount=wltCount+1;
+    cfg.template=window(@triang,wlti)';
+    %cfg.deadSamples = round(N*6/10);
+    cfg.deadSamples = 60;
+    Peaks=peaksDetrended(cfg,A191);
+    [post,negt,posTri,negTri]=peakPosNeg1c(Peaks,cfg.channel);
+    n1=hist(post,x);
+    n2=hist(negt,x);
+    Npos(wltCount,:)=n1;
+    Nneg(wltCount,:)=n2;
+    display([num2str(wlti),' samples template'])
+end
+
+% Y=freqs;
+% Y=round(1000.*ones(size(Y))./Y);
+figure('OuterPosition',[500 500 400 300]);
+imagesc(x,widths,Nneg);
+xlabel ('Latency')
+ylabel('template width (ms)')
+title('count of NEGATIVE peaks per latency time bin and template width')
+figure('OuterPosition',[500 500 400 300]);
+imagesc(x,widths,Npos);
+xlabel ('Latency')
+ylabel('template width (ms)')
+title('count of POSITIVE peaks per latency time bin and template width')
+
+figure;
+imagesc(x,widths,Npos-Nneg);
+title('Npos - Nneg')

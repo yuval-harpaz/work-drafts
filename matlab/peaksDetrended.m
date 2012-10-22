@@ -23,7 +23,7 @@ t=data.time{1,1};
 
 for triali=1:length(data.trial)
     x=data.trial{1,triali};
-    [SNR,~,sigSign]=fitTemp(x,tmplt,time0);
+    [SNR,~,sigSign]=fitTemp(x,tmplt,time0,true);
     SNRn=SNR.*sigSign;
     peaks.chan{1,1}.trial{1,triali}.time=[];
     peaks.chan{1,1}.trial{1,triali}.SNR=[];
