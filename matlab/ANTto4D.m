@@ -123,33 +123,41 @@ qrScale=10*mean(abs(median(qrtl')));
 fac=(2^15-1)./qrScale;
 facP=floor(log10(fac));
 rsEEGsc=rsEEGsc*10^facP;
-% maxVal=max(max(abs(rsEEG)));
-% fac=(2^15-1)./maxVal;
-% facP=floor(log10(fac));
-%plot(rsEEGsc(1,1:10172))
+% cleanup and writing to file
+clear eeg mMat rsEEG 
 display('writing eeg to a new MEG file')
 rewritePDF(rsEEGsc,labels,[run,'/',megFN]);
-
-%comparing eeg and meg
+clear rsEEGsc
+%% comparing eeg and meg
+display('plotting')
 cfg=[];
 cfg.channel={'E1','E2','E3','E4','E5','E6','E7','E8','E9','E10','E11','E12','E13','E14','E15','E16','E17','E18','E19','E20','E21','E22','E23','E24','E25','E26','E27','E28','E29','E30','E31','E32','E33','E34'};
 cfg.dataset=[run,'/rw_c,rfhp1.0Hz'];
 cfg.trl=[1,hdrMEG.nSamples,0];
+if hdrMEG.nSamples>1017250
+    cfg.trl=[1,1017250,0]; %take 1000sec or else RAM overflows
+    display('only taking 1000sec')
+end
 cfg.demean='yes';
+cfg.feedback='none';
 % cfg.bpfilter='yes';
 % cfg.bpfreq=[1 40];
 eeg=ft_preprocessing(cfg);
+eegRMS=sqrt(mean(eeg.trial{1,1}.*eeg.trial{1,1},1));
+E1=eeg.trial{1,1}(1,1:10172);
+clear eeg
 cfg.channel='MEG';
 meg=ft_preprocessing(cfg);
+time=meg.time{1,1};
 megRMS=sqrt(mean(meg.trial{1,1}.*meg.trial{1,1},1));
-eegRMS=sqrt(mean(eeg.trial{1,1}.*eeg.trial{1,1},1));
+clear meg
 figure;
-plot(megRMS/mean(megRMS));hold on;plot(eegRMS/mean(eegRMS),'g')
+plot(time,megRMS/mean(megRMS));hold on;plot(time,eegRMS/mean(eegRMS),'g')
 cr=corr(smooth(megRMS',20),smooth(eegRMS',20));
 title(['RMS for EEG and MEG. corr = ',num2str(cr)])
 legend('MEG','EEG');
 % check scale issues
 figure;
-plot(eeg.trial{1,1}(1,1:10172))
+plot(time(1:10172),E1)
 title('channel E1 (Fp1), first 10sec')
 
