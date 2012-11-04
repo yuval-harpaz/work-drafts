@@ -57,9 +57,13 @@ foi=1:50;
 talCohH(subs,foi)
 
 % L-R coherence, you need to have subs36.mat
-talGAcohLR_H
+%talGAcohLR_H([],'subs36')
+talGAcohLR_DC([],'subs46');
+%open talLRstats %run lines to view results.
+open talLRstatsDC %run lines to view results.
+open talCohLRstatsDC %permutation statistics
 
-open talLRstats %run lines to view results.
+
 chan='A192';freq=10;
 talStatTables(chan,freq,subsV1,groups)
 

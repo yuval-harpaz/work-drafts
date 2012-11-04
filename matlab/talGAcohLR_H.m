@@ -1,4 +1,5 @@
-function talGAcohLR_H(pat)
+function talGAcohLR_H(pat,subList)
+% subList is like 'subs36.mat'
 if ~exist('pat','var')
     pat=[];
 end
@@ -7,7 +8,7 @@ if isempty(pat)
 end
 patR=[pat(1:(end-3)),'talResults'];
 
-load ([pat,'/subs36'])
+load ([pat,'/',subList])
 cd ([patR,'/Coh'])
 % V1pre='';
 % V1post='';
