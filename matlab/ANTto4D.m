@@ -48,11 +48,17 @@ if ~exist([run,'/samp.mat'],'file')
     evt1017=round(events*1017.25);
     display('reading trig')
     trig=readTrig_BIU([run,'/',megFN]);
-    trig=bitand(uint16(trig),1024);
-    trigSh=trig(2:end);trigSh(end+1)=0;
-    onset=find(trigSh-trig>0);onset=onset+1;
+    TRIG=bitand(uint16(trig),1024);
+    if isempty(find(TRIG))
+        TRIG=bitand(uint16(trig),4096);
+    end
+    trigSh=TRIG(2:end);trigSh(end+1)=0;
+    onset=find(trigSh-TRIG>0);onset=onset+1;
     % onset is the sample in which the MEG trig had 1024 onset
     samp=findEegMegSamp(onset,evt1017);
+    if isempty(samp)
+        error('no match found, samp is empty')
+    end
     save([run,'/samp'],'samp')
 else
     load ([run,'/samp'])
