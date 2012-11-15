@@ -67,6 +67,7 @@ open talCohLRstatsDC %permutation statistics
 chan='A192';freq=10;
 talStatTables(chan,freq,subsV1,groups)
 
+
 %% anterior posterior coherence
 % I used talAntPostChans to make lists of channels
 load /media/Elements/MEG/tal/subs4
@@ -86,3 +87,14 @@ load /media/Elements/MEG/talResults/Coh/cohRv1pre_CM
 condB=V1pre;
 freq=10;
 talCohAPstats(condA,condB,freq,1)
+
+%% time production
+talPowerTP(subs)
+load /media/Elements/MEG/tal/subs46
+talMarkers(subsV1,'timeProd');talMarkers(subsV2,'timeProd');
+[cohLR,coh,freq,data]=talCohH(subsV1,[1:50],[],[],'timeProd');
+[cohLR,coh,freq,data]=talCohH(subsV2,[1:50],[],[],'timeProd');
+talGAcohLR_DC([],'subs46','timeProd');
+
+%open talLRstats %run lines to view results.
+open talLRstatsDC 

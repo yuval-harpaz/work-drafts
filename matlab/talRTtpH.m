@@ -46,15 +46,10 @@ for subi=1:length(subs)
 %                 end
                 RT(trialcount)=RTtr;
                 trialcount=trialcount+1;
-                eval(['!echo  ''',sub,' ',corr,' ',num2str(RTtr),...
-                    '''/media/Elements/MEG/talResults/RTtp.txt'])
+                eval(['!echo  ''',sub,' ',corr,' ',num2str(RTtr),''' >> ',...
+                    '/media/Elements/MEG/talResults/RTtp.txt'])
             end
         end
-%            save(['~/Desktop/talResults/s',sub,'_pow',num2str(trval),'_',num2str(1)],'pow');
-%        end
-        
-        
-        %
 end
 cd ('/media/Elements/MEG/talResults')
 end

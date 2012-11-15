@@ -1,4 +1,4 @@
-function [cohLR,coh,freq,data]=talCohH(subs,foi,pat,chCmb)
+function [cohLR,coh,freq,data]=talCohH(subs,foi,pat,chCmb,cond)
 % chCmb can be 'LR' or 'AntPost'
 % [cohLR,freq,data]=cohTal({'quad01'},[1:50]);
 try
@@ -21,13 +21,21 @@ cd (pat)
 for subi=1:length(subs)
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
-    indiv=talIndivPathH(sub,'rest',pat);
-    for i=1:2 % two eyes closed per subject
+    indiv=talIndivPathH(sub,cond,pat);
+    numRep=1;
+    if strcmp('rest',cond)
+        numRep=2;
+    end
+    for i=1:numRep % two eyes closed per subject
         eval(['cd (indiv.path',num2str(i),')']);
         eval(['source=indiv.source',num2str(i),';'])
         % converting MarkerFile to trl
-        trg=textread('restMarkerFile.mrk','%s');
-        startTrg=find(strcmp('eyesClosed',trg))+14;
+        trg=textread([cond,'MarkerFile.mrk'],'%s');
+        if strcmp('rest',cond)
+            startTrg=find(strcmp('eyesClosed',trg))+14;
+        elseif strcmp('timeProd',cond)
+            startTrg=find(strcmp([cond,'32'],trg))+14;
+        end
         numTrg=trg(startTrg-10);
         numTrg=str2num(numTrg{1,1});
         endTrg=startTrg+numTrg*2-2;
@@ -121,7 +129,13 @@ for subi=1:length(subs)
     %         plot(round(cohLR.freq),cohLR.cohspctrm(6:9,:));
     %         legend('A126','A129','A132','A135')
     %         title(sub)
-    save([patR,'/Coh/',sub,sufix],'coh1','coh2')
+    if strcmp(cond,'rest')
+        save([patR,'/Coh/',sub,sufix],'coh1','coh2')
+    else
+        if ~exist([patR,'/',cond,'Coh'],'dir')
+            mkdir([patR,'/',cond,'Coh']);
+        end
+        save([patR,'/',cond,'Coh/',sub,sufix],'coh1')
 end
 cd(PWD);
 end

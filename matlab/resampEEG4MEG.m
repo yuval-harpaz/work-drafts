@@ -16,5 +16,14 @@ function rsEEG = resampEEG4MEG(eegData, offset, srEEG, srMEG, lengthMEG)
 sEEGoffset = round(offset*srEEG);
 sMEG = 1 : lengthMEG;
 sEEG = sEEGoffset+round(sMEG/srMEG*srEEG);
-rsEEG = eegData(:,sEEG);
+try
+    rsEEG = eegData(:,sEEG);
+catch
+    noEEGyet=find(sEEG<1);
+    if ~isempty(noEEGyet)
+        sEEG(noEEGyet)=1;
+        rsEEG = eegData(:,sEEG);
+        rsEEG(:,1:length(noEEGyet))=0;
+    end
+end
 end

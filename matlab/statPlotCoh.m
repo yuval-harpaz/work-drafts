@@ -1,4 +1,4 @@
-function stat=statPlot(data1,data2,xlim,zlim,ttype);
+function stat=statPlotCoh(data1,data2,xlim,zlim,ttype);
 % independent sample ttest (two groups)
 %  stat=statPlot('cohLRv1pre_DM','cohLRv1pre_CM',[10 10],[],'ttest2')
 
@@ -22,12 +22,22 @@ if ischar(data1)
     
     load(data1)
     [path1, data1] = fileparts(data1)
-    title1=[path1(end-7:end),'/',data1];
+    try
+        title1=[path1(end-7:end),'/',data1];
+    catch
+        title1=data1;
+    end
     eval(['data1=',data1])
     load(data2)
     [path2, data2] = fileparts(data2)
-    title2=[path2(end-7:end),'/',data2];
+    try
+        title2=[path2(end-7:end),'/',data2];
+    catch
+        title2=data2;
+    end
     eval(['data2=',data2])
+    data1.powspctrm(find(data1.powspctrm==0))=1;
+    data2.powspctrm(find(data2.powspctrm==0))=1;
 else
     title1=inputname(1);
     title2=inputname(2);
