@@ -12,7 +12,7 @@ ambGrAvg(1:25)
 
 %% statistics M170
 % runs montecarlo. if stat exists already only plots the statistics.
-[cfg1,probplot,cfg2,statplot]=ambMonte('M350','subp','domp',0.995);
+[cfg1,probplot,cfg2,statplot]=ambMonte('M170','subp','domp',0.995);
 
 % by cluster
 %[cfg1,probplot,cfg2,statplot]=ambMonteClust('Clust','subp','domp',0.95);
@@ -156,98 +156,10 @@ cd /home/yuval/Dropbox/MEGpaper/files/matlab
 plotFields
 
 
-%% M170 main effect for hemisphere
-% merge sub and dom
-ambMergeSources('m170','pow');
-%    % get the pretrigger noise value
-ambGrAvg1([1:25],'m170','noise');
+%% M170 main effect
 
-%    % merge the two noise conditions
-ambMergeSources('m170','noise');
-
-%    % change noise field to pow
-load m170domsubN
-for subi=1:25;
-    m170domsubN.trial(1,subi).pow=m170domsubN.trial(1,subi).noise;
-    %[M350domsubN.trial(1,subi)]=rmfield(M350domsubN.trial(1,subi),'noise');
-end
-save m170domsubN m170domsubN
-
-% fix pos
-
-load template_grid_10mm
-load m170domsubp
-m170domsubp.pos=template_grid.pos;
-m170domsubp=rmfield(m170domsubp,'transform');
-save m170domsubp m170domsubp
-load m170domsubN
-m170domsubN.pos=template_grid.pos;
-m170domsubN=rmfield(m170domsubN,'transform');
-save m170domsubN m170domsubN
- %  I was unable to remove noise field, identical to pow now.
-% interpolate sources
-% load m170domsubN.mat
-% load m170domsubp.mat
-% load sMRI
-% cfg = [];
-% cfg.parameter = 'pow';
-% %cfg10.interpmethod  = 'spline';%'cubic' 'linear';
-% M170domsubN=ft_sourceinterpolate(cfg,m170domsubN,sMRI);
-
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_m170_ME','m170domsubp','m170domsubN',0.95,0.01);
-load Cl01_m170_MEstat
-stat=rmfield(stat,'transform');
-load template_grid_10mm
-stat.pos=template_grid.pos;
-load sMRI
-cfg=[];
-cfg.parameter = {'prob','stat'};
-stat=ft_sourceinterpolate(cfg,stat,sMRI)
-save Cl01_M170_MEstat stat
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_M170_ME','','',0.95,0.01);
-
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_m170_ME','m170domsubp','m170domsubN',0.95,0.005);
-load Cl005_m170_MEstat
-stat=rmfield(stat,'transform');
-load template_grid_10mm
-stat.pos=template_grid.pos;
-load sMRI
-cfg=[];
-cfg.parameter = {'prob','stat'};
-stat=ft_sourceinterpolate(cfg,stat,sMRI)
-save Cl005_M170_MEstat stat
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M170_ME','','',0.95,[]);
-
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl0001_m170_ME','m170domsubp','m170domsubN',0.95,0.0001);
-load Cl0001_m170_MEstat
-%stat=rmfield(stat,'transform');
-load template_grid_10mm
-stat.pos=template_grid.pos;
-load sMRI
-cfg=[];
-cfg.parameter = {'prob','stat'};
-stat=ft_sourceinterpolate(cfg,stat,sMRI)
-save Cl0001_M170_MEstat stat
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl0001_M170_ME','','',0.95,[]);
-cfg2.funcolorlim=[-7 7];
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('M170sub_N_00025','subp','M350domsubN',0.95,0.00025);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('M170dom_N_0025','domp','M350domsubN',0.95,0.0025);
+cfg2.funcolorlim=[-10 10];
+cfg2=rmfield(cfg2,'maskparameter')
 ft_sourceplot(cfg2,statplot)
-
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl0005_m170_ME','m170domsubp','m170domsubN',0.95,0.0005);
-load Cl0005_m170_MEstat
-%stat=rmfield(stat,'transform');
-load template_grid_10mm
-stat.pos=template_grid.pos;
-load sMRI
-cfg=[];
-cfg.parameter = {'prob','stat'};
-stat=ft_sourceinterpolate(cfg,stat,sMRI)
-save Cl0005_M170_MEstat stat
-[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl0005_M170_ME','','',0.95,[]);
-cfg2.funcolorlim=[-7 7];
-ft_sourceplot(cfg2,statplot)
-
-
-% 
-% 
-% load Cl005_m170_MEstat
-% stat=rmfield(stat,'transform');

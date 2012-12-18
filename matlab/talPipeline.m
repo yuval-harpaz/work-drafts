@@ -97,4 +97,17 @@ talMarkers(subsV1,'timeProd');talMarkers(subsV2,'timeProd');
 talGAcohLR_DC([],'subs46','timeProd');
 
 %open talLRstats %run lines to view results.
-open talLRstatsDC 
+open talLRstatsDC
+
+%% one back
+load('/media/My Passport/MEG/tal/subs46')
+talMarkers(subsV1,'oneBack');
+talMarkers(subsV2,'oneBack');
+foi=1:50;
+pat='/media/My Passport/MEG/tal';
+[cohLR,coh,freq,data]=talCohLR(subsV1,foi,pat,'oneBack');
+[cohLR,coh,freq,data]=talCohLR(subsV2,foi,pat,'oneBack'); % sub 3602 was bad
+talGAcohLR_DC(pat,'subs46no36','oneBack','W');
+talGAcohLR_DC(pat,'subs46no36','oneBack','NW');
+% view results
+open talLRstatsWNW

@@ -21,10 +21,12 @@ for i=1:length(condcell);
     source='';
     path2file=conditions{condcell(i)+1};
     stri=findstr(path2file,'/tal/');
-    talFolder=path2file(1:stri);
-    if strcmp(talFolder,{'/home/yuval/Desktop/'})
-        path2file(1:19)='/media/Elements/MEG';
-    end
+    %talFolder=path2file(1:stri);
+    subFolder=path2file(stri+5:end)
+%     if strcmp(talFolder,{'/home/yuval/Desktop/'})
+%         path2file(1:19)='/media/Elements/MEG';
+%     end
+    path2file=[pat,'/',subFolder];
     RUN=conditions{condcell(i)+1}(end);
     %fileName=['xc,lf_',fileName];
     cd(path2file)
