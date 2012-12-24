@@ -1,4 +1,4 @@
-function ANTto4D(eegFN,run,megFN,method,segBegSamp)
+function ANTto4Dauto(run)
 % mergeEegMeg
 % cd to where the eeg data is. there should be run folders with meg: 1,2...
 
@@ -6,22 +6,33 @@ function ANTto4D(eegFN,run,megFN,method,segBegSamp)
 % run='3';
 % megFN='c,rfhp1.0Hz';
 % segBegSamp=[1,round((10*60+29.038)*1024),round((23*60+44.578)*1024),round((36*60+28.374)*1024)];
-if isempty(megFN)
-    if exist('c,rfhp0.1Hz','file')
-        megFN='c,rfhp0.1Hz';
-    elseif exist('c,rfhp1.0Hz','file')
-        megFN='c,rfhp1.0Hz';
-    end
+if ~ischar(run)
+    run=num2str(run);
 end
-
+method='first2';
+if exist([run,'/c,rfhp0.1Hz'],'file')
+    megFN='c,rfhp0.1Hz';
+elseif exist([run,'/c,rfhp1.0Hz'],'file')
+    megFN='c,rfhp1.0Hz';
+else
+    error('default filename not found, please use ANTto4D')
+end
+LS=ls;
+if length(findstr(LS,'.cnt'))~=1
+    error('there has to be 1 cnt file. use ANTto4D to specify which one')
+else
+    eegFN=ls('*.cnt');
+    eegFN=eegFN(1:end-1);
+end
+if length(findstr(LS,'.seg'))~=0
+    error('segmented eeg, use ANTto4D')
+else
+    segBegSamp=1;
+end
 srEeg=1024;
 srMeg=1017.278;
 hdrEEG=ft_read_header(eegFN);
 
-
-if ~exist('segBegSamp','var')
-    segBegSamp=1;
-end
 
 hdrMEG=ft_read_header([run,'/',megFN]);
 
