@@ -6,7 +6,7 @@ function ECG = readECG(inFile)
 p = pdf4D(inFile);
 hdr = ft_read_header(inFile);
 
-chi = channel_index(p,'E34', 'name');
+chi = channel_index(p,'ECG', 'label');
 ECG = double(read_data_block(p,[],chi));
 nFactor = max(ECG);
 nECG = ECG/nFactor;
