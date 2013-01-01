@@ -7,16 +7,18 @@ function ANTto4D_ECG(eegFN,run,megFN,method,segBegSamp)
 % megFN='c,rfhp1.0Hz';
 % segBegSamp=[1,round((10*60+29.038)*1024),round((23*60+44.578)*1024),round((36*60+28.374)*1024)];
 
-srEeg=1024;
-srMeg=1017.278;
+hdrMEG=ft_read_header([run,'/',megFN]);
 hdrEEG=ft_read_header(eegFN);
+srEeg=hdrEEG.Fs;
+srMeg=hdrMEG.Fs;
+
 
 
 if ~exist('segBegSamp','var')
     segBegSamp=1;
 end
 
-hdrMEG=ft_read_header([run,'/',megFN]);
+
 
 % choose method of syncing
 % first2 = first matched pair, last2 = last matched pair, firstAndLast2 =
@@ -27,12 +29,12 @@ if ~exist('eeg.mat','file')
     cfg=[];
     cfg.demean='yes';
     cfg.bpfilter='yes';
-    cfg.channel = {'VEOG' 'ECG'};
+    cfg.channel = {'ECG'};
     cfg.bpfreq=[1 100];
     eeg=readCNT(cfg);
     display('saving eeg ft structure')
     save eeg eeg
-else
+else   
     display('loading eeg.mat')
     load eeg.mat
 end
@@ -45,6 +47,7 @@ if ~exist('events.mat','file')
 else
     load events
 end
+
 if ~exist([run,'/samp.mat'],'file')
     evt1017=round(events*1017.25);
     display('reading trig')
@@ -114,18 +117,19 @@ end
 % for li=1:2
 %     labels{li,1}=['E',num2str(li)];  %#ok<AGROW>
 % end
-labels{1,1} = 'E33';
-labels{2,1} = 'E34';
+% labels{1,1} = 'E33';
+% labels{2,1} = 'E34';
 
 % rescaling according to units per bits in the config
 pdf=pdf4D([run,'/',megFN]);
 header = get(pdf, 'Header');
-chi=channel_index(pdf,'EEG');
+chi=channel_index(pdf,'ECG','label');
+chn = channel_name(pdf, chi);
 config = get(pdf, 'config');
-for ch = 1:2
-    chan_no = header.channel_data{chi(ch)}.chan_no;
-    scale(ch) = config.channel_data{chan_no}.units_per_bit; %#ok<AGROW>
-end
+
+chan_no = header.channel_data{chi}.chan_no;
+scale = config.channel_data{chan_no}.units_per_bit; %#ok<AGROW>
+
 scFac=round(log10(median(scale)));
 rsEEGsc=rsEEG*10^scFac;
 % scale according to range of data (quartiles) to fit short format
@@ -137,12 +141,12 @@ rsEEGsc=rsEEGsc*10^facP;
 % cleanup and writing to file
 clear eeg mMat 
 display('writing eeg to a new MEG file')
-rewritePDF(rsEEGsc,labels,[run,'/',megFN]);
+rewritePDF(rsEEGsc,chn,[run,'/',megFN]);
 clear rsEEGsc rsEEG
 %% comparing eeg and meg
 display('plotting')
 cfg=[];
-cfg.channel= {'E33' 'E34'};%{'E1' 'E2' 'E3' 'E4' 'E5' 'E6''E7' 'E8' 'E9' 'E10' 'E11' 'E12' 'E13' 'E14' 'E15' 'E16' 'E17' 'E18' 'E19' 'E20' 'E21' 'E22' 'E23' 'E24' 'E25' 'E26' 'E27' 'E28' 'E29' 'E30' 'E31' 'E32' 'E33' 'E34' 'E35'};
+cfg.channel= chn; 
 cfg.dataset=[run,'/rw_',megFN];
 cfg.trl=[1, hdrMEG.nSamples ,0]; %
 % if hdrMEG.nSamples>1017250
@@ -153,27 +157,19 @@ cfg.demean='yes';
 cfg.feedback='none';
 % cfg.bpfilter='yes';
 % cfg.bpfreq=[1 40];
-eeg=ft_preprocessing(cfg);
+ECG=ft_preprocessing(cfg);
 
-VEOG = eeg.trial{1,1}(1,:);
-ECG = eeg.trial{1,1}(2,:);
+ECG = ECG.trial{1,1};
 
-clear eeg
-cfg.channel='A235';
+cfg.channel = {'MEG'};
 meg=ft_preprocessing(cfg);
 time=meg.time{1,1};
-megECG=meg.trial{1,1};
+megECG=mean(meg.trial{1,1});
 clear meg
 % check sync of EEG and MEG
 figure;
-plot(time,ECG/mean(ECG),'g');hold on;plot(time,megECG/mean(megECG))
-legend('ECG', 'MEG A235')
+plot(time,ECG/max(abs(ECG)),'g');hold on;plot(time,megECG/max(abs(megECG)))
+legend('ECG', 'mean MEG')
 
-% check scale issues
-% figure;
-% plot(ECG)
-% figure
-% plot(VEOG)
-% title('channel E1 (Fp1), first 10sec')
-% save ECG ECG
+corrEcgMeg = corrcoef(ECG(1:10000), megECG(1:10000));
 
