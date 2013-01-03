@@ -19,11 +19,11 @@ load subpath; cd(subpath);
 % in a terminal: 
 % cd <paste address here>
 % afni
-%% 
-talMove2tlrcH(subs,cond)
+%%
+pat='/media/My Passport/MEG/tal';
+talMove2tlrcH(subs,cond,pat)
 pref='alpha';
 talSAM_H(subs,pref,'eyesClosed',cond)
-
 SVL='alpha,7-13Hz,eyesClosed-NULL,P,Zp.svl';
 talFunc2tlrcH(subs,cond,SVL,pref)
 
@@ -111,3 +111,8 @@ talGAcohLR_DC(pat,'subs46no36','oneBack','W');
 talGAcohLR_DC(pat,'subs46no36','oneBack','NW');
 % view results
 open talLRstatsWNW
+
+%% alpha SAM statistics
+talGstats42 % group differences
+talStats42 % post - pre
+talVstats42 % visit2 - visit1

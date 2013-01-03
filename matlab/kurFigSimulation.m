@@ -1,0 +1,43 @@
+function figure1=kurFigSimulation
+
+alphaSim=[4,5,6,7,6,5,4,3,2,1,2,3,4,5,6,7,6,5,4,3,2,1,2,3,4,5,6,7,6,5,4];
+spikeSim=[4,4,4,4,4,4,4,4,4,4,4,4,4,5,6,7,6,5,4,4,4,4,4,4,4,4,4,4,4,4,4];
+spikeSim=spikeSim+4;
+noiseSim=   [2 8 3 5 2 6 3 7 7 7 5 1 2 9 2 8 5 10 1 4 1 10 0 8 8 9 1 4 3 8 4]; % round(10*rand(1,length(spikeSim)));
+noiseSim=noiseSim-10;
+
+YMatrix1=[spikeSim;alphaSim;noiseSim];
+YMatrix1=YMatrix1';
+
+
+figure1 = figure('XVisual',...
+    '0x29 (TrueColor, depth 24, RGB mask 0xff0000 0xff00 0x00ff)');
+
+% Create axes
+axes1 = axes('Visible','off','Parent',figure1);
+xlim(axes1,[0 45]);
+box(axes1,'on');
+hold(axes1,'all');
+
+% Create multiple lines using matrix input to plot
+plot(YMatrix1,'LineWidth',2,'Color',[0 0 0],'Parent',axes1);
+
+% Create title
+
+annotation(figure1,'textbox',...
+    [0.2 0.2 0.6 0.8],...
+    'string',{'g2 values for simulated spike,','alpha rhythm and noise'},...
+    'FontSize',20,...
+    'FontName','Times',...
+    'LineStyle','none');
+
+% Create textbox
+annotation(figure1,'textbox',...
+    [0.70826580226904 0.410797061260263 0.194489465153974 0.396319043608651],...
+    'String',{'g2 = 4.75','','','g2 = -1.06','','','g2 = -1.42'},...
+    'FontSize',20,...
+    'FontName','Times',...
+    'FitBoxToText','on',...
+    'LineStyle','none',...
+    'LineWidth',2);
+

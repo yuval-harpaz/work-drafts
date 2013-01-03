@@ -1,12 +1,18 @@
-function talMove2tlrcH(subs,cond)
+function talMove2tlrcH(subs,cond,pat)
 % cond='rest';
 % creates a script in the home directory 'warped2tlrc' for moving the warped+orig to warped+tlrc
 % run in a terminal ./warped2tlrc
 ! echo ''> ~/warped2tlrc
 ! chmod 777 ~/warped2tlrc
-cd ('/media/Elements/MEG/tal')
+if ~exist('pat','var')
+    pat=[];
+end
+if isempty(pat)
+    pat='/media/Elements/MEG/tal';
+end
+cd (pat)
 for subi=1:length(subs)
-    cd ('/media/Elements/MEG/tal')
+    cd (pat)
     sub=subs{subi};
     display(['BEGGINING WITH ',sub]);
     cd ([sub,'/',sub,'/0.14d1']);
