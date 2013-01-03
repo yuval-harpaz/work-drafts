@@ -9,7 +9,7 @@ function ANTto4Dauto(run)
 if ~ischar(run)
     run=num2str(run);
 end
-method='first2';
+method='firstAndLast2';
 if exist([run,'/c,rfhp0.1Hz'],'file')
     megFN='c,rfhp0.1Hz';
 elseif exist([run,'/c,rfhp1.0Hz'],'file')
@@ -82,6 +82,10 @@ else
     load ([run,'/samp'])
 end
 %%
+if isempty(find(diff(samp)>101725))
+    method='first2';
+    warning('did not find sync events more than 100sec apart, using first2 triggers')
+end
 switch method
     case 'first2'
         t1=events(samp(1,3));
