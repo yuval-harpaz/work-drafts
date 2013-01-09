@@ -21,3 +21,9 @@ G2(vsFro(t10:t60))
 load /home/yuval/Data/kurtosis/b024/vsLR
 t=[2 6];s=round(678.17*t);
 plot(timeline(s(1):s(2)),[vsR(:,s(1):s(2))+1.5;vsL(:,s(1):s(2))],'k','LineWidth',2)
+
+ylabel('Source moment (e-7 Amp per divition)');
+xlabel('Time (Seconds)');
+title('Frequent versus Large Spikes')
+
+kurFigWindows
