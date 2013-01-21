@@ -116,3 +116,15 @@ open talLRstatsWNW
 talGstats42 % group differences
 talStats42 % post - pre
 talVstats42 % visit2 - visit1
+
+%% voxel values
+pat='/media/Elements/MEG/tal';
+load([pat,'/subs46'])
+gr=groups(groups>0);
+subs1=subsV1(find(gr<4)); % all
+coordinates=[27, -37, 55;9, -37, -15;57, 27,2;37, -78,9];
+alphaV1Pre=talCorBehav1(subs1,coordinates,'alpha1',pat);
+alphaV1Post=talCorBehav1(subs1,coordinates,'alpha2',pat);
+subs2=subsV2(find(gr<4)); % all
+alphaV2Pre=talCorBehav1(subs2,coordinates,'alpha1',pat);
+alphaV2Post=talCorBehav1(subs2,coordinates,'alpha2',pat);
