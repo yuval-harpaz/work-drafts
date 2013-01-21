@@ -312,3 +312,38 @@ for ti=1:9
     maxG2rnd(ti)=max(g);
     sumG2rnd(ti)=sum(g(find(g>0)));
 end
+
+
+
+
+% simulate rare spikes
+rate=[1,4,8,16,32,64];
+rate=round(rate*678.17);
+vx=rand(1,67817);
+vx=vx-mean(vx);
+for ratei=1:6;
+    vs=vx;
+    for begSpike=1:rate(ratei):67817-rate(ratei);
+        vs(begSpike:begSpike+32)=vx(begSpike:begSpike+32)+5*[[0:0.1:1.6],[1.5:-0.1:0]];
+    end
+    
+    for ti=1:9
+        lat(ti)=2^(ti-4);
+        samps=round(678.17*lat(ti));
+        segBeg=1:round(samps/2):length(vx);
+        segBeg=segBeg(1:end-2);
+        X=[];
+        for segi=1:length(segBeg)
+            X(segi,1:samps)=vs(segBeg(segi):(segBeg(segi)+samps-1));
+        end
+        g=G2(X);
+        maxG2(ti,ratei)=max(g);
+        sumG2(ti,ratei)=sum(g(find(g>1)));
+    end
+end
+maxG2
+sumG2
+
+
+%% simulation 
+
