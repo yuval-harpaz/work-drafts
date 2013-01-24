@@ -1,4 +1,4 @@
-function ANTto4Dauto(run)
+function ANTto4Dauto(run,drift)
 % mergeEegMeg
 % cd to where the eeg data is. there should be run folders with meg: 1,2...
 
@@ -6,6 +6,11 @@ function ANTto4Dauto(run)
 % run='3';
 % megFN='c,rfhp1.0Hz';
 % segBegSamp=[1,round((10*60+29.038)*1024),round((23*60+44.578)*1024),round((36*60+28.374)*1024)];
+% drift here is the samples allowed for eeg and meg triggers to be apart
+% (in 2 sec anyway), default is 2 samples.
+if ~exist('drift','var')
+    drift=2;
+end
 if ~ischar(run)
     run=num2str(run);
 end
@@ -48,7 +53,7 @@ if ~exist('eeg.mat','file')
     cfg.bpfreq=[1 400];
     eeg=readCNT(cfg);
     display('saving eeg ft structure')
-    save eeg eeg
+    save eeg eeg -v7.3
 else
     display('loading eeg.mat')
     load eeg.mat
@@ -73,7 +78,7 @@ if ~exist([run,'/samp.mat'],'file')
     trigSh=TRIG(2:end);trigSh(end+1)=0;
     onset=find(trigSh-TRIG>0);onset=onset+1;
     % onset is the sample in which the MEG trig had 1024 onset
-    samp=findEegMegSamp(onset,evt1017);
+    samp=findEegMegSamp(onset,evt1017,drift);
     if isempty(samp)
         error('no match found, samp is empty')
     end
