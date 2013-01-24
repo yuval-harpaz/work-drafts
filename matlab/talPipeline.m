@@ -111,6 +111,7 @@ talGAcohLR_DC(pat,'subs46no36','oneBack','W');
 talGAcohLR_DC(pat,'subs46no36','oneBack','NW');
 % view results
 open talLRstatsWNW
+open talLRcohFigs
 
 %% alpha SAM statistics
 talGstats42 % group differences

@@ -1,4 +1,4 @@
-function stat=statPlot(data1,data2,xlim,zlim,ttype);
+function [stat,figure1]=statPlot(data1,data2,xlim,zlim,ttype);
 % independent sample ttest (two groups)
 %  stat=statPlot('cohLRv1pre_DM','cohLRv1pre_CM',[10 10],[],'ttest2')
 
@@ -83,7 +83,7 @@ cfg.highlightchannel = find(stat.prob<0.05);
 % figure;ft_topoplotER(cfg, datadif);
 % colorbar;
 % title(strrep([title1,' - ',title2],'_',' '));
-figure;
+figure1=figure('Units','normalized','Position',[0 0 1 1]);
 subplot(1,2,1)
 ft_topoplotER(cfg,data1)
 title(strrep(title1,'_',' '));
