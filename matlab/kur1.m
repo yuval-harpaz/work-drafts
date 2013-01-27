@@ -317,7 +317,7 @@ end
 
 
 % simulate rare spikes
-rate=[1,4,8,16,32,64];
+rate=[1,2,4,8,16,32];
 rate=round(rate*678.17);
 vx=rand(1,67817);
 vx=vx-mean(vx);
@@ -344,6 +344,11 @@ end
 maxG2
 sumG2
 
+table1=NaN;
+table1(2:10,1)=[0.125;0.25;0.5;1;2;4;8;16;32];
+table1(1,2:5)=[4,8,16,32];
+table1(2:end,2:end)=sumG2(:,3:6);
+rat=table1(2:end,2:end-1)./table1(2:end,3:end);
 
 %% simulation 
 

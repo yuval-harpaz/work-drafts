@@ -62,7 +62,7 @@ talGAcohLR_DC([],'subs46');
 %open talLRstats %run lines to view results.
 open talLRstatsDC %run lines to view results.
 open talCohLRstatsDC %permutation statistics
-
+open talCohList %prepare list of channel info for rest
 
 chan='A192';freq=10;
 talStatTables(chan,freq,subsV1,groups)

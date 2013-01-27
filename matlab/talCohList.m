@@ -15,20 +15,3 @@ for gri=1:3
         eval([group{gri},'_A156(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,A156i,10);']);
     end
 end
-        
-
-        
-
-,'talResults/Coh/cohLRv1pre_D',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2post_D','talResults/Coh/cohLRv2pre_D',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv1post_CQ','talResults/Coh/cohLRv1pre_CQ',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2post_CQ','talResults/Coh/cohLRv2pre_CQ',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv1post_CV','talResults/Coh/cohLRv1pre_CV',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2post_CV','talResults/Coh/cohLRv2pre_CV',[freq freq],[0 1],'paired-ttest')
-
-stat=statPlot('talResults/Coh/cohLRv2pre_D','talResults/Coh/cohLRv1pre_D',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2post_D','talResults/Coh/cohLRv1post_D',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2pre_CQ','talResults/Coh/cohLRv1pre_CQ',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2post_CQ','talResults/Coh/cohLRv1post_CQ',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2pre_CV','talResults/Coh/cohLRv1pre_CV',[freq freq],[0 1],'paired-ttest')
-stat=statPlot('talResults/Coh/cohLRv2post_CV','talResults/Coh/cohLRv1post_CV',[freq freq],[0 1],'paired-ttest')

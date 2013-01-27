@@ -7,6 +7,11 @@ figure2=kurFigA22vs;
 % ictal or magnetographic seizure
 figure3=kurFigMagSeiz;
 % status
-fig4=kurFigStatus
+figure4=kurFigStatus
+% real data metric + window length effect
+[figure5top,figure5bottom]=kurFigWindows1
 
-kurFigWindows
+figure6=kurFigSimRate
+
+
+
