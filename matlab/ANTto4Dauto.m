@@ -7,9 +7,9 @@ function ANTto4Dauto(run,drift)
 % megFN='c,rfhp1.0Hz';
 % segBegSamp=[1,round((10*60+29.038)*1024),round((23*60+44.578)*1024),round((36*60+28.374)*1024)];
 % drift here is the samples allowed for eeg and meg triggers to be apart
-% (in 2 sec anyway), default is 2 samples.
+% (in 2 sec anyway), default is 3 samples.
 if ~exist('drift','var')
-    drift=2;
+    drift=3;
 end
 if ~ischar(run)
     run=num2str(run);
