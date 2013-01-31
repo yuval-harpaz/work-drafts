@@ -1,4 +1,4 @@
-function kurFigSimRate
+function figure1=kurFigSimRate
 load /home/yuval/Data/kurtosis/table1
 YMatrix1=table1(2:end,2:end-1)./table1(2:end,3:end);
 X1=1:size(YMatrix1,1);
@@ -36,6 +36,8 @@ legend1=legend(axes1,'show');
 set(legend1,'EdgeColor',[1 1 1]);
 xlim([0,10])
 title('g2 ratio for sparse spikes as a function of window length')
+xlabel('Window length (Seconds)')
+ylabel({'Ratio between g2 values','for adjacent spike rates'})
 box off
 
 
