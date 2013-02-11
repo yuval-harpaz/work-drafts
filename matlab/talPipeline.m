@@ -112,7 +112,7 @@ talGAcohLR_DC(pat,'subs46no36','oneBack','NW');
 % view results
 open talLRstatsWNW
 open talLRcohFigs
-
+talPower1bk(subsV1);
 %% alpha SAM statistics
 talGstats42 % group differences
 talStats42 % post - pre
@@ -129,3 +129,13 @@ alphaV1Post=talCorBehav1(subs1,coordinates,'alpha2',pat);
 subs2=subsV2(find(gr<4)); % all
 alphaV2Pre=talCorBehav1(subs2,coordinates,'alpha1',pat);
 alphaV2Post=talCorBehav1(subs2,coordinates,'alpha2',pat);
+
+%% 10.02.13
+open talCohList
+
+open talPowList
+chan='A171';
+freq=4;
+[list,labels]=talPowList1(chan,freq);
+freq=10;
+[list,labels]=talPowList1(chan,freq);
