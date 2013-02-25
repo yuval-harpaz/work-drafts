@@ -1,4 +1,4 @@
-function ANTto4Dauto(run,drift)
+function ANTto4Dauto(run,drift,trigVal)
 % mergeEegMeg
 % cd to where the eeg data is. there should be run folders with meg: 1,2...
 
@@ -8,7 +8,11 @@ function ANTto4Dauto(run,drift)
 % segBegSamp=[1,round((10*60+29.038)*1024),round((23*60+44.578)*1024),round((36*60+28.374)*1024)];
 % drift here is the samples allowed for eeg and meg triggers to be apart
 % (in 2 sec anyway), default is 3 samples.
+% if asked, looks for a certain trigger value in the data.
 if ~exist('drift','var')
+    drift=3;
+end
+if isempty(drift)
     drift=3;
 end
 if ~ischar(run)
@@ -38,8 +42,9 @@ srEeg=1024;
 srMeg=1017.278;
 hdrEEG=ft_read_header(eegFN);
 
-
-hdrMEG=ft_read_header([run,'/',megFN]);
+trig=readTrig_BIU([run,'/',megFN]);
+hdrMEG.nSamples=length(trig);
+% hdrMEG=ft_read_header([run,'/',megFN]); %it got stuck once
 
 % choose method of syncing
 % first2 = first matched pair, last2 = last matched pair, firstAndLast2 =
@@ -59,26 +64,38 @@ else
     load eeg.mat
 end
 
-if ~exist('events.mat','file')
+%if ~exist('events.mat','file')
     evt=readTrg;
-    events=evt(find(evt(:,3)==1),1); %#ok<FNDSB>
+    if exist('trigVal','var');
+        events=evt(find(evt(:,3)==trigVal),1);
+    else
+        events=evt(find(evt(:,3)==1),1); %#ok<FNDSB>
+    end
     % events is the time in which the .trg file had event value 1
     save events events
-else
+%else
     load events
-end
+%end
 if ~exist([run,'/samp.mat'],'file')
     evt1017=round(events*1017.25);
     display('reading trig')
-    trig=readTrig_BIU([run,'/',megFN]);
-    TRIG=bitand(uint16(trig),1024);
-    if isempty(find(TRIG))
-        TRIG=bitand(uint16(trig),4096);
+    %trig=readTrig_BIU([run,'/',megFN]);
+    if exist('trigVal','var')
+        TRIG=bitand(uint16(trig),trigVal);
+    else
+        TRIG=bitand(uint16(trig),1024);
+        if isempty(find(TRIG,1))
+            TRIG=bitand(uint16(trig),4096);
+        end
     end
     trigSh=TRIG(2:end);trigSh(end+1)=0;
     onset=find(trigSh-TRIG>0);onset=onset+1;
     % onset is the sample in which the MEG trig had 1024 onset
-    samp=findEegMegSamp(onset,evt1017,drift);
+    if exist('trigVal','var')
+        samp=findEegMegSampExp(onset,evt1017,drift);
+    else
+        samp=findEegMegSamp(onset,evt1017,drift);
+    end
     if isempty(samp)
         error('no match found, samp is empty')
     end
@@ -87,9 +104,11 @@ else
     load ([run,'/samp'])
 end
 %%
-if isempty(find(diff(samp)>101725))
-    method='first2';
-    warning('did not find sync events more than 100sec apart, using first2 triggers')
+if ~exist('trigVal','var')
+    if isempty(find(diff(samp)>101725))
+        method='first2';
+        warning('did not find sync events more than 100sec apart, using first2 triggers')
+    end
 end
 switch method
     case 'first2'

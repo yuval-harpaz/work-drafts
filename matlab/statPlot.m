@@ -21,11 +21,20 @@ end
 if ischar(data1)
     
     load(data1)
-    [path1, data1] = fileparts(data1)
+    if isempty(findstr('/',data1))
+        path1=pwd;
+    else
+        [path1, data1] = fileparts(data1)
+    end
     title1=[path1(end-7:end),'/',data1];
     eval(['data1=',data1])
     load(data2)
-    [path2, data2] = fileparts(data2)
+    if isempty(findstr('/',data2))
+        path2=pwd;
+    else
+        [path2, data2] = fileparts(data2)
+    end
+    
     title2=[path2(end-7:end),'/',data2];
     eval(['data2=',data2])
 else

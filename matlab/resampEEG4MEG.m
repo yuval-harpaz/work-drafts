@@ -24,6 +24,14 @@ catch
         sEEG(noEEGyet)=1;
         rsEEG = eegData(:,sEEG);
         rsEEG(:,1:length(noEEGyet))=0;
+    else
+        noEEGalready=find(sEEG>size(eegData,2));
+        if ~isempty(noEEGalready)
+            sEEG(noEEGalready)=size(eegData,2);
+            rsEEG = eegData(:,sEEG);
+            rsEEG(:,size(eegData,2):end)=0;
+        end
     end
+    
 end
 end

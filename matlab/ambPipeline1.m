@@ -163,3 +163,11 @@ plotFields
 cfg2.funcolorlim=[-10 10];
 cfg2=rmfield(cfg2,'maskparameter')
 ft_sourceplot(cfg2,statplot)
+
+%% unrelated trials
+ambUR(1:19)
+ambUR20to25(20:25)
+load /home/yuval/Data/amb/behav
+[~,pACC,~,sACC]=ttest2(behav(:,1),behav(:,3))
+[~,pRT,~,sRT]=ttest2(behav(:,2),behav(:,4))
+mean([behav(:,2),behav(:,4)],1)
