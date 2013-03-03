@@ -171,3 +171,68 @@ load /home/yuval/Data/amb/behav
 [~,pACC,~,sACC]=ttest2(behav(:,1),behav(:,3))
 [~,pRT,~,sRT]=ttest2(behav(:,2),behav(:,4))
 mean([behav(:,2),behav(:,4)],1)
+% run one run at a time
+open ambCleanUR
+% grand avging (and resampling 20-25)
+lironGAur
+cfg=[];
+cfg.method='RMS';
+cfg.neighbours='LR';
+rmsD=clustData(cfg,Dur);
+rmsS=clustData(cfg,Sur);
+
+% plot BL uncorrected RMS
+[figure1,figure2]=RMSfigureUR2;
+%% Gosh, I had the unrelated all along
+% load /home/yuval/Dropbox/MEGpaper/files/matlab/RMS_LR_2011
+cd /home/yuval/Dropbox/MEGpaper/files/matlab
+correctBL_RMS1
+AreaBL1
+load Area_2013_M170
+
+%correct BL, same BL for all conditions
+correctBL_RMS2
+% change p (peak) inside
+open Area_BL2
+load /home/yuval/Dropbox/MEGpaper/files/matlab/Area_2013_M170_all
+% move to statistica7
+
+load /home/yuval/Dropbox/MEGpaper/files/matlab/RMS_2013_allConds1BL
+
+time=-0.3:1/1017.25:0.7;
+mLrmsBL=squeeze(mean(LrmsBL,3));
+mRrmsBL=squeeze(mean(RrmsBL,3));
+
+figure;
+plot(time,mLrmsBL(:,[2,8]))
+hold on
+plot(time,mRrmsBL(:,[2,8]),'--')
+title('RELATED')
+legend('L D','L S','R D','R S')
+ylim(1e-13*[-0.5 1.5])
+figure
+plot(time,mLrmsBL(:,[3,9]))
+hold on
+plot(time,mRrmsBL(:,[3,9]),'--')
+title('UNRELATED')
+legend('L D','L S','R D','R S')
+ylim(1e-13*[-0.5 1.5])
+
+figure;
+plot(time,mLrmsBL(:,[2,3]))
+hold on
+plot(time,mLrmsBL(:,[8,9]),'--')
+title('Left')
+legend('D Re','D UR','S RE','S UR')
+ylim(1e-13*[-0.5 1.5])
+figure
+plot(time,mRrmsBL(:,[2,3]))
+hold on
+plot(time,mRrmsBL(:,[8,9]),'--')
+title('Right')
+legend('D Re','D UR','S RE','S UR')
+ylim(1e-13*[-0.5 1.5])
+
+%% source loc unrelated
+ambURsourceloc(1)
+ambGrAvgURs(1:25)

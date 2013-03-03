@@ -29,9 +29,9 @@ for subi=subs
                     end
                 end
             end
-            trl=trl-306;
-            trl(:,2)=trl+1017;
-            trl(:,3)=-306;
+            trl=trl-2*306;
+            trl(:,2)=trl+2*1017;
+            trl(:,3)=-2*306;
             cfg=[];
             cfg.trl=trl;
             cfg.lpfilter='yes';

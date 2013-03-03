@@ -139,3 +139,11 @@ freq=4;
 [list,labels]=talPowList1(chan,freq);
 freq=10;
 [list,labels]=talPowList1(chan,freq);
+
+%% 03.03.13
+% mean coh and pow
+talAvgCoh4Plot(4)
+figure;talAvgCoh4Plot(4,{'A157','A172'})
+figure;talAvgCoh4Plot(10,{'A157','A172'})
+
+
