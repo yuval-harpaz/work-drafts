@@ -86,9 +86,7 @@ legend('all','over 30Hz','below 8Hz','8-30Hz')
 %let's start with new cfg1 as before
 
 cfg.channel='MEG'; % only reads MEG channels
-cfg.bpfilter='no';
-cfg.lpfilter='yes';
-cfg.lpfreq=[1 40]; % bandpass frequencies
+cfg.bpfreq=[1 40]; % bandpass frequencies
 data=ft_preprocessing(cfg);
 
 % the timeline is in data.time{1,1}. the data is in data.trial{1,1}. you can plot it simply by
