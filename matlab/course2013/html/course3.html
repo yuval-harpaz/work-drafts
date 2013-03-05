@@ -1,0 +1,330 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>cleanMEG repository, createCleanFile function.</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-03-05"><meta name="DC.source" content="course3.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>cleanMEG repository, createCleanFile function.</h1><!--introduction--><p>The function can clean different artifacts. It can clean the the heartbeat but sometimes fails. It can clean the electricity artifact without filter, allowing measurment of 50Hz brain activity. We have markers on the trigger channel for the 50Hz sycles recorded from the wall, trigger value 256. It can clean building vibrations by our accelerometer channels X4 X5 and X6 It can do some agressive cleaning in the frequency domain (byFFT option) The first example cleans only a part of the data (30s) to save time. The second example</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">cleaning 30 seconds</a></li><li><a href="#2">Cleaning the whole data</a></li><li><a href="#3">The trigger channel</a></li><li><a href="#4">read raw data</a></li><li><a href="#5">read data with baseline correction</a></li></ul></div><h2>cleaning 30 seconds<a name="1"></a></h2><pre class="codeinput">cd <span class="string">somsens</span>
+<span class="comment">% cleaning the directory before starting</span>
+<span class="keyword">if</span> exist(<span class="string">'tryCleanOP.mat'</span>,<span class="string">'file'</span>)
+    <span class="syscmd">!rm tryCleanOP.mat</span>
+<span class="keyword">end</span>
+<span class="keyword">if</span> exist(<span class="string">'hb,lf_c,rfhp0.1Hz'</span>,<span class="string">'file'</span>)
+    <span class="syscmd">!rm hb,lf_c,rfhp0.1Hz</span>
+<span class="keyword">end</span>
+<span class="comment">% cleaning</span>
+fileName = <span class="string">'c,rfhp0.1Hz'</span>;
+p=pdf4D(fileName);
+cleanCoefs = createCleanFile(p, fileName,<span class="string">'byLF'</span>,256,<span class="string">'HeartBeat'</span>,[],<span class="string">'CleanPartOnly'</span>,[0 30]);
+title(<span class="string">'First 100s of the data after averaging all MEG channels together'</span>)
+</pre><pre class="codeoutput">
+Warning: MATLAB:MEGanalysis: Not Testing big steps 
+Starting the MEG file and adjusting parameters
+samples : 1 - 30517
+NOT searching for large step like artifacts
+finding LF for: 0  30
+cleaning LF for the piece 0  30
+Finding heart beat for the piece 0  30
+cleaning HB for the piece 0  30
+</pre><img vspace="5" hspace="5" src="course3_01.png" alt=""> <h2>Cleaning the whole data<a name="2"></a></h2><p>This is a more standard example. this takes time.</p><pre class="codeinput"><span class="comment">% cleanCoefs = createCleanFile(p, fileName,...</span>
+<span class="comment">%     'byLF',256 ,'Method','Adaptive',...</span>
+<span class="comment">%     'xClean',[4,5,6],...</span>
+<span class="comment">%     'byFFT',0,...</span>
+<span class="comment">%     'HeartBeat',[],...</span>
+<span class="comment">%     'maskTrigBits', 512);</span>
+</pre><h2>The trigger channel<a name="3"></a></h2><p>The trigger channel is a digital channel recorded simultaneously with the MEG. It has information about 50Hz cycles but also about the onset of visual stimuli (value 2048) and the timing of events (trials) of different sorts like left and right somatosensory stimulation. The first thing to happen in this data is 2 minutes rest with eyes open and two minutes eyes closed. These are marked by the trigger values 90 and 92. The 50Hz is recorded twice here which makes the trigger channel rise in 256 and 512 every 20ms (and often both up to 768).</p><pre class="codeinput"><span class="comment">% first read the trigger channel</span>
+trig=readTrig_BIU(<span class="string">'c,rfhp0.1Hz'</span>);
+<span class="comment">% now we are getting rid of the 50Hz markers by making a clear trigger</span>
+<span class="comment">% chanel  - trigCl.</span>
+trigCl=clearTrig(trig);
+xlim([28000 29000])
+legend (<span class="string">'original trigger'</span>,<span class="string">'cleared trigger'</span>)
+title(<span class="string">'REST'</span>)
+<span class="comment">% first lets see what different trigger values exist.</span>
+unique(trigCl)
+<span class="comment">% 90 - the first rest, 92 - second rest. 102 - right index finger. 104 -</span>
+<span class="comment">% left index finger. 222 230 240 and 250 are different visual stimuli. 50,</span>
+<span class="comment">% 52 and 54 are in the end of the experiment, they are, they, I forgot what they are.</span>
+
+<span class="comment">% now look at one second of the somatosensory experiment.</span>
+
+trigCl=clearTrig(trig);
+xlim([400000 401017]);
+legend (<span class="string">'original trigger'</span>,<span class="string">'cleared trigger'</span>)
+title(<span class="string">'SOMATOSENSORY'</span>)
+<span class="comment">% now one visual trial</span>
+
+trigCl=clearTrig(trig);
+xlim([500000 501017])
+legend (<span class="string">'original trigger'</span>,<span class="string">'cleared trigger'</span>)
+title(<span class="string">'VISUAL'</span>)
+</pre><pre class="codeoutput">Warning: 50Hz cleaning with cleanMEG pack will not be possible using the new trigger 
+
+ans =
+
+     0    50    52    54    90    92   102   104   106   108   222   230   240   250
+
+Warning: 50Hz cleaning with cleanMEG pack will not be possible using the new trigger 
+Warning: 50Hz cleaning with cleanMEG pack will not be possible using the new trigger 
+</pre><img vspace="5" hspace="5" src="course3_02.png" alt=""> <img vspace="5" hspace="5" src="course3_03.png" alt=""> <img vspace="5" hspace="5" src="course3_04.png" alt=""> <h2>read raw data<a name="4"></a></h2><p>Trigger value 104 marks left index finger stimulation. We use a trial function called BIUtrialfun to tell fieldtrip how to read our trigger channel while ignoring 256, consider visual trigger and so on. We read 0.3s after the finger press and 0.1s before. ft_definetrial only checks the trigger channel. ft_preprocessing actually reads the data. here no real preprocessing is done, no baseline correction or filters applied.</p><pre class="codeinput">fileName=<span class="string">'c,rfhp0.1Hz'</span>;
+cfg=[];
+cfg.dataset=fileName;
+cfg.trialdef.eventtype=<span class="string">'TRIGGER'</span>;
+cfg.trialdef.prestim=0.1;
+cfg.trialdef.poststim=0.3;
+cfg.trialdef.offset=-0.1;
+cfg.trialfun=<span class="string">'BIUtrialfun'</span>;
+cfg.trialdef.eventvalue= 104; <span class="comment">%left index finger</span>
+cfg1=ft_definetrial(cfg);
+cfg1.feedback=<span class="string">'no'</span>;
+raw=ft_preprocessing(cfg1);
+<span class="comment">% averaging</span>
+cfg=[];
+cfg.feedback=<span class="string">'no'</span>;
+rawAvg=ft_timelockanalysis(cfg,raw);
+<span class="comment">%plotting</span>
+cfg4.layout=<span class="string">'4D248.lay'</span>;
+cfg4.interactive=<span class="string">'yes'</span>;
+cfg4.ylim=[-2e-13 2e-13];
+fig1=figure;
+set(fig1,<span class="string">'Position'</span>,[0,0,800,800])
+ft_multiplotER(cfg4,rawAvg);
+title (<span class="string">'Averaged data with no BL correction'</span>)
+<span class="comment">% some channels are off the image leaving a streight line over or below.</span>
+<span class="comment">% even 'OK' channels are sometimes all below or above zero.</span>
+</pre><pre class="codeoutput">evaluating trialfunction 'BIUtrialfun'
+reading header...
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+reading events from file...
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+found 894 events
+created 100 trials
+the call to "ft_definetrial" took 3 seconds and an estimated 0 MB
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+processing channel { 'TRIGGER' 'RESPONSE' 'MLzA' 'MLyA' 'MLzaA' 'MLyaA' 'MLxA' 'A22' 'MLxaA' 'A2' 'MRzA' 'MRxA' 'MRzaA' 'MRxaA' 'MRyA' 'MCzA' 'MRyaA' 'MCzaA' 'MCyA' 'GzxA' 'MCyaA' 'A104' 'A241' 'MCxA' 'A138' 'MCxaA' 'A214' 'A71' 'A26' 'A93' 'A39' 'A125' 'A20' 'A65' 'A9' 'A8' 'A95' 'A114' 'A175' 'A16' 'A228' 'A35' 'A191' 'A37' 'A170' 'A207' 'A112' 'A224' 'A82' 'A238' 'A202' 'A220' 'A28' 'A239' 'A13' 'A165' 'A204' 'A233' 'A98' 'A25' 'A70' 'A72' 'A11' 'A47' 'A160' 'A64' 'A3' 'A177' 'A63' 'A155' 'A10' 'A127' 'A67' 'A115' 'A247' 'A174' 'A194' 'A5' 'A242' 'A176' 'A78' 'A168' 'A31' 'A223' 'A245' 'A219' 'A12' 'A186' 'A105' 'A222' 'A76' 'A50' 'A188' 'A231' 'A45' 'A180' 'A99' 'A234' 'A215' 'A235' 'A181' 'A38' 'A230' 'A91' 'A212' 'A24' 'A66' 'A42' 'A96' 'A57' 'A86' 'A56' 'A116' 'A151' 'A141' 'A120' 'A189' 'A80' 'A210' 'A143' 'A113' 'A27' 'A137' 'A135' 'A167' 'A75' 'A240' 'A206' 'A107' 'A130' 'A100' 'A43' 'A200' 'A102' 'A132' 'A183' 'A199' 'A122' 'A19' 'A62' 'A21' 'A229' 'A84' 'A213' 'A55' 'A32' 'A85' 'A146' 'A58' 'A60' 'GyyA' 'A88' 'A79' 'GzyA' 'GxxA' 'A169' 'A54' 'GyxA' 'A203' 'A145' 'A103' 'A163' 'A139' 'A49' 'A166' 'A156' 'A128' 'A68' 'A159' 'A236' 'A161' 'A121' 'A4' 'A61' 'A6' 'A126' 'A14' 'A94' 'A15' 'A193' 'A150' 'A227' 'A59' 'A36' 'A225' 'A195' 'A30' 'A109' 'A172' 'A108' 'A81' 'A171' 'A218' 'A173' 'A201' 'A74' 'A29' 'A164' 'A205' 'A232' 'A69' 'A157' 'A97' 'A217' 'A101' 'A124' 'A40' 'A123' 'A153' 'A178' 'A1' 'A179' 'A33' 'A147' 'A117' 'A148' 'A87' 'A89' 'A243' 'A119' 'A52' 'A142' 'A211' 'A190' 'A53' 'A192' 'A73' 'A226' 'A136' 'A184' 'A51' 'A237' 'A77' 'A129' 'A131' 'A198' 'A197' 'A182' 'A46' 'A92' 'A41' 'A90' 'A7' 'A23' 'A83' 'A154' 'A34' 'A17' 'A18' 'A248' 'A149' 'A118' 'A208' 'A152' 'A140' 'A144' 'A209' 'A110' 'A111' 'A244' 'A185' 'A246' 'A162' 'A106' 'A187' 'A48' 'A221' 'A196' 'A133' 'A158' 'A44' 'A134' 'A216' 'UACurrent' 'X1' 'X3' 'X5' 'X2' 'X4' 'X6' }
+the call to "ft_preprocessing" took 2 seconds and an estimated 0 MB
+the input is raw data with 280 channels and 100 trials
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+selection avg along dimension 1
+selection dof along dimension 1
+selection var along dimension 1
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_multiplotER" took 1 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course3_05.png" alt=""> <h2>read data with baseline correction<a name="5"></a></h2><pre class="codeinput">cfg1.demean=<span class="string">'yes'</span>;<span class="comment">% old version was: cfg1.blc='yes';</span>
+cfg1.baselinewindow=[-0.1,0];
+blc=ft_preprocessing(cfg1);
+<span class="comment">% averaging</span>
+blcAvg=ft_timelockanalysis(cfg,blc);
+<span class="comment">% now make an interactive multiplot and look for the evoked response</span>
+fig2=figure;
+set(fig2,<span class="string">'Position'</span>,[0,0,800,800])
+ft_multiplotER(cfg4,blcAvg);
+title (<span class="string">'Averaged data with BL correction'</span>)
+<span class="comment">% click and drag to choose channels</span>
+</pre><pre class="codeoutput">applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+processing channel { 'TRIGGER' 'RESPONSE' 'MLzA' 'MLyA' 'MLzaA' 'MLyaA' 'MLxA' 'A22' 'MLxaA' 'A2' 'MRzA' 'MRxA' 'MRzaA' 'MRxaA' 'MRyA' 'MCzA' 'MRyaA' 'MCzaA' 'MCyA' 'GzxA' 'MCyaA' 'A104' 'A241' 'MCxA' 'A138' 'MCxaA' 'A214' 'A71' 'A26' 'A93' 'A39' 'A125' 'A20' 'A65' 'A9' 'A8' 'A95' 'A114' 'A175' 'A16' 'A228' 'A35' 'A191' 'A37' 'A170' 'A207' 'A112' 'A224' 'A82' 'A238' 'A202' 'A220' 'A28' 'A239' 'A13' 'A165' 'A204' 'A233' 'A98' 'A25' 'A70' 'A72' 'A11' 'A47' 'A160' 'A64' 'A3' 'A177' 'A63' 'A155' 'A10' 'A127' 'A67' 'A115' 'A247' 'A174' 'A194' 'A5' 'A242' 'A176' 'A78' 'A168' 'A31' 'A223' 'A245' 'A219' 'A12' 'A186' 'A105' 'A222' 'A76' 'A50' 'A188' 'A231' 'A45' 'A180' 'A99' 'A234' 'A215' 'A235' 'A181' 'A38' 'A230' 'A91' 'A212' 'A24' 'A66' 'A42' 'A96' 'A57' 'A86' 'A56' 'A116' 'A151' 'A141' 'A120' 'A189' 'A80' 'A210' 'A143' 'A113' 'A27' 'A137' 'A135' 'A167' 'A75' 'A240' 'A206' 'A107' 'A130' 'A100' 'A43' 'A200' 'A102' 'A132' 'A183' 'A199' 'A122' 'A19' 'A62' 'A21' 'A229' 'A84' 'A213' 'A55' 'A32' 'A85' 'A146' 'A58' 'A60' 'GyyA' 'A88' 'A79' 'GzyA' 'GxxA' 'A169' 'A54' 'GyxA' 'A203' 'A145' 'A103' 'A163' 'A139' 'A49' 'A166' 'A156' 'A128' 'A68' 'A159' 'A236' 'A161' 'A121' 'A4' 'A61' 'A6' 'A126' 'A14' 'A94' 'A15' 'A193' 'A150' 'A227' 'A59' 'A36' 'A225' 'A195' 'A30' 'A109' 'A172' 'A108' 'A81' 'A171' 'A218' 'A173' 'A201' 'A74' 'A29' 'A164' 'A205' 'A232' 'A69' 'A157' 'A97' 'A217' 'A101' 'A124' 'A40' 'A123' 'A153' 'A178' 'A1' 'A179' 'A33' 'A147' 'A117' 'A148' 'A87' 'A89' 'A243' 'A119' 'A52' 'A142' 'A211' 'A190' 'A53' 'A192' 'A73' 'A226' 'A136' 'A184' 'A51' 'A237' 'A77' 'A129' 'A131' 'A198' 'A197' 'A182' 'A46' 'A92' 'A41' 'A90' 'A7' 'A23' 'A83' 'A154' 'A34' 'A17' 'A18' 'A248' 'A149' 'A118' 'A208' 'A152' 'A140' 'A144' 'A209' 'A110' 'A111' 'A244' 'A185' 'A246' 'A162' 'A106' 'A187' 'A48' 'A221' 'A196' 'A133' 'A158' 'A44' 'A134' 'A216' 'UACurrent' 'X1' 'X3' 'X5' 'X2' 'X4' 'X6' }
+the call to "ft_preprocessing" took 2 seconds and an estimated 0 MB
+the input is raw data with 280 channels and 100 trials
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+selection avg along dimension 1
+selection dof along dimension 1
+selection var along dimension 1
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_multiplotER" took 1 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course3_06.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%% cleanMEG repository, createCleanFile function.
+% The function can clean different artifacts. 
+% It can clean the the heartbeat but sometimes fails.
+% It can clean the electricity artifact without filter, allowing measurment of
+% 50Hz brain activity. We have markers on the trigger channel for the 50Hz
+% sycles recorded from the wall, trigger value 256.
+% It can clean building vibrations by our accelerometer channels X4 X5 and
+% X6
+% It can do some agressive cleaning in the frequency domain (byFFT option)
+% The first example cleans only a part of the data (30s) to save time.
+% The second example 
+
+%% cleaning 30 seconds
+cd somsens
+% cleaning the directory before starting
+if exist('tryCleanOP.mat','file')
+    !rm tryCleanOP.mat
+end
+if exist('hb,lf_c,rfhp0.1Hz','file')
+    !rm hb,lf_c,rfhp0.1Hz
+end
+% cleaning
+fileName = 'c,rfhp0.1Hz';
+p=pdf4D(fileName);
+cleanCoefs = createCleanFile(p, fileName,'byLF',256,'HeartBeat',[],'CleanPartOnly',[0 30]);  
+title('First 100s of the data after averaging all MEG channels together')
+%% Cleaning the whole data
+% This is a more standard example. 
+% this takes time.
+
+% cleanCoefs = createCleanFile(p, fileName,...
+%     'byLF',256 ,'Method','Adaptive',...
+%     'xClean',[4,5,6],...
+%     'byFFT',0,...
+%     'HeartBeat',[],...
+%     'maskTrigBits', 512);
+
+
+
+
+%% The trigger channel
+% The trigger channel is a digital channel recorded simultaneously with the MEG.
+% It has information about 50Hz cycles but also about the onset of visual stimuli (value 2048)
+% and the timing of events (trials) of different sorts like left and right
+% somatosensory stimulation.
+% The first thing to happen in this data is 2 minutes rest with eyes open and two minutes eyes closed.
+% These are marked by the trigger values 90 and 92.
+% The 50Hz is recorded twice here which makes the trigger channel rise in
+% 256 and 512 every 20ms (and often both up to 768).
+
+% first read the trigger channel
+trig=readTrig_BIU('c,rfhp0.1Hz');
+% now we are getting rid of the 50Hz markers by making a clear trigger
+% chanel  - trigCl.
+trigCl=clearTrig(trig);
+xlim([28000 29000])
+legend ('original trigger','cleared trigger')
+title('REST')
+% first lets see what different trigger values exist. 
+unique(trigCl)
+% 90 - the first rest, 92 - second rest. 102 - right index finger. 104 -
+% left index finger. 222 230 240 and 250 are different visual stimuli. 50,
+% 52 and 54 are in the end of the experiment, they are, they, I forgot what they are.
+
+% now look at one second of the somatosensory experiment.
+
+trigCl=clearTrig(trig);
+xlim([400000 401017]);
+legend ('original trigger','cleared trigger')
+title('SOMATOSENSORY')
+% now one visual trial
+
+trigCl=clearTrig(trig);
+xlim([500000 501017])
+legend ('original trigger','cleared trigger')
+title('VISUAL')
+
+
+%% read raw data
+% Trigger value 104 marks left index finger stimulation.
+% We use a trial function called BIUtrialfun to tell fieldtrip how to read
+% our trigger channel while ignoring 256, consider visual trigger and so on.
+% We read 0.3s after the finger press and 0.1s before.
+% ft_definetrial only checks the trigger channel. ft_preprocessing actually
+% reads the data. here no real preprocessing is done, no baseline
+% correction or filters applied.
+
+fileName='c,rfhp0.1Hz';
+cfg=[];
+cfg.dataset=fileName;
+cfg.trialdef.eventtype='TRIGGER';
+cfg.trialdef.prestim=0.1;
+cfg.trialdef.poststim=0.3;
+cfg.trialdef.offset=-0.1;
+cfg.trialfun='BIUtrialfun';
+cfg.trialdef.eventvalue= 104; %left index finger
+cfg1=ft_definetrial(cfg);
+cfg1.feedback='no';
+raw=ft_preprocessing(cfg1);
+% averaging
+cfg=[];
+cfg.feedback='no';
+rawAvg=ft_timelockanalysis(cfg,raw);
+%plotting
+cfg4.layout='4D248.lay';
+cfg4.interactive='yes';
+cfg4.ylim=[-2e-13 2e-13];
+fig1=figure;
+set(fig1,'Position',[0,0,800,800])
+ft_multiplotER(cfg4,rawAvg);
+title ('Averaged data with no BL correction')
+% some channels are off the image leaving a streight line over or below.
+% even 'OK' channels are sometimes all below or above zero.
+%% read data with baseline correction
+cfg1.demean='yes';% old version was: cfg1.blc='yes';
+cfg1.baselinewindow=[-0.1,0];
+blc=ft_preprocessing(cfg1);
+% averaging
+blcAvg=ft_timelockanalysis(cfg,blc);
+% now make an interactive multiplot and look for the evoked response
+fig2=figure;
+set(fig2,'Position',[0,0,800,800])
+ft_multiplotER(cfg4,blcAvg);
+title ('Averaged data with BL correction')
+% click and drag to choose channels
+
+
+
+##### SOURCE END #####
+--></body></html>
