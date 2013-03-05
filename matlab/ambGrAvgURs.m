@@ -1,4 +1,7 @@
-function ambGrAvgURs(subs)
+function ambGrAvgURs(subs,prefix)
+if ~exist('prefix','var')
+    prefix='';
+end
 cd /home/yuval/Data/amb
 %subs=1:25;
 % load ~/ft_BIU/matlab/LCMV/template_grid_10mm
@@ -8,8 +11,8 @@ strS='';strD='';
 for subi=subs
     substr=num2str(subi);
     display(['loading ',substr])
-    load ([substr,'/domur'])
-    load ([substr,'/subur'])
+    load ([substr,'/',prefix,'domur'])
+    load ([substr,'/',prefix,'subur'])
     dom.transform=M;
     sub.transform=M;
     
@@ -29,7 +32,7 @@ cfg.parameter          = 'pow'; % 'pow' 'nai' or 'coh'
 cfg.keepindividual     = 'yes';
 eval(['suburG=sourcegrandaverage(cfg,',strS(2:size(strS,2)),')']);
 eval(['domurG=sourcegrandaverage(cfg,',strD(2:size(strD,2)),')']);
-save grndAvgUR suburG domurG
+save (['grndAvgUR',prefix],'suburG','domurG')
 %eval(['save s',num2str(con),'p',compt,' s',num2str(con),'p']);
 % cfg.parameter='nai';
 % eval(['s',num2str(con),'n=sourcegrandaverage(cfg,',str(2:size(str,2)),')']);

@@ -236,3 +236,119 @@ ylim(1e-13*[-0.5 1.5])
 %% source loc unrelated
 ambURsourceloc(1)
 ambGrAvgURs(1:25)
+load /home/yuval/Data/amb/grndAvgUR
+load subMskdp
+suburp=suburG;
+suburp.inside=subMskdp.inside;
+suburp.outside=subMskdp.outside;
+save suburp suburp
+domurp=domurG;
+domurp.inside=subMskdp.inside;
+domurp.outside=subMskdp.outside;
+save domurp domurp
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl05_m170ur','suburp','domurp',0.95,0.05);
+
+load subMskdp
+load domMskdp
+load suburp
+load domurp
+subreurp=suburp;
+domreurp=subreurp;
+subreurp.avg.pow=(suburp.avg.pow+subMskdp.avg.pow)./2;
+domreurp.avg.pow=(domurp.avg.pow+domMskdp.avg.pow)./2;
+for subi=1:25
+    subreurp.trial(1,subi).pow=(suburp.trial(1,subi).pow+subMskdp.trial(1,subi).pow)./2;
+    domreurp.trial(1,subi).pow=(domurp.trial(1,subi).pow+domMskdp.trial(1,subi).pow)./2;
+end
+save domreurp domreurp
+save subreurp subreurp
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl05_m170reur','subreurp','domreurp',0.95,0.05);
+
+
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_m170reur','subreurp','domreurp',0.9,0.01);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl025_m170reur','subreurp','domreurp',0.85,0.025);
+
+
+%% M350
+ambURsourceloc350(1:25)
+ambGrAvgURs(1:25,'M350');
+load /home/yuval/Data/amb/grndAvgURM350
+load subMskdp
+M350suburp=suburG;
+M350suburp.inside=subMskdp.inside;
+M350suburp.outside=subMskdp.outside;
+save M350suburp M350suburp
+M350domurp=domurG;
+M350domurp.inside=subMskdp.inside;
+M350domurp.outside=subMskdp.outside;
+save M350domurp M350domurp
+%[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl05_m170ur','suburp','domurp',0.95,0.05);
+
+load M350subp
+load M350domp
+load M350domurp
+load M350suburp
+M350rep=M350suburp;
+M350urp=M350rep;
+M350rep.avg.pow=(M350subp.avg.pow+M350domp.avg.pow)./2;
+M350urp.avg.pow=(M350suburp.avg.pow+M350domurp.avg.pow)./2;
+for subi=1:25
+    M350rep.trial(1,subi).pow=(M350subp.trial(1,subi).pow+M350domp.trial(1,subi).pow)./2;
+    M350urp.trial(1,subi).pow=(M350suburp.trial(1,subi).pow+M350domurp.trial(1,subi).pow)./2;
+end
+save M350urp M350urp
+save M350rep M350rep
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl05_m350reur','M350urp','M350rep',0.95,0.05);
+
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl01_m350reur','M350urp','M350rep',0.95,0.01);
+
+M350subreurp=M350suburp;
+M350domreurp=M350subreurp;
+M350subreurp.avg.pow=(M350suburp.avg.pow+M350subp.avg.pow)./2;
+M350domreurp.avg.pow=(M350domurp.avg.pow+M350domp.avg.pow)./2;
+for subi=1:25
+    M350subreurp.trial(1,subi).pow=(M350suburp.trial(1,subi).pow+M350subp.trial(1,subi).pow)./2;
+    M350domreurp.trial(1,subi).pow=(M350domurp.trial(1,subi).pow+M350domp.trial(1,subi).pow)./2;
+end
+save M350domreurp M350domreurp
+save M350subreurp M350subreurp
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl1_m350sd','M350subreurp','M350domreurp',0.9,0.1);
+
+%% doing it like the related
+% ambFTur(1:25);
+% 
+% ambGrAvg(1:25,'ur');
+% 
+% load /home/yuval/Data/amb/grndAvgur
+% load /home/yuval/Data/amb/subMskdp
+% suburp=subG;
+% suburp.inside=subMskdp.inside;
+% suburp.outside=subMskdp.outside;
+% save /home/yuval/Data/amb/suburp suburp
+% domurp=domG;
+% domurp.inside=subMskdp.inside;
+% domurp.outside=subMskdp.outside;
+% save /home/yuval/Data/amb/domurp domurp
+% cd /home/yuval/Data/amb
+% [cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl05_m170ur','suburp','domurp',0.85,0.05);
+% % nothing again. p=0.11
+
+%% plot final 2
+cd /home/yuval/Data/amb
+ambPlotStat1('Cl05_m170reur',[0.85 0.95],'ortho',60); % RH
+
+ambPlotFields1
+% ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
+% ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
+% ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
+% % get mni coordinates, same but with crosshair on
+% ambPlotStatCHon('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
+% ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
+% ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
+% ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
+% 
+% cd /home/yuval/Dropbox/MEGpaper/files/matlab
+
+
+
+
