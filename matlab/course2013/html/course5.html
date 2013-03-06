@@ -1,0 +1,649 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Frequency and Time Frequency analysis</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-03-06"><meta name="DC.source" content="course5.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>Frequency and Time Frequency analysis</h1><!--introduction--><p>Here we do frequency analysis to visual data. We first reject trials with high frequency noise (muscles). Next we correct MOG (eye movement artifact). After cleaning we perform frequency analysis and then time frequency analysis. The data we use is already after heartbeat correction.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Reject high frequency noise trials (muscle artifact)</a></li><li><a href="#2">Clean MOG by PCA, find Up-Down component</a></li><li><a href="#3">Clean MOG by PCA, find L-R component</a></li><li><a href="#4">Now you clean the data of MOG</a></li><li><a href="#5">Check if there are bad trials left</a></li><li><a href="#6">Frequency analysis</a></li><li><a href="#7">Time-Frequency analysis</a></li><li><a href="#8">Window size effect</a></li><li><a href="#9">3 cycles per windows</a></li><li><a href="#10">7 cycles per windows</a></li><li><a href="#11">1 cycle, all channels</a></li><li><a href="#12">Normalization</a></li><li><a href="#13">Within subject (between trials) statistics.</a></li></ul></div><h2>reject high frequency noise trials (muscle artifact)<a name="1"></a></h2><p>here we read the data with a 60Hz high pass filter we take a large window because of the sliding windows for low freqs</p><pre class="codeinput">cd <span class="string">somsens</span>
+
+fileName=<span class="string">'hb_c,rfhp0.1Hz'</span>;
+cfg=[];
+cfg.dataset=fileName;
+cfg.trialdef.eventtype=<span class="string">'TRIGGER'</span>;
+cfg.trialdef.prestim=0.5;
+cfg.trialdef.poststim=1;
+cfg.trialdef.offset=-0.5; <span class="comment">%NOTE large baseline to measure low freq</span>
+cfg.trialdef.visualtrig= <span class="string">'visafter'</span>;
+cfg.trialfun=<span class="string">'BIUtrialfun'</span>;
+cfg.trialdef.eventvalue= [222 230 240 250];
+cfg=ft_definetrial(cfg);
+
+cfg.demean=<span class="string">'yes'</span>;
+cfg.baselinewindow=[-0.5 0];
+cfg.channel=<span class="string">'MEG'</span>;
+cfg.padding=0.1;
+cfg.feedback=<span class="string">'no'</span>;
+dataorig=ft_preprocessing(cfg);
+
+cfg=[];
+cfg.method=<span class="string">'summary'</span>;
+cfg.channel=<span class="string">'MEG'</span>;
+cfg.alim=1e-12;
+cfg1.hpfilter=<span class="string">'yes'</span>;
+cfg1.hpfreq=60; <span class="comment">%SEE?</span>
+dataNoMscl=ft_rejectvisual(cfg, dataorig); <span class="comment">% data high freq reject visual</span>
+<span class="comment">% reject bad trials</span>
+</pre><pre class="codeoutput">evaluating trialfunction 'BIUtrialfun'
+reading header...
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+reading events from file...
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+found 894 events
+created 160 trials
+the call to "ft_definetrial" took 3 seconds and an estimated 0 MB
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+processing channel { 'A22' 'A2' 'A104' 'A241' 'A138' 'A214' 'A71' 'A26' 'A93' 'A39' 'A125' 'A20' 'A65' 'A9' 'A8' 'A95' 'A114' 'A175' 'A16' 'A228' 'A35' 'A191' 'A37' 'A170' 'A207' 'A112' 'A224' 'A82' 'A238' 'A202' 'A220' 'A28' 'A239' 'A13' 'A165' 'A204' 'A233' 'A98' 'A25' 'A70' 'A72' 'A11' 'A47' 'A160' 'A64' 'A3' 'A177' 'A63' 'A155' 'A10' 'A127' 'A67' 'A115' 'A247' 'A174' 'A194' 'A5' 'A242' 'A176' 'A78' 'A168' 'A31' 'A223' 'A245' 'A219' 'A12' 'A186' 'A105' 'A222' 'A76' 'A50' 'A188' 'A231' 'A45' 'A180' 'A99' 'A234' 'A215' 'A235' 'A181' 'A38' 'A230' 'A91' 'A212' 'A24' 'A66' 'A42' 'A96' 'A57' 'A86' 'A56' 'A116' 'A151' 'A141' 'A120' 'A189' 'A80' 'A210' 'A143' 'A113' 'A27' 'A137' 'A135' 'A167' 'A75' 'A240' 'A206' 'A107' 'A130' 'A100' 'A43' 'A200' 'A102' 'A132' 'A183' 'A199' 'A122' 'A19' 'A62' 'A21' 'A229' 'A84' 'A213' 'A55' 'A32' 'A85' 'A146' 'A58' 'A60' 'A88' 'A79' 'A169' 'A54' 'A203' 'A145' 'A103' 'A163' 'A139' 'A49' 'A166' 'A156' 'A128' 'A68' 'A159' 'A236' 'A161' 'A121' 'A4' 'A61' 'A6' 'A126' 'A14' 'A94' 'A15' 'A193' 'A150' 'A227' 'A59' 'A36' 'A225' 'A195' 'A30' 'A109' 'A172' 'A108' 'A81' 'A171' 'A218' 'A173' 'A201' 'A74' 'A29' 'A164' 'A205' 'A232' 'A69' 'A157' 'A97' 'A217' 'A101' 'A124' 'A40' 'A123' 'A153' 'A178' 'A1' 'A179' 'A33' 'A147' 'A117' 'A148' 'A87' 'A89' 'A243' 'A119' 'A52' 'A142' 'A211' 'A190' 'A53' 'A192' 'A73' 'A226' 'A136' 'A184' 'A51' 'A237' 'A77' 'A129' 'A131' 'A198' 'A197' 'A182' 'A46' 'A92' 'A41' 'A90' 'A7' 'A23' 'A83' 'A154' 'A34' 'A17' 'A18' 'A248' 'A149' 'A118' 'A208' 'A152' 'A140' 'A144' 'A209' 'A110' 'A111' 'A244' 'A185' 'A246' 'A162' 'A106' 'A187' 'A48' 'A221' 'A196' 'A133' 'A158' 'A44' 'A134' 'A216' }
+the call to "ft_preprocessing" took 5 seconds and an estimated 0 MB
+the input is raw data with 248 channels and 160 trials
+showing a summary of the data for all channels and trials
+computing metric [--------------------------------------------------------\]
+145 trials marked as GOOD, 15 trials marked as BAD
+248 channels marked as GOOD, 0 channels marked as BAD
+the following trials were removed: 1, 11, 25, 33, 39, 44, 70, 74, 81, 87, 90, 95, 108, 109, 115
+the call to "ft_rejectvisual" took 11 seconds and an estimated 0 MB
+<img vspace="5" hspace="5" src="course5_m01.png" alt="">
+<img vspace="5" hspace="5" src="course5_m02.png" alt="">
+</pre><h2>clean MOG by PCA, find Up-Down component<a name="2"></a></h2><p>first clear some memory</p><pre class="codeinput">clear <span class="string">dataorig</span>
+
+trig=readTrig_BIU(fileName);
+trig=clearTrig(trig);
+<span class="comment">% up-down eye movement</span>
+startt=find(trig==50,1)/1017.25; <span class="comment">%877.4451</span>
+endt=find(trig==52,1)/1017.25; <span class="comment">%886.3406</span>
+cfg2=[];
+cfg2.dataset=fileName;
+cfg2.trialdef.beginning=startt;
+cfg2.trialdef.end=endt;
+cfg2.trialfun=<span class="string">'trialfun_raw'</span>; <span class="comment">% the other usefull trialfun we have are trialfun_beg and trialfun_BIU</span>
+cfg=ft_definetrial(cfg2);
+cfg.demean=<span class="string">'yes'</span>;<span class="comment">% old version was: cfg1.blc='yes';</span>
+<span class="comment">%cfg1.baselinewindow=[-0.1,0];</span>
+cfg.lpfilter=<span class="string">'yes'</span>;
+cfg.lpfreq=40;
+cfg.channel=<span class="string">'MEG'</span>;
+MOGud=ft_preprocessing(cfg);
+<span class="comment">% left right eye movement</span>
+startt=find(trig==52,1)/1017.25;
+endt=find(trig==54,1)/1017.25;
+cfg2.trialdef.beginning=startt;
+cfg2.trialdef.end=endt;
+cfg=ft_definetrial(cfg2);
+cfg.demean=<span class="string">'yes'</span>;<span class="comment">% old version was: cfg1.blc='yes';</span>
+<span class="comment">%cfg1.baselinewindow=[-0.1,0];</span>
+cfg.lpfilter=<span class="string">'yes'</span>;
+cfg.lpfreq=40;
+cfg.channel=<span class="string">'MEG'</span>;
+cfg.feedback=<span class="string">'no'</span>;
+MOGlr=ft_preprocessing(cfg);
+
+cfg=[];
+cfg.method=<span class="string">'pca'</span>;
+compMOGud           = ft_componentanalysis(cfg, MOGud);
+compMOGlr           = ft_componentanalysis(cfg, MOGlr);
+<span class="comment">% see the components and find the HB and MOG artifact</span>
+<span class="comment">% remember the numbers of the bad components and close the data browser</span>
+cfg=[];
+cfg.layout=<span class="string">'4D248.lay'</span>;
+cfg.channel = 1:5;
+cfg.continuous=<span class="string">'yes'</span>;
+cfg.event.type=<span class="string">''</span>;
+cfg.event.sample=1;
+cfg.blocksize=3;
+ft_databrowser(cfg,compMOGud);
+
+close
+</pre><pre class="codeoutput">Warning: 50Hz cleaning with cleanMEG pack will not be possible using the new trigger 
+evaluating trialfunction 'trialfun_raw'
+reading header...
+Warning: READ_HEADER is only a compatibility wrapper, which will soon be removed. Please instead
+call FT_READ_HEADER. 
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+found 1 events
+created 1 trials
+the call to "ft_definetrial" took 1 seconds and an estimated 0 MB
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+processing channel { 'A22' 'A2' 'A104' 'A241' 'A138' 'A214' 'A71' 'A26' 'A93' 
+reading and preprocessing
+reading and preprocessing trial 1 from 1
+the call to "ft_preprocessing" took 1 seconds and an estimated 0 MB
+evaluating trialfunction 'trialfun_raw'
+reading header...
+Warning: READ_HEADER is only a compatibility wrapper, which will soon be removed. Please instead
+call FT_READ_HEADER. 
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+found 1 events
+created 1 trials
+the call to "ft_definetrial" took 1 seconds and an estimated 0 MB
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+processing channel { 'A22' 'A2' 'A104' 'A241' 'A138' 'A214' 'A71' 'A26' 'A93' 
+the call to "ft_preprocessing" took 1 seconds and an estimated 0 MB
+the input is raw data with 248 channels and 1 trials
+selecting 248 channels
+baseline correcting data 
+scaling data with 1 over 0.000000
+concatenating data.
+concatenated data matrix size 248x9050
+starting decomposition using pca
+applying the mixing matrix to the sensor description
+the call to "ft_componentanalysis" took 0 seconds and an estimated 0 MB
+the input is raw data with 248 channels and 1 trials
+selecting 248 channels
+baseline correcting data 
+scaling data with 1 over 0.000000
+concatenating data.
+concatenated data matrix size 248x11287
+starting decomposition using pca
+applying the mixing matrix to the sensor description
+the call to "ft_componentanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 1 seconds and an estimated 0 MB
+the input is component data with 248 components and 248 original channels
+detected   0 visual artifacts
+redrawing with viewmode component
+fetching data... done
+fetching artifacts... done
+preprocessing data... done
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+plotting artifacts...
+plotting events...
+plotting data...
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+plotting component topographies...
+done
+</pre><img vspace="5" hspace="5" src="course5_m05.png" alt=""> <h2>clean MOG by PCA, find L-R component<a name="3"></a></h2><pre class="codeinput">ft_databrowser(cfg,compMOGlr);
+<span class="comment">% remember the component number for up-down and for left-right MOG. we'll</span>
+close
+</pre><pre class="codeoutput">reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 1 seconds and an estimated 0 MB
+the input is component data with 248 components and 248 original channels
+detected   0 visual artifacts
+redrawing with viewmode component
+fetching data... done
+fetching artifacts... done
+preprocessing data... done
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+plotting artifacts...
+plotting events...
+plotting data...
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+plotting component topographies...
+done
+<img vspace="5" hspace="5" src="course5_m06.png" alt="">
+</pre><h2>now you clean the data of MOG<a name="4"></a></h2><p>set the bad comps as the value for cfgrc.component.</p><pre class="codeinput">cfg = [];
+cfg.component = 1; <span class="comment">% change</span>
+cfg.feedback=<span class="string">'no'</span>;
+dataca = ft_rejectcomponent(cfg, compMOGud,dataNoMscl);
+cfg.component = 1; <span class="comment">% change</span>
+dataca = ft_rejectcomponent(cfg, compMOGlr,dataca);
+<span class="comment">% clear the workspace a little.</span>
+clear <span class="string">dataNoMscl</span> <span class="string">comp*</span> <span class="string">MOG*</span> <span class="string">trig</span> <span class="string">cfg*</span> <span class="string">endt</span> <span class="string">startt</span>
+</pre><pre class="codeoutput">baseline correcting data 
+removing 1 components
+keeping 247 components
+the call to "ft_rejectcomponent" took 9 seconds and an estimated 0 MB
+baseline correcting data 
+removing 1 components
+keeping 247 components
+the call to "ft_rejectcomponent" took 8 seconds and an estimated 0 MB
+</pre><h2>check if there are bad trials left<a name="5"></a></h2><pre class="codeinput">cfg=[];
+cfg.method=<span class="string">'summary'</span>; <span class="comment">%trial</span>
+cfg.channel=<span class="string">'MEG'</span>;
+cfg.alim=1e-12;
+datacln=ft_rejectvisual(cfg, dataca);
+clear <span class="string">dataca</span>
+</pre><pre class="codeoutput">the input is raw data with 248 channels and 145 trials
+showing a summary of the data for all channels and trials
+computing metric [--------------------------------------------------------\]
+144 trials marked as GOOD, 1 trials marked as BAD
+248 channels marked as GOOD, 0 channels marked as BAD
+the following trials were removed: 52
+the call to "ft_rejectvisual" took 10 seconds and an estimated 0 MB
+<img vspace="5" hspace="5" src="course5_m07.png" alt="">
+</pre><h2>frequency analysis<a name="6"></a></h2><pre class="codeinput">cfgfr=[];
+<span class="comment">%cfgfr.trials=find(datacln.trialinfo==222);</span>
+cfgfr.output       = <span class="string">'pow'</span>;
+cfgfr.channel      = <span class="string">'MEG'</span>;
+cfgfr.method       = <span class="string">'mtmfft'</span>;
+cfgfr.taper        = <span class="string">'hanning'</span>;
+cfgfr.foi          = 1:100;
+cfgfr.feedback=<span class="string">'no'</span>;
+FrAll = ft_freqanalysis(cfgfr, datacln);
+
+<span class="comment">% plot results for alpha</span>
+cfgp = [];
+cfgp.xlim = [9 11];
+cfgp.layout       = <span class="string">'4D248.lay'</span>;
+cfgp.interactive=<span class="string">'yes'</span>;
+ft_topoplotER(cfgp, FrAll);
+</pre><pre class="codeoutput">the call to "ft_freqanalysis" took 3 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+Warning: Some points fall outside the outline, please consider using another layout 
+the call to "ft_topoplotTFR" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 0 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course5_m03.png" alt=""> <h2>time-frequency analysis<a name="7"></a></h2><pre class="codeinput"><span class="comment">% go to FieldTrip website and search for time frequency tutorial</span>
+
+<span class="comment">% we will check frequencies with a moving window of 0.5s. the freq</span>
+<span class="comment">% resolution is therefore 2Hz (1/winlength).</span>
+<span class="comment">% we set the window size in the field t_ftimwin</span>
+<span class="comment">% just to play with it a little we test only trial number 1.</span>
+cfgtfr              = [];
+cfgtfr.output       = <span class="string">'pow'</span>;
+cfgtfr.channel      = <span class="string">'MEG'</span>;
+cfgtfr.method       = <span class="string">'mtmconvol'</span>;
+cfgtfr.taper        = <span class="string">'hanning'</span>;
+cfgtfr.foi          = 1:30;                            <span class="comment">% freq of interest 3 to 100Hz</span>
+cfgtfr.t_ftimwin    = ones(length(cfgtfr.foi),1).*0.5;  <span class="comment">% length of time window fixed at 0.5 sec</span>
+cfgtfr.toi          = -0.1:0.02:0.5;                    <span class="comment">% time window "slides" from -0.1 to 0.5 sec in steps of 0.02 sec (20 ms)</span>
+cfgtfr.trials=1;
+cfgtfr.channel=<span class="string">'A54'</span>;
+cfgtfr.feedback=<span class="string">'no'</span>;
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+<span class="comment">% now plot one channel</span>
+figure;ft_singleplotTFR([], TFtest);
+</pre><pre class="codeoutput">selecting 1 trials
+selecting 1 trials
+the call to "ft_freqanalysis" took 0 seconds and an estimated 0 MB
+the call to "ft_singleplotTFR" took 0 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course5_03.png" alt=""> <h2>Window size effect<a name="8"></a></h2><p>now a window with smaller size for smaller frequencies we start with a window length of 1 cycle for every frequency</p><pre class="codeinput">cfgtfr.t_ftimwin    = 1./cfgtfr.foi;  <span class="comment">% 1 cycle per window</span>
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+</pre><pre class="codeoutput">selecting 1 trials
+selecting 1 trials
+the call to "ft_freqanalysis" took 0 seconds and an estimated 0 MB
+the call to "ft_singleplotTFR" took 0 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course5_04.png" alt=""> <h2>3 cycles per windows<a name="9"></a></h2><p>we now move to 3 cycles per window (10Hz will be tested with a sliding window of 30ms. more cycles - smoother results but you loose low freqs.</p><pre class="codeinput">cfgtfr.t_ftimwin    = 3./cfgtfr.foi;  <span class="comment">% 1 cycle per window</span>
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+</pre><pre class="codeoutput">selecting 1 trials
+selecting 1 trials
+the call to "ft_freqanalysis" took 0 seconds and an estimated 0 MB
+the call to "ft_singleplotTFR" took 0 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course5_05.png" alt=""> <h2>7 cycles per windows<a name="10"></a></h2><pre class="codeinput">cfgtfr.t_ftimwin    = 7./cfgtfr.foi;  <span class="comment">% 1 cycle per window</span>
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+</pre><pre class="codeoutput">selecting 1 trials
+selecting 1 trials
+the call to "ft_freqanalysis" took 0 seconds and an estimated 0 MB
+the call to "ft_singleplotTFR" took 0 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course5_06.png" alt=""> <h2>1 cycle, all channels<a name="11"></a></h2><p>now we'll do 1 cycle per freq for the whole data and all the channels. it will take a few minutes.</p><pre class="codeinput">cfgtfr.t_ftimwin    = 1./cfgtfr.foi;
+cfgtfr.trials=<span class="string">'all'</span>;
+cfgtfr.channel=<span class="string">'MEG'</span>;
+cfgtfr.keeptrials=<span class="string">'yes'</span>;
+TFrAll = ft_freqanalysis(cfgtfr, datacln);
+cfgp = [];
+<span class="comment">%cfgp.ylim = [3 30];</span>
+fig1=figure;
+set(fig1,<span class="string">'Position'</span>,[0,0,800,800]);
+cfgp.layout       = <span class="string">'4D248.lay'</span>;
+cfgp.interactive=<span class="string">'yes'</span>;
+ft_multiplotTFR(cfgp, TFrAll);
+</pre><pre class="codeoutput">the call to "ft_freqanalysis" took 77 seconds and an estimated 253 MB
+the input is freq data with 248 channels, 30 frequencybins and 31 timebins
+the call to "ft_freqdescriptives" took 0 seconds and an estimated 252 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 252 MB
+Warning: (one of the) axis is/are not evenly spaced, but plots are made as if axis are linear 
+the call to "ft_multiplotTFR" took 1 seconds and an estimated 252 MB
+</pre><img vspace="5" hspace="5" src="course5_07.png" alt=""> <h2>Normalization<a name="12"></a></h2><p>a bit messy. needs some normalization.</p><pre class="codeinput">fig2=figure;
+set(fig2,<span class="string">'Position'</span>,[0,0,800,800]);
+cfgp.baseline=[-0.5 0];
+cfgp.baselinetype = <span class="string">'relative'</span>; <span class="comment">%or 'absolute'</span>
+ft_multiplotTFR(cfgp, TFrAll);
+</pre><pre class="codeoutput">the input is freq data with 248 channels, 30 frequencybins and 31 timebins
+the call to "ft_freqdescriptives" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the input is freq data with 248 channels, 30 frequencybins and 31 timebins
+the call to "ft_freqbaseline" took 0 seconds and an estimated 0 MB
+Warning: (one of the) axis is/are not evenly spaced, but plots are made as if axis are linear 
+the call to "ft_multiplotTFR" took 1 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course5_08.png" alt=""> <h2>within subject (between trials) statistics.<a name="13"></a></h2><p>first baseline correction</p><pre class="codeinput">baseline=mean(TFrAll.powspctrm(:,:,:,1:6),4);
+<span class="keyword">for</span> timei=2:31;
+    TFrAll.powspctrm(:,:,:,timei)=TFrAll.powspctrm(:,:,:,timei)-baseline;
+<span class="keyword">end</span>
+<span class="comment">% no compute the statistic</span>
+cfg=[];
+cfg.method=<span class="string">'stats'</span>;
+nsubj=size(TFrAll.powspctrm,1);
+cfg.design(1,:) = [ones(1,nsubj)];
+cfg.latency     = [0 0.35];
+cfg.frequency   = [1 20];
+cfg.statistic = <span class="string">'ttest'</span>; <span class="comment">% compares the mean to zero</span>
+cfg.feedback=<span class="string">'no'</span>;
+frstat=ft_freqstatistics(cfg,TFrAll);
+<span class="comment">% now plot 1-probability (1 = sig, less than 0.95 not sig)</span>
+cfg=[];
+cfg.layout=<span class="string">'4D248.lay'</span>;
+frstat.powspctrm=1-frstat.prob;
+cfg.zlim=[0.999 1]
+cfg.interactive=<span class="string">'yes'</span>;
+fig3=figure;
+set(fig3,<span class="string">'Position'</span>,[0,0,800,800]);
+ft_multiplotTFR(cfg, frstat);
+</pre><pre class="codeoutput">computing statistic over the frequency range [1.333 20.000]
+computing statistic over the time range [0.000 0.350]
+selection powspctrm along dimension 2
+selection powspctrm along dimension 3
+selection powspctrm along dimension 4
+using "statistics_stats" for the statistical testing
+number of observations 94240
+number of replications 144
+the call to "ft_freqstatistics" took 27 seconds and an estimated 207 MB
+
+cfg = 
+
+    layout: '4D248.lay'
+      zlim: [0.9990 1]
+
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 207 MB
+Warning: (one of the) axis is/are not evenly spaced, but plots are made as if axis are linear 
+the call to "ft_multiplotTFR" took 1 seconds and an estimated 207 MB
+</pre><img vspace="5" hspace="5" src="course5_09.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Frequency and Time Frequency analysis
+% Here we do frequency analysis to visual data.
+% We first reject trials with high frequency noise (muscles).
+% Next we correct MOG (eye movement artifact).
+% After cleaning we perform frequency analysis and then time frequency
+% analysis.
+% The data we use is already after heartbeat correction.
+%% reject high frequency noise trials (muscle artifact)
+% here we read the data with a 60Hz high pass filter 
+% we take a large window because of the sliding windows for low freqs
+cd somsens
+
+fileName='hb_c,rfhp0.1Hz';
+cfg=[];
+cfg.dataset=fileName;
+cfg.trialdef.eventtype='TRIGGER';
+cfg.trialdef.prestim=0.5;
+cfg.trialdef.poststim=1;
+cfg.trialdef.offset=-0.5; %NOTE large baseline to measure low freq
+cfg.trialdef.visualtrig= 'visafter';
+cfg.trialfun='BIUtrialfun';
+cfg.trialdef.eventvalue= [222 230 240 250];
+cfg=ft_definetrial(cfg);
+
+cfg.demean='yes';
+cfg.baselinewindow=[-0.5 0];
+cfg.channel='MEG';
+cfg.padding=0.1;
+cfg.feedback='no';
+dataorig=ft_preprocessing(cfg);
+
+cfg=[];
+cfg.method='summary';
+cfg.channel='MEG';
+cfg.alim=1e-12;
+cfg1.hpfilter='yes';
+cfg1.hpfreq=60; %SEE?
+dataNoMscl=ft_rejectvisual(cfg, dataorig); % data high freq reject visual
+% reject bad trials
+
+
+%% clean MOG by PCA, find L-R component
+% first clear some memory
+clear dataorig
+
+trig=readTrig_BIU(fileName);
+trig=clearTrig(trig);
+% up-down eye movement
+startt=find(trig==50,1)/1017.25; %877.4451
+endt=find(trig==52,1)/1017.25; %886.3406
+cfg2=[];
+cfg2.dataset=fileName;
+cfg2.trialdef.beginning=startt;
+cfg2.trialdef.end=endt;
+cfg2.trialfun='trialfun_raw'; % the other usefull trialfun we have are trialfun_beg and trialfun_BIU
+cfg=ft_definetrial(cfg2);
+cfg.demean='yes';% old version was: cfg1.blc='yes';
+%cfg1.baselinewindow=[-0.1,0];
+cfg.lpfilter='yes';
+cfg.lpfreq=40;
+cfg.channel='MEG';
+MOGud=ft_preprocessing(cfg);
+% left right eye movement
+startt=find(trig==52,1)/1017.25;
+endt=find(trig==54,1)/1017.25;
+cfg2.trialdef.beginning=startt;
+cfg2.trialdef.end=endt;
+cfg=ft_definetrial(cfg2);
+cfg.demean='yes';% old version was: cfg1.blc='yes';
+%cfg1.baselinewindow=[-0.1,0];
+cfg.lpfilter='yes';
+cfg.lpfreq=40;
+cfg.channel='MEG';
+cfg.feedback='no';
+MOGlr=ft_preprocessing(cfg);
+
+cfg=[];
+cfg.method='pca';
+compMOGud           = ft_componentanalysis(cfg, MOGud);
+compMOGlr           = ft_componentanalysis(cfg, MOGlr);
+% see the components and find the HB and MOG artifact
+% remember the numbers of the bad components and close the data browser
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.channel = 1:5;
+cfg.continuous='yes';
+cfg.event.type='';
+cfg.event.sample=1;
+cfg.blocksize=3;
+ft_databrowser(cfg,compMOGud);
+
+close
+%% clean MOG by PCA, find L-R component
+ft_databrowser(cfg,compMOGlr);
+% remember the component number for up-down and for left-right MOG. we'll
+close
+%% now you clean the data of MOG
+% set the bad comps as the value for cfgrc.component.
+cfg = [];
+cfg.component = 1; % change
+cfg.feedback='no';
+dataca = ft_rejectcomponent(cfg, compMOGud,dataNoMscl);
+cfg.component = 1; % change
+dataca = ft_rejectcomponent(cfg, compMOGlr,dataca);
+% clear the workspace a little.
+clear dataNoMscl comp* MOG* trig cfg* endt startt
+
+
+%% check if there are bad trials left
+cfg=[];
+cfg.method='summary'; %trial
+cfg.channel='MEG';
+cfg.alim=1e-12;
+datacln=ft_rejectvisual(cfg, dataca);
+clear dataca
+%% frequency analysis
+cfgfr=[];
+%cfgfr.trials=find(datacln.trialinfo==222);
+cfgfr.output       = 'pow';
+cfgfr.channel      = 'MEG';
+cfgfr.method       = 'mtmfft';
+cfgfr.taper        = 'hanning';
+cfgfr.foi          = 1:100;
+cfgfr.feedback='no';
+FrAll = ft_freqanalysis(cfgfr, datacln);
+
+% plot results for alpha
+cfgp = [];
+cfgp.xlim = [9 11];         
+cfgp.layout       = '4D248.lay';
+cfgp.interactive='yes';
+ft_topoplotER(cfgp, FrAll);
+
+%% time-frequency analysis
+
+% go to FieldTrip website and search for time frequency tutorial
+
+% we will check frequencies with a moving window of 0.5s. the freq
+% resolution is therefore 2Hz (1/winlength).
+% we set the window size in the field t_ftimwin
+% just to play with it a little we test only trial number 1.
+cfgtfr              = [];
+cfgtfr.output       = 'pow';
+cfgtfr.channel      = 'MEG';
+cfgtfr.method       = 'mtmconvol';
+cfgtfr.taper        = 'hanning';
+cfgtfr.foi          = 1:30;                            % freq of interest 3 to 100Hz
+cfgtfr.t_ftimwin    = ones(length(cfgtfr.foi),1).*0.5;  % length of time window fixed at 0.5 sec
+cfgtfr.toi          = -0.1:0.02:0.5;                    % time window "slides" from -0.1 to 0.5 sec in steps of 0.02 sec (20 ms)
+cfgtfr.trials=1;
+cfgtfr.channel='A54';
+cfgtfr.feedback='no';
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+% now plot one channel
+figure;ft_singleplotTFR([], TFtest);
+
+%% Window size effect
+% now a window with smaller size for smaller frequencies
+% we start with a window length of 1 cycle for every frequency
+cfgtfr.t_ftimwin    = 1./cfgtfr.foi;  % 1 cycle per window
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+
+%% 3 cycles per windows
+% we now move to 3 cycles per window (10Hz will be tested with a sliding
+% window of 30ms. more cycles - smoother results but you loose low freqs.
+cfgtfr.t_ftimwin    = 3./cfgtfr.foi;  % 1 cycle per window
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+
+%% 7 cycles per windows
+
+cfgtfr.t_ftimwin    = 7./cfgtfr.foi;  % 1 cycle per window
+TFtest = ft_freqanalysis(cfgtfr, datacln);
+figure;ft_singleplotTFR([], TFtest);
+
+%% 1 cycle, all channels
+% now we'll do 1 cycle per freq for the whole data and all the channels. it
+% will take a few minutes.
+cfgtfr.t_ftimwin    = 1./cfgtfr.foi;
+cfgtfr.trials='all';
+cfgtfr.channel='MEG';
+cfgtfr.keeptrials='yes';
+TFrAll = ft_freqanalysis(cfgtfr, datacln);
+cfgp = [];
+%cfgp.ylim = [3 30];
+fig1=figure;
+set(fig1,'Position',[0,0,800,800]);
+cfgp.layout       = '4D248.lay';
+cfgp.interactive='yes';
+ft_multiplotTFR(cfgp, TFrAll);
+
+%% Normalization
+% a bit messy. needs some normalization.
+fig2=figure;
+set(fig2,'Position',[0,0,800,800]);
+cfgp.baseline=[-0.5 0];
+cfgp.baselinetype = 'relative'; %or 'absolute'
+ft_multiplotTFR(cfgp, TFrAll);
+
+%% within subject (between trials) statistics.
+% first baseline correction
+baseline=mean(TFrAll.powspctrm(:,:,:,1:6),4);
+for timei=2:31;
+    TFrAll.powspctrm(:,:,:,timei)=TFrAll.powspctrm(:,:,:,timei)-baseline;
+end
+% no compute the statistic
+cfg=[];
+cfg.method='stats';
+nsubj=size(TFrAll.powspctrm,1);
+cfg.design(1,:) = [ones(1,nsubj)];
+cfg.latency     = [0 0.35];
+cfg.frequency   = [1 20];
+cfg.statistic = 'ttest'; % compares the mean to zero
+cfg.feedback='no';
+frstat=ft_freqstatistics(cfg,TFrAll);
+% now plot 1-probability (1 = sig, less than 0.95 not sig)
+cfg=[];
+cfg.layout='4D248.lay';
+frstat.powspctrm=1-frstat.prob;
+cfg.zlim=[0.999 1]
+cfg.interactive='yes';
+fig3=figure;
+set(fig3,'Position',[0,0,800,800]);
+ft_multiplotTFR(cfg, frstat);
+
+
+##### SOURCE END #####
+--></body></html>
