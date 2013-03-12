@@ -39,7 +39,7 @@ dataNoMscl=ft_rejectvisual(cfg, dataorig); % data high freq reject visual
 % reject bad trials
 
 
-%% clean MOG by PCA, find L-R component
+%% clean MOG by PCA, find Up-Down component
 % first clear some memory
 clear dataorig
 
@@ -90,7 +90,7 @@ cfg.blocksize=3;
 ft_databrowser(cfg,compMOGud);
 
 close
-%% clean MOG by PCA, find Up-Down component
+%% clean MOG by PCA, find L-R component
 ft_databrowser(cfg,compMOGlr);
 % remember the component number for up-down and for left-right MOG. we'll
 close
