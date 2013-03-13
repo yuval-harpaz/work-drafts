@@ -107,6 +107,7 @@ cfg.zlim=[0 1];
 cfg.comment='no';
 if ~exist('highlight','var')
     cfg.marker='labels';
+    cfg.interactive='yes';
 else
     cfg.highlight          = 'labels';           
     cfg.highlightchannel   = highlight;

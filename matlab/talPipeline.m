@@ -146,4 +146,16 @@ talAvgCoh4Plot(4)
 figure;talAvgCoh4Plot(4,{'A157','A172'})
 figure;talAvgCoh4Plot(10,{'A157','A172'})
 
+%%
+chans4Hz= {'A155', 'A156', 'A157', 'A158', 'A178', 'A179', 'A212'};
+chans10Hz=  {'A129', 'A130', 'A131', 'A156', 'A157', 'A158', 'A159', 'A180', 'A181', 'A197', 'A198'};
+pat='/media/Elements/MEG/tal';
+% load([pat,'/subs46'])
+chan='A198';freq=10;
+table=talCohList1(chan,freq);
 
+[list,labels]=talPowList1(chan,freq);
+
+%% LRcoh WNW source level
+[cohLR,coh,freq,data]=talWNW(subsV1,foi,pat,'oneBack');
+[cohLR,coh,freq,data]=talWNW({'quad01'},4);
