@@ -158,4 +158,4 @@ table=talCohList1(chan,freq);
 
 %% LRcoh WNW source level
 [cohLR,coh,freq,data]=talWNW(subsV1,foi,pat,'oneBack');
-[cohLR,coh,freq,data]=talWNW({'quad01'},4);
+[cohLR,coh,freq,data]=talWNW({'quad01'},4); % FIXME - write LR BRIK files

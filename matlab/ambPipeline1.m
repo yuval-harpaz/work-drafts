@@ -338,17 +338,32 @@ cd /home/yuval/Data/amb
 ambPlotStat1('Cl05_m170reur',[0.85 0.95],'ortho',60); % RH
 
 ambPlotFields1
-% ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
-% ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
-% ambPlotStat1('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
-% % get mni coordinates, same but with crosshair on
-% ambPlotStatCHon('Cl025_M170masked_S_D',[0.95 0.98],'ortho',60); % RH
-% ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',60); % RH
-% ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-50); % broca
-% ambPlotStatCHon('Cl01_M350masked_ME',[0.7 1.5],'ortho',-64); % Wernicke
-% 
-% cd /home/yuval/Dropbox/MEGpaper/files/matlab
+% ambPlotFields2 % UR - Re
 
 
 
 
+
+%% behaviour related
+[domRT,domACC,subRT,subACC]=ambREbehav(1:25);
+
+load /home/yuval/Data/amb/behav
+labels(5:8)=labels(1:4);
+labels(1:4)={'UR_DomAcc','UR_DomRT','UR_SubACC','UR_SubRT'};
+behav(:,5)=domACC;behav(:,6)=domRT;behav(:,8)=subRT;behav(:,7)=subACC;
+
+%% plot M350
+
+load M350subp
+load M350domp
+load M350domurp
+load M350suburp
+M350allp=M350suburp;
+M350allp.avg.pow=(M350suburp.avg.pow+M350subp.avg.pow+M350domurp.avg.pow+M350domp.avg.pow)./4;
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl005_M350all_ME','M350allp','M350maskedN',0.95,0.005);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl001_M350all_ME','M350allp','M350maskedN',0.95,0.001);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl025_M350reur','M350urp','M350rep',0.95,0.025);
+
+m170domp.avg.pow=(M350suburp.avg.pow+M350subp.avg.pow+M350domurp.avg.pow+M350domp.avg.pow)./4;
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl025_M170dur_dre','domurp','domp',0.95,0.025);
+[cfg1,probplot,cfg2,statplot]=ambMonteClust('Cl025_M170dur_dre','domurp','domp',0.9,0.025);

@@ -14,5 +14,5 @@ for subi=subs
     
 end
 end
-behav=[DomACC',DomRT',SubACC',SubRT'];
-save /home/yuval/Data/amb/behav behav
+% behav=[DomACC',DomRT',SubACC',SubRT'];
+% save /home/yuval/Data/amb/behav behav
