@@ -168,6 +168,11 @@ channelSelection = {'A11', 'A26', 'A27', 'A40', 'A41', 'A42', 'A43', 'A44', 'A45
 [vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
 % save headmodel vol grid mesh M1
 % note the units, here we work in mm.
+
+% view mesh for fun
+bnd.pnt=mesh.tess_ctx.vert;
+bnd.tri=mesh.tess_ctx.face;
+ft_plot_mesh(bnd)
 %% fit a dipole
 cfg5 = [];
 cfg5.latency = [t t];  % specify latency window around M50 peak

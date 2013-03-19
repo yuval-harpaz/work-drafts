@@ -105,6 +105,42 @@ plot(oddball.time,vsSt);hold on;
 plot(oddball.time,vsOd,'r');
 legend('standard','oddball')
 
+% estimate noise
+ns=ActWgts;
+ns=ns-repmat(mean(ns,2),1,size(ns,2));
+ns=ns.*ns;
+ns=mean(ns,2);
+
+% get toi mean square (no BL correction)
+samples=[nearest(oddball.time,toi(1)),nearest(oddball.time,toi(2))];
+vsSt=ActWgts*oddball.avg(:,samples(1):samples(2));
+vsStMS=mean(vsSt.^vsSt,2)./ns;
+cfg=[];
+%cfg.func='~/vsMovies/Data/funcTemp+orig';
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='St';
+VS2Brik(cfg,vsStMS);
+
+% SAMspm
+spm=zeros(size(ActWgts,1),1);
+conds={'VGalpha','OEalpha'};
+for condi=1:2
+    eval(['data=',conds{condi},';'])
+    for triali=1:length(data.trial);
+        vs=ActWgts*data.trial{1,triali};
+        vs=vs-repmat(mean(vs,2),1,size(vs,2));
+        pow=vs.*vs;
+        pow=mean(pow,2);
+        pow=pow./ns;
+        spm=spm+pow;
+        display(['trial ',num2str(triali)])
+    end
+    eval(['spm',conds{condi}(1:2),'=spm./triali;'])
+end
+
+
+
 % now we want the whole brain activity at one time point, beware, messy!
 t=0.2733;
 [vs,timeline,allInd]=VS_slice(oddball,wtsNoSuf,1,[t t]);
