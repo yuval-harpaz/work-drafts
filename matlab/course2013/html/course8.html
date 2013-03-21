@@ -1,0 +1,471 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Beamforming with fieldtrip</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-03-21"><meta name="DC.source" content="course8.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h1>Beamforming with fieldtrip</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">use SAMwts with fieldtrip</a></li></ul></div><h2>use SAMwts with fieldtrip<a name="1"></a></h2><p>make a text file with grid points here the grid points are 10mm spaced on template. the spacing is modified for each subject</p><pre class="codeinput">cd <span class="string">oddball</span>
+[vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],<span class="string">'localspheres'</span>);
+save <span class="string">headmodel</span> <span class="string">vol</span> <span class="string">grid</span> <span class="string">mesh</span> <span class="string">M1</span>
+load <span class="string">~/ft_BIU/matlab/files/sMRI.mat</span>
+mri_realign=sMRI;
+mri_realign.transform=inv(M1)*sMRI.transform;
+grid2t(grid);
+
+<span class="syscmd">!cp pnt.txt SAM/pnt.txt</span>
+cd <span class="string">..</span>
+<span class="syscmd">!SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -t pnt.txt -v</span>
+
+
+cd <span class="string">oddball/SAM</span>;
+
+wtsNoSuf=<span class="string">'pnt.txt'</span>;
+<span class="keyword">if</span> ~exist([wtsNoSuf,<span class="string">'.mat'</span>],<span class="string">'file'</span>)
+[SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,<span class="string">'.wts'</span>]);
+save([wtsNoSuf,<span class="string">'.mat'</span>],<span class="string">'SAMHeader'</span>, <span class="string">'ActIndex'</span>, <span class="string">'ActWgts'</span>);
+<span class="keyword">else</span> load([wtsNoSuf,<span class="string">'.mat'</span>])
+<span class="keyword">end</span>
+filter=wts2filter(ActWgts,grid.inside,size(grid.outside,1));
+cd <span class="string">../</span>
+load <span class="string">data</span>
+dataSt=data;
+trli=find(data.trialinfo==128);
+dataSt.trial=data.trial(1,trli);
+dataSt.time=data.time(1,trli);
+dataStAvg=ft_timelockanalysis([],dataSt);
+timewin=[0.043657 0.075163];
+
+<span class="comment">% use weights from SAM (Dr. Robinson's) to make images with fieldtrip</span>
+sourceTest=OBbeamform(dataSt,timewin,<span class="string">'SAM'</span>,mri_realign,filter)
+<span class="comment">% make similar weights from raw data with fieldtrip version of SAM.</span>
+<span class="comment">% multiply by averaged data, like SAMerf</span>
+sourceTest=OBbeamform(dataSt,timewin,<span class="string">'sam'</span>,mri_realign)
+<span class="comment">% compute weights on averaged data. Dr. Robinson won't approve.</span>
+sourceTest=OBbeamform(dataStAvg,timewin,<span class="string">'sam'</span>,mri_realign)
+</pre><pre class="codeoutput">evaluating trialfunction 'trialfun_beg'
+reading header...
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+found 1 events
+created 1 trials
+the call to "ft_definetrial" took 1 seconds and an estimated 0 MB
+applying digital weights in the gradiometer balancing matrix
+undoing the Supine balancing
+processing channel { 'TRIGGER' 'RESPONSE' 'MLzA' 'MLyA' 'MLzaA' 'MLyaA' 'MLxA' 'A22' 'MLxaA' 'A2' 'MRzA' 'MRxA' 
+reading and preprocessing
+reading and preprocessing trial 1 from 1
+the call to "ft_preprocessing" took 1 seconds and an estimated 0 MB
+applying digital weights in the gradiometer balancing matrix
+converting units from 'm' to 'mm'
+the call to "ft_prepare_localspheres_mm" took 5 seconds and an estimated 0 MB
+undoing the Supine balancing
+single sphere,    2562 surface points, center = [11.7  1.9 45.2], radius = 80.7
+creating dipole grid based on user specified 3D grid
+3480 dipoles inside, 795 dipoles outside brain
+S A M   C O E F F I C I E N T   G E N E R A T O R	v4.2 (4D/Linux)
+opening data file - done
+parsing 'allTrials' parameter file - done
+modeling forward solution using multiple local spheres - done
+reading target list file - done
+using covariances in allTrials,1-40Hz
+allocating memory - done
+reading covariance file(s) - done
+determining SAM noise variance using data covariance - done
+augmenting covariance matrices - done
+opening SAM weight file for write - done
+stepping through coordinates:
+	0 percent done
+	1 percent done
+	2 percent done
+	...
+	100 percent done
+'SAMwts' done
+the input is raw data with 248 channels and 231 trials
+averaging trials
+averaging trial 1 of 231
+.
+.
+.
+averaging trial 231 of 231
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+converting units from 'm' to 'mm'
+Warning: TIMELOCKANALYSIS is only a compatibility wrapper, which will soon be removed. Please instead call
+FT_TIMELOCKANALYSIS. 
+the input is raw data with 248 channels and 231 trials
+averaging trials
+averaging trial 1 of 231
+.
+.
+.
+averaging trial 231 of 231
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+Warning: SOURCEINTERPOLATE is only a compatibility wrapper, which will soon be removed. Please instead call
+FT_SOURCEINTERPOLATE. 
+the input is source data with 4275 positions
+the input is volume data with dimensions [91 109 91]
+selecting subvolume of 48.8%
+interpolating
+interpolating 0.0%
+.
+.
+.
+interpolating 100.0%
+the call to "ft_sourceinterpolate" took 1 seconds and an estimated 0 MB
+the input is volume data with dimensions [91 109 91]
+not downsampling anatomy
+not downsampling avg.nai
+not downsampling inside
+the call to "ft_volumedownsample" took 0 seconds and an estimated 0 MB
+no masking parameter
+
+click with mouse button to reposition the cursor
+press n/l/r on keyboard to record a fiducial position
+press q on keyboard to quit interactive mode
+voxel 361260, indices [81 46 37], location [-2.3 59.5 51.7] mm, value 844.073021
+scaling anatomy
+scaling anatomy
+scaling anatomy
+the call to "ft_sourceplot" took 35 seconds and an estimated 2 MB
+
+sourceTest = 
+
+        pos: [4275x3 double]
+     inside: [3480x1 double]
+    outside: [795x1 double]
+        dim: [15 19 15]
+        avg: [1x1 struct]
+
+converting units from 'm' to 'mm'
+Warning: TIMELOCKANALYSIS is only a compatibility wrapper, which will soon be removed. Please instead call
+FT_TIMELOCKANALYSIS. 
+the input is raw data with 248 channels and 231 trials
+selecting 100 trials
+selecting 100 trials
+Warning: the option cfg.covariancewindow is not specified, taking all time points 
+averaging trials
+averaging trial 1 of 100
+.
+.
+.
+averaging trial 99 of 100
+averaging trial 100 of 100
+the call to "ft_timelockanalysis" took 1 seconds and an estimated 193 MB
+the input is timelock data with 248 channels and 1018 timebins
+Warning: The field cfg.lambda is deprecated, please specify it as cfg.sam.lambda instead of cfg. 
+using headmodel specified in the configuration
+using gradiometers specified in the data
+creating dipole grid based on user specified dipole positions
+3480 dipoles inside, 795 dipoles outside brain
+the call to "ft_prepare_sourcemodel" took 0 seconds and an estimated 0 MB
+scanning repetition 1
+scanning grid
+Warning: The input units are unknown for points and S/unknown for conductivity 
+scanning grid 1/3480
+scanning grid 2/3480
+scanning grid 3/3480
+.
+.
+.
+scanning grid 3475/3480
+scanning grid 3476/3480
+scanning grid 3477/3480
+scanning grid 3478/3480
+scanning grid 3479/3480
+scanning grid 3480/3480
+the call to "ft_sourceanalysis" took 74 seconds and an estimated 193 MB
+Warning: TIMELOCKANALYSIS is only a compatibility wrapper, which will soon be removed. Please instead call
+FT_TIMELOCKANALYSIS. 
+the input is raw data with 248 channels and 231 trials
+averaging trials
+averaging trial 1 of 231
+averaging trial 2 of 231
+.
+.
+.
+averaging trial 231 of 231
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 193 MB
+Warning: SOURCEINTERPOLATE is only a compatibility wrapper, which will soon be removed. Please instead call
+FT_SOURCEINTERPOLATE. 
+the input is source data with 4275 positions
+the input is volume data with dimensions [91 109 91]
+selecting subvolume of 48.8%
+
+interpolating
+interpolating 0.0%
+interpolating 5.0%
+interpolating 10.0%
+interpolating 100.0%
+
+
+
+reslicing and interpolating avg.nai
+interpolating
+interpolating 0.0%
+interpolating 5.0%
+interpolating 95.0%
+interpolating 100.0%
+
+
+the call to "ft_sourceinterpolate" took 1 seconds and an estimated 0 MB
+the input is volume data with dimensions [91 109 91]
+not downsampling anatomy
+not downsampling avg.nai
+not downsampling inside
+the call to "ft_volumedownsample" took 0 seconds and an estimated 0 MB
+no masking parameter
+
+click with mouse button to reposition the cursor
+press n/l/r on keyboard to record a fiducial position
+press q on keyboard to quit interactive mode
+voxel 363161, indices [71 67 37], location [34.6 43.1 41.7] mm, value 233.925902
+scaling anatomy
+scaling anatomy
+scaling anatomy
+the call to "ft_sourceplot" took 46 seconds and an estimated 0 MB
+
+sourceTest = 
+
+        dim: [15 19 15]
+       time: [1x1018 double]
+        pos: [4275x3 double]
+     inside: [3480x1 double]
+    outside: [795x1 double]
+     method: 'average'
+        avg: [1x1 struct]
+        cfg: [1x1 struct]
+
+converting units from 'm' to 'mm'
+the input is timelock data with 248 channels and 1018 timebins
+Warning: the trial definition in the configuration is inconsistent with the actual data 
+Warning: reconstructing sampleinfo by assuming that the trials are consecutive segments of a continuous recording 
+averaging trials
+averaging trial 1 of 1
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 193 MB
+the input is timelock data with 248 channels and 1018 timebins
+averaging trials
+averaging trial 1 of 1
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 193 MB
+the input is timelock data with 248 channels and 1018 timebins
+Warning: The field cfg.lambda is deprecated, please specify it as cfg.sam.lambda instead of cfg. 
+using headmodel specified in the configuration
+using gradiometers specified in the data
+creating dipole grid based on user specified dipole positions
+3480 dipoles inside, 795 dipoles outside brain
+the call to "ft_prepare_sourcemodel" took 0 seconds and an estimated 0 MB
+scanning repetition 1
+Warning: covariance matrix is rank deficient 
+scanning grid
+Warning: The input units are unknown for points and S/unknown for conductivity 
+scanning grid 1/3480
+scanning grid 2/3480
+I skipped here (yuval)
+scanning grid 3478/3480
+scanning grid 3479/3480
+scanning grid 3480/3480
+the call to "ft_sourceanalysis" took 73 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1018 timebins
+Warning: The field cfg.lambda is deprecated, please specify it as cfg.sam.lambda instead of cfg. 
+using headmodel specified in the configuration
+using gradiometers specified in the data
+creating dipole grid based on user specified dipole positions
+3480 dipoles inside, 795 dipoles outside brain
+the call to "ft_prepare_sourcemodel" took 0 seconds and an estimated 0 MB
+scanning repetition 1
+Warning: covariance matrix is rank deficient 
+scanning grid
+scanning grid 1/3480
+
+scanning grid 3479/3480
+scanning grid 3480/3480
+the call to "ft_sourceanalysis" took 73 seconds and an estimated 0 MB
+Warning: SOURCEINTERPOLATE is only a compatibility wrapper, which will soon be removed. Please instead call
+FT_SOURCEINTERPOLATE. 
+the input is source data with 4275 positions
+the input is volume data with dimensions [91 109 91]
+selecting subvolume of 48.8%
+interpolating
+interpolating 0.0%
+interpolating 5.0%
+interpolating 10.0%
+interpolating 15.0%
+interpolating 20.0%
+interpolating 25.0%
+interpolating 30.0%
+interpolating 35.0%
+interpolating 40.0%
+interpolating 45.0%
+interpolating 50.0%
+interpolating 55.0%
+interpolating 60.0%
+interpolating 65.0%
+interpolating 70.0%
+interpolating 75.0%
+interpolating 80.0%
+interpolating 85.0%
+interpolating 90.0%
+interpolating 95.0%
+interpolating 100.0%
+reslicing and interpolating avg.nai
+interpolating
+interpolating 0.0%
+interpolating 5.0%
+interpolating 10.0%
+interpolating 15.0%
+interpolating 20.0%
+interpolating 25.0%
+interpolating 30.0%
+interpolating 35.0%
+interpolating 40.0%
+interpolating 45.0%
+interpolating 50.0%
+interpolating 55.0%
+interpolating 60.0%
+interpolating 65.0%
+interpolating 70.0%
+interpolating 75.0%
+interpolating 80.0%
+interpolating 85.0%
+interpolating 90.0%
+interpolating 95.0%
+interpolating 100.0%
+the call to "ft_sourceinterpolate" took 1 seconds and an estimated 0 MB
+the input is volume data with dimensions [91 109 91]
+not downsampling anatomy
+not downsampling avg.nai
+not downsampling inside
+the call to "ft_volumedownsample" took 0 seconds and an estimated 0 MB
+no masking parameter
+
+click with mouse button to reposition the cursor
+press n/l/r on keyboard to record a fiducial position
+press q on keyboard to quit interactive mode
+voxel 312176, indices [46 52 32], location [5.7 2.1 41.5] mm, value 71.424101
+scaling anatomy
+scaling anatomy
+scaling anatomy
+nas = undefined
+lpa = undefined
+rpa = undefined
+
+
+
+        dim: [15 19 15]
+       time: [1x1018 double]
+        pos: [4275x3 double]
+     inside: [3480x1 double]
+    outside: [795x1 double]
+     method: 'average'
+        avg: [1x1 struct]
+        cfg: [1x1 struct]
+
+</pre><img vspace="5" hspace="5" src="course8_m01.png" >
+</pre><img vspace="5" hspace="5" src="course8_m02.png" alt="">
+<img vspace="5" hspace="5" src="course8_m03.png" alt="">
+ <p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Beamforming with fieldtrip
+
+%% use SAMwts with fieldtrip
+% make a text file with grid points
+% here the grid points are 10mm spaced on template. the spacing is modified
+% for each subject
+cd oddball
+[vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
+save headmodel vol grid mesh M1
+load ~/ft_BIU/matlab/files/sMRI.mat
+mri_realign=sMRI;
+mri_realign.transform=inv(M1)*sMRI.transform;
+grid2t(grid);
+
+!cp pnt.txt SAM/pnt.txt
+cd ..
+!SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -t pnt.txt -v
+
+
+cd oddball/SAM;
+
+wtsNoSuf='pnt.txt';
+if ~exist([wtsNoSuf,'.mat'],'file')
+[SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
+save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts');
+else load([wtsNoSuf,'.mat'])
+end
+filter=wts2filter(ActWgts,grid.inside,size(grid.outside,1));
+cd ../
+load data
+dataSt=data;
+trli=find(data.trialinfo==128);
+dataSt.trial=data.trial(1,trli);
+dataSt.time=data.time(1,trli);
+dataStAvg=ft_timelockanalysis([],dataSt);
+timewin=[0.043657 0.075163];
+
+% use weights from SAM (Dr. Robinson's) to make images with fieldtrip
+sourceTest=OBbeamform(dataSt,timewin,'SAM',mri_realign,filter)
+% make similar weights from raw data with fieldtrip version of SAM.
+% multiply by averaged data, like SAMerf
+sourceTest=OBbeamform(dataSt,timewin,'sam',mri_realign)
+% compute weights on averaged data. Dr. Robinson won't approve.
+sourceTest=OBbeamform(dataStAvg,timewin,'sam',mri_realign)
+
+##### SOURCE END #####
+--></body></html>

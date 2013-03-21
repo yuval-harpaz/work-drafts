@@ -1,32 +1,30 @@
+%% Beamforming with fieldtrip
+
 %% use SAMwts with fieldtrip
 % make a text file with grid points
 % here the grid points are 10mm spaced on template. the spacing is modified
 % for each subject
-
-
-
-
-% first we want a headmodel
-% put debug points here: in headmodel_BIU at lines 119 (D.inv{1}...) and
-% 131 (eval([tinpoints...). in ft_prepare_localspheres_mm in line 195(end)
-% now run
+cd oddball
 [vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],'localspheres');
 save headmodel vol grid mesh M1
 load ~/ft_BIU/matlab/files/sMRI.mat
 mri_realign=sMRI;
 mri_realign.transform=inv(M1)*sMRI.transform;
 grid2t(grid);
-% make new weights based on individually fit grid (pnt.txt)
-% this works only after SAMcov (course7)
-cd ..
+
 !cp pnt.txt SAM/pnt.txt
+cd ..
 !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -t pnt.txt -v
 
 
 cd oddball/SAM;
+
 wtsNoSuf='pnt.txt';
+if ~exist([wtsNoSuf,'.mat'],'file')
 [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
 save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts');
+else load([wtsNoSuf,'.mat'])
+end
 filter=wts2filter(ActWgts,grid.inside,size(grid.outside,1));
 cd ../
 load data
