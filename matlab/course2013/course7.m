@@ -1,7 +1,7 @@
+%% SAM beamforming
+
 cd oddball
-if ~exist('oddball.rtw','file')
-    !cp /home/meg/SAM_BIU/docs/SuDi0811.rtw oddball.rtw
-end
+
 
 load trl % this was calculated in course6 (auditory data)
 source='c,rfhp0.1Hz';
@@ -13,24 +13,32 @@ cfg2.trl=trl;
 cfg2.demean='yes';
 cfg2.baselinewindow=[-0.2 0];
 cfg2.bpfilter='yes';
-cfg2.bpfreq=[3 30];
-cfg2.channel={'MEG','MEGREF'};
+cfg2.bpfreq=[1 40];
+cfg2.channel={'MEG'};%,'MEGREF'};
 data=ft_preprocessing(cfg2);
 
-cfg4.latency=[-0.1 0.6];
-cfg4.trials=find(data.trialinfo==128);
-cfg4.channel='MEG';
-standard=ft_timelockanalysis(cfg4,data);
-cfg4.trials=find(data.trialinfo==64);
-oddball=ft_timelockanalysis(cfg4,data);
 
+
+
+%reject some trials
+cfg=[];
+cfg.method='summary';
+cfg.channel='MEG';
+cfg.alim=1e-12;
+data=ft_rejectvisual(cfg, data); 
+% average standard
+cfg=[];
+cfg.latency=[-0.1 0.6];
+cfg.trials=find(data.trialinfo==128);
+%cfg4.channel='MEG';
+standard=ft_timelockanalysis(cfg,data);
 % choose time of interest
 cfg=[];
 cfg.interactive='yes';
 cfg.layout='4D248.lay';
 cfg.zlim=[-5e-14 5e-14];
 figure;
-ft_multiplotER(cfg,standard,oddball);
+ft_multiplotER(cfg,standard);
 
 toi=[0.043657 0.075163]; % toi=[0.26 0.354];
 close all
@@ -48,15 +56,16 @@ Trig2mark(...
 
 fitMRI2hs('c,rfhp0.1Hz')
 
-hs2afni % for AFNI (required for nudging)
-hs2afni('small'); % for ft_sourceplot (view only)
+
+hs2afni('small');
 
 % to see the headshape on top of the MRI:
-hdsh=ft_read_mri('hds+ORIG.BRIK');
+hdsh=ft_read_mri('hds+orig.BRIK');
 hs_points=hdsh.anatomy>0;
-mri=ft_read_mri('warped+ORIG.BRIK');
+mri=ft_read_mri('warped+orig.BRIK');
 mri.anatomy=mri.anatomy+hs_points;
-cfg=[];cfg.interactive='yes';
+cfg=[];
+cfg.interactive='yes';
 figure, ft_sourceplot(cfg,mri);
 % see that the headshape fits the MRI with AFNI
 % if you have to nudge this is the time.
@@ -65,27 +74,43 @@ figure, ft_sourceplot(cfg,mri);
 !~/abin/3dSkullStrip -input warped+orig -prefix mask -mask_vol -skulls -o_ply ortho
 !meshnorm ortho_brainhull.ply > hull.shape
 
-%% param file
+%% SAMerf, evoked activity
+% create a param file, copy the real time weights (rtw) used online to clean the data
+% and run SAMcov, SAMwts and SAMerf
 cd ..
 createPARAM('allTrials','ERF','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0.5],[],[],'MultiSphere');
 
-
+if ~exist('oddball/oddball.rtw','file')
+    !cp ~/SAM_BIU/docs/SuDi0811.rtw oddball/oddball.rtw
+end
 % to run SAM you have to be one folder above the data
-!SAMcov -r oddball -d c,rfhp0.1Hz -m allTrials -v
-!SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -v
-!SAMerf -r oddball -d c,rfhp0.1Hz -m allTrials -v -z 3
-!cp oddball/SAM/*svl oddball/
+if ~ exist('oddball/allTrials,Trig-All,43-75ms,1-40Hz,ERF.svl','file')
+    !SAMcov -r oddball -d c,rfhp0.1Hz -m allTrials -v
+    !SAMwts -r oddball -d c,rfhp0.1Hz -m allTrials -c Alla -v
+    !SAMerf -r oddball -d c,rfhp0.1Hz -m allTrials -v -z 3
+    !cp oddball/SAM/*svl oddball/
+end
+
 % now see the image in afni
-createPARAM('allinduced','SPM','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0.5],[],[],'MultiSphere');
-!SAMcov -r oddball -d c,rfhp0.1Hz -m allinduced -v
-!SAMwts -r oddball -d c,rfhp0.1Hz -m allinduced -c Alla -v
-% FIXME, this line didn't work!SAMspm -r oddball -d c,rfhp0.1Hz -m allinduced -v
+!~/abin/afni -dset warped+orig &
+
+%% SAMspm, induced activity
+%SAMspm didn't work in this example, don't know why.
+
+% createPARAM('allinduced','SPM','All',toi,'All',[(toi(1)-toi(2)) 0],[1 40],[-0.1 0.5],[],[],'MultiSphere');
+% !SAMcov -r oddball -d c,rfhp0.1Hz -m allinduced -v
+% !SAMwts -r oddball -d c,rfhp0.1Hz -m allinduced -c Alla -v
+% !SAMspm -r oddball -d c,rfhp0.1Hz -m allinduced -v
 
 %% read the weights and compute images by yourself
 cd oddball;
 wtsNoSuf='SAM/allTrials,1-40Hz,Alla';
-[SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
-save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts'); %save in mat format, quicker to read later.
+if exist([wtsNoSuf,'.mat'],'file')
+    load ([wtsNoSuf,'.mat'])
+else
+    [SAMHeader, ActIndex, ActWgts]=readWeights([wtsNoSuf,'.wts']);
+    save([wtsNoSuf,'.mat'],'SAMHeader', 'ActIndex', 'ActWgts'); %save in mat format, quicker to read later.
+end
 % after watching the SAMerf image we choose a voxel of interest
 vox=[1.5,-5.5,5.5];
 % lets visualize the weights used for source loc to this voxel
@@ -105,42 +130,93 @@ plot(oddball.time,vsSt);hold on;
 plot(oddball.time,vsOd,'r');
 legend('standard','oddball')
 
+%% Use AFNI MATLAB library to make images from virtual sensorsvsMovies
+
 % estimate noise
 ns=ActWgts;
 ns=ns-repmat(mean(ns,2),1,size(ns,2));
 ns=ns.*ns;
 ns=mean(ns,2);
 
-% get toi mean square (no BL correction)
+% get toi mean square (different than SAMerf, no BL correction)
 samples=[nearest(oddball.time,toi(1)),nearest(oddball.time,toi(2))];
-vsSt=ActWgts*oddball.avg(:,samples(1):samples(2));
-vsStMS=mean(vsSt.^vsSt,2)./ns;
+vsSt=ActWgts*standard.avg(:,samples(1):samples(2));
+vsStMS=mean(vsSt.*vsSt,2)./ns;
+vsStMS=vsStMS./max(vsStMS); %scale
+%make image 3D of mean square (MS, power)
 cfg=[];
-%cfg.func='~/vsMovies/Data/funcTemp+orig';
 cfg.step=5;
 cfg.boxSize=[-120 120 -90 90 -20 150];
-cfg.prefix='St';
+cfg.prefix='StMS';
 VS2Brik(cfg,vsStMS);
 
+% Make a power movie of the whole trial
+vsStS=(ActWgts*standard.avg).*(ActWgts*standard.avg);
+ns=repmat(ns,1,size(vsStS,2));
+vsStS=vsStS./ns;
+vsStS=vsStS./max(max(max(vsStS)));
+
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='StS';
+cfg.torig=-200;
+cfg.TR=1/1.017;
+VS2Brik(cfg,vsStS);
+
+
 % SAMspm
+ns=ActWgts;
+ns=ns-repmat(mean(ns,2),1,size(ns,2));
+ns=ns.*ns;
+ns=mean(ns,2);
 spm=zeros(size(ActWgts,1),1);
-conds={'VGalpha','OEalpha'};
-for condi=1:2
-    eval(['data=',conds{condi},';'])
-    for triali=1:length(data.trial);
-        vs=ActWgts*data.trial{1,triali};
+tri=find(data.trialinfo==128);
+for triali=tri'
+        vs=ActWgts*data.trial{1,triali}(:,samples(1):samples(2));
         vs=vs-repmat(mean(vs,2),1,size(vs,2));
         pow=vs.*vs;
         pow=mean(pow,2);
         pow=pow./ns;
         spm=spm+pow;
         display(['trial ',num2str(triali)])
-    end
-    eval(['spm',conds{condi}(1:2),'=spm./triali;'])
 end
+spm=spm./length(tri);
+cfg=[];
+%cfg.func='~/vsMovies/Data/funcTemp+orig';
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='StSPM';
+VS2Brik(cfg,spm);
+
+spmN=zeros(size(ActWgts,1),1);
+tri=find(data.trialinfo==128);
+for triali=tri'
+        vs=ActWgts*data.trial{1,triali}(:,1:samples(1)-1);
+        vs=vs-repmat(mean(vs,2),1,size(vs,2));
+        pow=vs.*vs;
+        pow=mean(pow,2);
+        pow=pow./ns;
+        spmN=spmN+pow;
+        display(['trial ',num2str(triali)])
+end
+spmN=spmN./length(tri);
+NAI=(spm-spmN)./spmN;
+cfg=[];
+%cfg.func='~/vsMovies/Data/funcTemp+orig';
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='StSPMnai';
+VS2Brik(cfg,NAI);
 
 
 
+cfg=[];
+%cfg.func='~/vsMovies/Data/funcTemp+orig';
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='StSPM';
+VS2Brik(cfg,spm);
 % now we want the whole brain activity at one time point, beware, messy!
 t=0.2733;
 [vs,timeline,allInd]=VS_slice(oddball,wtsNoSuf,1,[t t]);

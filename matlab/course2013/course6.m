@@ -120,6 +120,7 @@ trl=trigon'-203;
 trl(:,2)=trl+1017;
 trl(:,3)=(-203);
 trl(:,4)=trigFixed(trigon);
+save trl trl
 % standard
 %trl=trl(find(trl(:,4)==128),:);
 cfg.dataset=source;
