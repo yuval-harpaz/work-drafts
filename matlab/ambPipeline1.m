@@ -340,7 +340,7 @@ ambPlotStat1('Cl05_m170reur',[0.85 0.95],'ortho',60); % RH
 ambPlotFields1
 % ambPlotFields2 % UR - Re
 
-
+ambRMSfigureUR4
 
 
 

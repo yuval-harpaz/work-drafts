@@ -1,7 +1,7 @@
 %% Beamforming with fieldtrip
 
 %% use SAMwts with fieldtrip
-% make a text file with grid points
+% make a text file with grid points.
 % here the grid points are 10mm spaced on template. the spacing is modified
 % for each subject
 cd oddball
@@ -34,11 +34,12 @@ dataSt.trial=data.trial(1,trli);
 dataSt.time=data.time(1,trli);
 dataStAvg=ft_timelockanalysis([],dataSt);
 timewin=[0.043657 0.075163];
-
 % use weights from SAM (Dr. Robinson's) to make images with fieldtrip
 sourceTest=OBbeamform(dataSt,timewin,'SAM',mri_realign,filter)
-% make similar weights from raw data with fieldtrip version of SAM.
+
+%% make similar weights from raw data with fieldtrip version of SAM.
 % multiply by averaged data, like SAMerf
 sourceTest=OBbeamform(dataSt,timewin,'sam',mri_realign)
-% compute weights on averaged data. Dr. Robinson won't approve.
+
+%% compute weights on averaged data. Dr. Robinson won't approve.
 sourceTest=OBbeamform(dataStAvg,timewin,'sam',mri_realign)
