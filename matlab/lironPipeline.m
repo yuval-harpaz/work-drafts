@@ -452,3 +452,49 @@ hold on
 bar(2:2:16,oeBlocks(vsi,:),'b')
 title(labels(6))
 
+%% normalize spm different ways
+cd /home/yuval/Data/tel_hashomer/liron
+%load all
+wtsNoSuf='SAM/alpha,7-13Hz,Alla';
+load (wtsNoSuf)
+ns=ActWgts;
+ns=ns-repmat(mean(ns,2),1,size(ns,2));
+ns=ns.*ns;
+ns=mean(ns,2);
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='MSwts';
+VS2Brik(cfg,ns);
+
+% boy, this is identical to Robinson noise estimate
+
+cd('/home/yuval/Data/tel_hashomer/liron/SAM/alpha,7-13Hz');
+!./readcov_liron.py > noiseCov.txt
+Cn=importdata('noiseCov.txt');
+save noiseCov Cn
+wtsNoSuf='/home/yuval/Data/tel_hashomer/liron/SAM/alpha,7-13Hz,Alla';
+load (wtsNoSuf)
+
+for c=1:size(ActWgts,1)
+    ActNse=0;
+    CnCount=1;
+    for i=1:248
+        for j=1:248
+            CnCount=CnCount+1;
+            ActNse = ActNse + ActWgts(c,i) .* ActWgts(c,j) .* Cn(CnCount);
+        end
+    end
+    ns(c)=ActNse;
+    %if round(c/100)==c;
+    c
+    %end
+end
+cd /home/yuval/Data/tel_hashomer/liron
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='NoiseCovWts';
+VS2Brik(cfg,ns');
+
+
