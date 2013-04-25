@@ -127,8 +127,7 @@ vox=[1.5,-5.5,5.5];
 % lets visualize the weights used for source loc to this voxel
 plotWeights(wtsNoSuf,vox)
 
-% now we want a virtual sensor created for this voxel to be created for 2
-% conditions
+% now we want a virtual sensor created for this voxel
 [voxi,allInd]=voxIndex(vox,100.*[...
     SAMHeader.XStart SAMHeader.XEnd ...
     SAMHeader.YStart SAMHeader.YEnd ...
@@ -136,13 +135,11 @@ plotWeights(wtsNoSuf,vox)
     100.*SAMHeader.StepSize,1);
 wts=ActWgts(voxi,:);
 vsSt=ActWgts(voxi,:)*standard.avg;
-vsOd=ActWgts(voxi,:)*oddball.avg;
-plot(oddball.time,vsSt);hold on;
-plot(oddball.time,vsOd,'r');
-legend('standard','oddball')
+plot(standard.time,vsSt);
+
 
 %% Use AFNI MATLAB library to make images and movies from virtual sensors
-
+clear data % memory issues ahead
 % estimate noise
 ns=ActWgts;
 ns=ns-repmat(mean(ns,2),1,size(ns,2));
@@ -150,7 +147,7 @@ ns=ns.*ns;
 ns=mean(ns,2);
 
 % get toi mean square (different than SAMerf, no BL correction)
-samples=[nearest(oddball.time,toi(1)),nearest(oddball.time,toi(2))];
+samples=[nearest(standard.time,toi(1)),nearest(standard.time,toi(2))];
 vsSt=ActWgts*standard.avg(:,samples(1):samples(2));
 vsStMS=mean(vsSt.*vsSt,2)./ns;
 vsStMS=vsStMS./max(vsStMS); %scale
@@ -160,7 +157,7 @@ cfg.step=5;
 cfg.boxSize=[-120 120 -90 90 -20 150];
 cfg.prefix='StMS';
 VS2Brik(cfg,vsStMS);
-
+clear vsSt*
 % Make a power movie of the whole trial
 vsStS=(ActWgts*standard.avg).*(ActWgts*standard.avg);
 ns=repmat(ns,1,size(vsStS,2));
