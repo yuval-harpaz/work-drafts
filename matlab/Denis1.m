@@ -49,14 +49,16 @@ ft_databrowser(cfg,comp);
 cfg = [];
 cfg.component = 1; % change
 dataPCA = ft_rejectcomponent(cfg, comp);
-
+cfg=[];
+cfg.demean='yes';
+cfg.baselinewindow=[-0.1 0];
+dataPCA=ft_preprocessing(cfg,dataPCA);
 cfg=[];
 cfg.method='summary';
 cfg.channel='MEG';
 cfg.alim=1e-12;
 dataCln=ft_rejectvisual(cfg, dataPCA);
-cfg=[];
-cfg
+
 cfg=[];
 cfg.trials=find(dataCln.trialinfo==1);
 con=ft_timelockanalysis(cfg,dataCln);
