@@ -62,7 +62,7 @@ p.footer {
   color: gray;
 }
 
-  </style></head><body><div class="content"><h1>Beamforming with fieldtrip</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">use SAMwts with fieldtrip</a></li><li><a href="#2">make similar weights from raw data with fieldtrip version of SAM.</a></li><li><a href="#3">compute weights on averaged data. Dr. Robinson won't approve.</a></li></ul></div><h2>use SAMwts with fieldtrip<a name="1"></a></h2><p>make a text file with grid points. here the grid points are 10mm spaced on template. the spacing is modified for each subject</p><pre class="codeinput">cd <span class="string">oddball</span>
+  </style></head><body><div class="content"><h1>Beamforming with fieldtrip</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">use SAMwts with fieldtrip</a></li><li><a href="#2">make similar weights from raw data with fieldtrip version of SAM.</a></li><li><a href="#3">compute weights on averaged data.</a></li></ul></div><h2>use SAMwts with fieldtrip<a name="1"></a></h2><p>make a text file with grid points. here the grid points are 10mm spaced on template. the spacing is modified for each subject</p><pre class="codeinput">cd <span class="string">oddball</span>
 [vol,grid,mesh,M1]=headmodel_BIU([],[],[],[],<span class="string">'localspheres'</span>);
 save <span class="string">headmodel</span> <span class="string">vol</span> <span class="string">grid</span> <span class="string">mesh</span> <span class="string">M1</span>
 load <span class="string">~/ft_BIU/matlab/files/sMRI.mat</span>

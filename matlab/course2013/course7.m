@@ -179,7 +179,9 @@ ns=ns-repmat(mean(ns,2),1,size(ns,2));
 ns=ns.*ns;
 ns=mean(ns,2);
 spm=zeros(size(ActWgts,1),1);
+load data
 tri=find(data.trialinfo==128);
+
 for triali=tri'
         vs=ActWgts*data.trial{1,triali}(:,samples(1):samples(2));
         vs=vs-repmat(mean(vs,2),1,size(vs,2));
@@ -197,4 +199,4 @@ cfg.boxSize=[-120 120 -90 90 -20 150];
 cfg.prefix='StSPM';
 VS2Brik(cfg,spm);
 
-
+% view results with AFNI

@@ -290,8 +290,7 @@ vox=[1.5,-5.5,5.5];
 <span class="comment">% lets visualize the weights used for source loc to this voxel</span>
 plotWeights(wtsNoSuf,vox)
 
-<span class="comment">% now we want a virtual sensor created for this voxel to be created for 2</span>
-<span class="comment">% conditions</span>
+<span class="comment">% now we want a virtual sensor created for this voxel to be created</span>
 [voxi,allInd]=voxIndex(vox,100.*[<span class="keyword">...</span>
     SAMHeader.XStart SAMHeader.XEnd <span class="keyword">...</span>
     SAMHeader.YStart SAMHeader.YEnd <span class="keyword">...</span>
@@ -299,16 +298,13 @@ plotWeights(wtsNoSuf,vox)
     100.*SAMHeader.StepSize,1);
 wts=ActWgts(voxi,:);
 vsSt=ActWgts(voxi,:)*standard.avg;
-vsOd=ActWgts(voxi,:)*oddball.avg;
-plot(oddball.time,vsSt);hold <span class="string">on</span>;
-plot(oddball.time,vsOd,<span class="string">'r'</span>);
-legend(<span class="string">'standard'</span>,<span class="string">'oddball'</span>)
+plot(standard.time,vsSt)
+<span class="comment">% you can multiply the weights by the oddball average to compare with standard</span>
 </pre><pre class="codeoutput">loading weights from *.mat file
 undoing the Supine balancing
 creating layout from data.grad
 creating layout for bti248 system
 the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
-the call to "ft_topoplotTFR" took 1 seconds and an estimated 0 MB
 the call to "ft_topoplotER" took 1 seconds and an estimated 0 MB
 </pre><img vspace="5" hspace="5" src="course7_03.png" alt=""> <h2>Use AFNI MATLAB library to make images and movies from virtual sensors<a name="12"></a></h2><pre class="codeinput"><span class="comment">% estimate noise</span>
 ns=ActWgts;
@@ -317,7 +313,7 @@ ns=ns.*ns;
 ns=mean(ns,2);
 
 <span class="comment">% get toi mean square (different than SAMerf, no BL correction)</span>
-samples=[nearest(oddball.time,toi(1)),nearest(oddball.time,toi(2))];
+samples=[nearest(standard.time,toi(1)),nearest(standard.time,toi(2))];
 vsSt=ActWgts*standard.avg(:,samples(1):samples(2));
 vsStMS=mean(vsSt.*vsSt,2)./ns;
 vsStMS=vsStMS./max(vsStMS); <span class="comment">%scale</span>
