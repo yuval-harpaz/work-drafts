@@ -1,4 +1,4 @@
-%% Beamforming with fieldtrip
+%% FieldTrip beamforming 1
 
 %% use SAMwts with fieldtrip
 % make a text file with grid points.

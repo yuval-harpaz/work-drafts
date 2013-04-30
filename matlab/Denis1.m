@@ -88,7 +88,7 @@ createPARAM('AllTrials','SPM','All',[0.15 0.3],[],[],[3 35],[-0.1 0.7],'Pseudo-Z
 cd /home/yuval/Copy/social_motor_study
 !~/bin/SAMcov64 -r 204707 -d hb_c,rfDC -m AllTrials -v
 !~/bin/SAMwts64 -r 204707 -d hb_c,rfDC -m AllTrials -c Alla -v
-cd 204707
+cd /home/yuval/Copy/social_motor_study204707
 covDir='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz';
 wtsFile='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz,Alla.wts';
 normWts(covDir,wtsFile);
