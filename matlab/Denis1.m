@@ -79,4 +79,66 @@ samps=dataCln.sampleinfo;
 samps=(samps+203)/678.17;
 contrig=samps(find(dataCln.trialinfo==1));
 inctrig=samps(find(dataCln.trialinfo==2));
-trig2mark('congruent',contrig','incongruent',inctrig');
+all=samps(find(dataCln.trialinfo));
+trig2mark('congruent',contrig','incongruent',inctrig','All',all');
+%% making param file (one for all subjects)
+createPARAM('AllTrials','SPM','All',[0.15 0.3],[],[],[3 35],[-0.1 0.7],'Pseudo-Z',0.5,'MultiSphere','Power',[60 90]);
+% change the box size to fit Denis tilt
+%% global wts
+cd /home/yuval/Copy/social_motor_study
+!~/bin/SAMcov64 -r 204707 -d hb_c,rfDC -m AllTrials -v
+!~/bin/SAMwts64 -r 204707 -d hb_c,rfDC -m AllTrials -c Alla -v
+cd 204707
+covDir='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz';
+wtsFile='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz,Alla.wts';
+normWts(covDir,wtsFile);
+
+[SAMHeader, ActIndex, ActWgts]=readWeights(wtsFile);
+boxSize=[...
+SAMHeader.XStart SAMHeader.XEnd ...
+SAMHeader.YStart SAMHeader.YEnd ...
+SAMHeader.ZStart SAMHeader.ZEnd];
+
+% fix when normWts gets stuch
+load ('/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz/NoiseCovWts.mat')
+cfg=[];
+cfg.step=5;
+cfg.boxSize=1000*boxSize;
+cfg.prefix='NoiseCovWts';
+VS2Brik(cfg,ns);
+
+%% make images
+wtsFile='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz,Alla.wts';
+[SAMHeader, ~, ActWgts]=readWeights(wtsFile);
+boxSize=[...
+SAMHeader.XStart SAMHeader.XEnd ...
+SAMHeader.YStart SAMHeader.YEnd ...
+SAMHeader.ZStart SAMHeader.ZEnd];
+
+load /home/yuval/Copy/social_motor_study/204707/con
+load /home/yuval/Copy/social_motor_study/204707/inc
+incVS=ActWgts*inc.avg;
+conVS=ActWgts*con.avg;
+time=[0.15 0.3];
+samp=[nearest(inc.time,time(1)),nearest(inc.time,time(2))];
+inc250=mean((incVS(:,samp(1):samp(2))).^2,2);
+con250=mean((conVS(:,samp(1):samp(2))).^2,2);
+
+cd /home/yuval/Copy/social_motor_study/204707
+cfg=[];
+cfg.step=5;
+cfg.boxSize=1000*boxSize;
+cfg.prefix='con250';
+VS2Brik(cfg,con250);
+cfg.prefix='inc250';
+VS2Brik(cfg,inc250);
+
+
+ns=ActWgts;
+ns=ns-repmat(mean(ns,2),1,size(ns,2));
+ns=ns.*ns;
+ns=mean(ns,2);
+
+
+
+
