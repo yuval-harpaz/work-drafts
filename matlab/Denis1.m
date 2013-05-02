@@ -84,7 +84,7 @@ trig2mark('congruent',contrig','incongruent',inctrig','All',all');
 %% making param file (one for all subjects)
 createPARAM('AllTrials','SPM','All',[0.15 0.3],[],[],[3 35],[-0.1 0.7],'Pseudo-Z',0.5,'MultiSphere','Power',[60 90]);
 % change the box size to fit Denis tilt
-%% global wts
+%% global c,rfhp1.0Hz,ee
 cd /home/yuval/Copy/social_motor_study
 !~/bin/SAMcov64 -r 204707 -d hb_c,rfDC -m AllTrials -v
 !~/bin/SAMwts64 -r 204707 -d hb_c,rfDC -m AllTrials -c Alla -v
@@ -139,6 +139,121 @@ ns=ns-repmat(mean(ns,2),1,size(ns,2));
 ns=ns.*ns;
 ns=mean(ns,2);
 
+%% movie
+cd /home/yuval/Copy/social_motor_study/204707
+% load ('SAM/AllTrials,3-35Hz/NoiseCovWts.mat');
+wtsFile='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz,Alla.wts';
+[SAMHeader, ~, ActWgts]=readWeights(wtsFile);
+boxSize=[...
+    SAMHeader.XStart SAMHeader.XEnd ...
+    SAMHeader.YStart SAMHeader.YEnd ...
+    SAMHeader.ZStart SAMHeader.ZEnd];
+%load con
 
+load inc
+ns=mean(abs(ActWgts),2);
+ns=repmat(ns,1,length(inc.time));
+incVS=ActWgts*inc.avg;
+%conVS=ActWgts*con.avg;
+incVSabs=abs(incVS)./ns;
+fac=round(log10(max(max(abs(incVSabs)))));
+incVSabs=incVSabs*10^-fac;
 
+cfg=[];
+cfg.step=5;
+cfg.boxSize=1000*boxSize;
+cfg.torig=-299.335; % beginning of VS in ms
+cfg.TR=num2str(1000/678.17);
+cfg.prefix='incVSabs';
+if exist([cfg.prefix,'+orig.BRIK'],'file')
+    eval(['!rm ',cfg.prefix,'+orig.*'])
+end
+VS2Brik(cfg,incVSabs);
 
+% cfg.prefix='con250';
+% VS2Brik(cfg,con250);
+
+%% SAM with fieldtrip
+% make single sphere
+cd /home/yuval/Copy/social_motor_study/204707
+hs=ft_read_headshape('hs_file');
+[o,r]=fitsphere(hs.pnt);
+vol=[];
+vol.r=r+0.01;
+vol.o=o;
+ft_plot_vol(vol);
+hold on
+plot3pnt(hs.pnt,'.')
+% make grid
+wtsFile='/home/yuval/Copy/social_motor_study/204707/SAM/AllTrials,3-35Hz,Alla.wts';
+[SAMHeader, ~, ActWgts]=readWeights(wtsFile);
+boxSize=[...
+    SAMHeader.XStart SAMHeader.XEnd ...
+    SAMHeader.YStart SAMHeader.YEnd ...
+    SAMHeader.ZStart SAMHeader.ZEnd];
+[~,allInd]=voxIndex([0,0,0],100.*boxSize,100.*SAMHeader.StepSize,1);
+grid.outside=find(ActWgts(:,1)==0);
+grid.inside=find(ActWgts(:,1)~=0);
+grid.dim=[length(SAMHeader.XStart:SAMHeader.StepSize:SAMHeader.XEnd), ...
+    length(SAMHeader.YStart:SAMHeader.StepSize:SAMHeader.YEnd), ...
+    length(SAMHeader.ZStart:SAMHeader.StepSize:SAMHeader.ZEnd)];
+grid.pos=allInd;
+
+% cov
+load dataCln
+
+cfg7                  = [];
+cfg7.covariance       = 'yes';
+cfg7.removemean       = 'yes';
+cfg7.channel='MEG';
+cfg7.keeptrials='yes';
+cov=timelockanalysis(cfg7, dataCln);
+
+% hdr=read_4d_hdr_BIU(fileName);
+cov.grad=ft_convert_units(cov.grad,'mm');
+cfg=[];
+cfg.vol=ft_convert_units(vol,'mm');
+cfg.grid=ft_convert_units(grid,'mm');
+cfg.method = 'sam'; % 'mne'
+cfg.lambda = 0.05;
+cfg.keepfilter='yes';
+%cfg.rawtrial='yes';
+%cfg8.fixedori='robert'; % 'stephen' doesn't work; default is spinning.
+sourceGlobal = ft_sourceanalysis(cfg, cov);
+save sourceGlobal sourceGlobal
+wts=filter2wts(sourceGlobal.avg.filter);
+save wts wts
+load inc
+% reconstructing source trace
+ns=mean(abs(wts),2);
+ns=repmat(ns,1,length(inc.time));
+incVS=wts*inc.avg;
+%conVS=ActWgts*con.avg;
+incVSabs=abs(incVS)./ns;
+fac=round(log10(max(max(abs(incVSabs)))));
+incVSabs=incVSabs*10^-fac;
+
+cfg=[];
+cfg.step=5;
+cfg.boxSize=1000*boxSize;
+cfg.torig=-299.335; % beginning of VS in ms
+cfg.TR=num2str(1000/678.17);
+cfg.prefix='incFTabs';
+if exist([cfg.prefix,'+orig.BRIK'],'file')
+    eval(['!rm ',cfg.prefix,'+orig.*'])
+end
+VS2Brik(cfg,incVSabs);
+
+load con
+conVS=wts*con.avg;
+%conVS=ActWgts*con.avg;
+conVSabs=abs(conVS)./ns;
+conVSabs=conVSabs*10^-fac;
+cfg.prefix='conFTabs';
+if exist([cfg.prefix,'+orig.BRIK'],'file')
+    eval(['!rm ',cfg.prefix,'+orig.*'])
+end
+VS2Brik(cfg,conVSabs);
+
+ !~/abin/3dcalc -a incFTabs+orig -b conFTabs+orig -exp 'a/b-b' -prefix incDivCon
+ !~/abin/3dcalc -a incFTabs+orig -b conFTabs+orig -exp 'a-b' -prefix incMinCon

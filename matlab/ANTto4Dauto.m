@@ -34,10 +34,10 @@ else
     eegFN=eegFN(1:end-1);
 end
 if length(findstr(LS,'.seg'))~=0
-    error('segmented eeg, use ANTto4D')
-else
-    segBegSamp=1;
+    warning('segmented eeg, use ANTto4D')
 end
+    segBegSamp=1;
+% end
 srEeg=1024;
 srMeg=1017.278;
 hdrEEG=ft_read_header(eegFN);
