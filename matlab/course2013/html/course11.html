@@ -1,0 +1,966 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>course11</title><meta name="generator" content="MATLAB 7.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-05-21"><meta name="DC.source" content="course11.m"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Group statistics, sensor level</a></li><li><a href="#2">grand average</a></li><li><a href="#3">plot the fields</a></li><li><a href="#4">t-test per channel for one time point</a></li><li><a href="#5">Similarity and differences between subjects in 100ms field</a></li><li><a href="#6">Realign subjects correct fields for head position and size</a></li><li><a href="#7">t-test per channel for one time point, realigned data</a></li><li><a href="#8">cluster based permutations statistics</a></li><li><a href="#9">Compute planar gradient (megplanar) to reduce noise.</a></li><li><a href="#10">MEG planar statistics for M170</a></li><li><a href="#11">RMS for all the MEG channels</a></li><li><a href="#12">RMS for left and right sensors</a></li><li><a href="#13">RMS for clusters</a></li><li><a href="#14">Mean cluster value</a></li></ul></div><h2>Group statistics, sensor level<a name="1"></a></h2><p>here we run sensor level statistics for reading data where biased ambiguous words were coupled with subordinate and dominant associations (see Harpaz, Lavidor and Goldstein, accepted). we found RH activity for subordinate meanings around 200ms from target word onset.</p><pre class="codeinput">cd <span class="string">amb</span>
+</pre><h2>grand average<a name="2"></a></h2><p>number the average structures and make a string of names.</p><pre class="codeinput">domstr=<span class="string">''</span>;
+substr=<span class="string">''</span>;
+<span class="keyword">for</span> subi=1:25
+    display([<span class="string">'loading subject '</span>,num2str(subi)])
+    subjn=num2str(subi);
+    load ([subjn,<span class="string">'/DOM/dom.mat'</span>])
+    eval([<span class="string">'dom'</span>,subjn,<span class="string">'=dom;'</span>]);
+    domstr=[domstr,<span class="string">',dom'</span>,subjn];
+    load ([subjn,<span class="string">'/SUB/sub.mat'</span>])
+    eval([<span class="string">'sub'</span>,subjn,<span class="string">'=sub;'</span>]);
+    substr=[substr,<span class="string">',sub'</span>,subjn];
+<span class="keyword">end</span>
+
+cfg=[];
+cfg.channel=<span class="string">'MEG'</span>;
+cfg.keepindividual = <span class="string">'yes'</span>;
+
+eval([<span class="string">'gadom=ft_timelockgrandaverage(cfg'</span>,domstr,<span class="string">');'</span>]);
+eval([<span class="string">'gasub=ft_timelockgrandaverage(cfg'</span>,substr,<span class="string">');'</span>]);
+clear <span class="string">dom*</span> <span class="string">sub*</span>
+</pre><pre class="codeoutput">loading subject 1
+loading subject 2
+loading subject 3
+.
+.
+.
+loading subject 24
+loading subject 25
+Warning: discarding gradiometer position information because it cannot be averaged 
+the call to "ft_timelockgrandaverage" took 0 seconds and an estimated 96 MB
+Warning: discarding gradiometer position information because it cannot be averaged 
+the call to "ft_timelockgrandaverage" took 0 seconds and an estimated 69 MB
+</pre><h2>plot the fields<a name="3"></a></h2><pre class="codeinput">timepoint=0.2;
+cfg=[];
+cfg.zlim=<span class="string">'maxmin'</span>;
+cfg.xlim=[timepoint timepoint];
+cfg.layout = <span class="string">'4D248.lay'</span>;
+figure;
+ft_topoplotER(cfg,gasub)
+title (<span class="string">'Subordinate Meanings'</span>)
+figure;
+ft_topoplotER(cfg,gadom)
+title (<span class="string">'Dominant Meanings'</span>)
+</pre><pre class="codeoutput">the input is timelock data with 248 channels and 1017 timebins
+Warning: the trial definition in the configuration is inconsistent with the actual data 
+Warning: reconstructing sampleinfo by assuming that the trials are consecutive segments of a continuous
+recording 
+averaging trials
+averaging trial 1 of 25
+averaging trial 2 of 25
+.
+.
+.
+averaging trial 24 of 25
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 69 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 69 MB
+
+
+time=[0.2 0.2]
+
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+
+time=[0.2 0.2]
+
+</pre><img vspace="5" hspace="5" src="course11_01.png" alt=""> <img vspace="5" hspace="5" src="course11_02.png" alt=""> <h2>t-test per channel for one time point<a name="4"></a></h2><pre class="codeinput">cfgs=[];
+cfgs.latency=[timepoint timepoint];
+cfgs.method=<span class="string">'stats'</span>;
+cfgs.statistic=<span class="string">'paired-ttest'</span>;
+cfgs.design = [ones(1,25) ones(1,25)*2];
+[stat] = ft_timelockstatistics(cfgs, gasub,gadom);
+
+datadif=gadom;
+datadif.individual=gasub.individual-gadom.individual;
+cfg.highlight = <span class="string">'on'</span>;
+cfg.highlightchannel = find(stat.prob&lt;0.05);
+cfg.zlim=<span class="string">'maxmin'</span>;
+figure;ft_topoplotER(cfg, datadif);
+colorbar;
+title(<span class="string">'Sub - Dom'</span>)
+<span class="comment">% I arranged the above script in a function 'statPlot11' to save space</span>
+<span class="comment">% below. run as statPlot11(gasub,gadom,0.2)</span>
+</pre><pre class="codeoutput">selected 248 channels
+selected 1 time bins
+selected 1 frequency bins
+using "statistics_stats" for the statistical testing
+number of observations 248
+number of replications 25 and 25
+ [-----------------------------------------------------------------------/ ]
+the call to "ft_timelockstatistics" took 3 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_03.png" alt=""> <h2>Similarity and differences between subjects in 100ms field<a name="5"></a></h2><pre class="codeinput">cfg=[];
+cfg.layout=<span class="string">'4D248.lay'</span>;
+cfg.interactive=<span class="string">'yes'</span>;
+cfg.xlim=[0.1 0.1];
+load <span class="string">1/DOM/dom</span>
+figure;ft_topoplotER(cfg,dom);
+title(<span class="string">'SUBJECT 1'</span>)
+load <span class="string">2/DOM/dom</span>
+figure;ft_topoplotER(cfg,dom);
+title(<span class="string">'SUBJECT 2'</span>)
+load <span class="string">8/DOM/dom</span>
+figure;ft_topoplotER(cfg,dom);
+title(<span class="string">'SUBJECT 8'</span>)
+</pre><pre class="codeoutput">reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 0 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_04.png" alt=""> <img vspace="5" hspace="5" src="course11_05.png" alt=""> <img vspace="5" hspace="5" src="course11_06.png" alt=""> <h2>Realign subjects correct fields for head position and size<a name="6"></a></h2><pre class="codeinput">subjn=<span class="string">'2'</span>;
+load <span class="string">'25/DOM/dom.mat'</span>;
+cfg=[];
+cfg.template={dom.grad};
+hs=ft_read_headshape([subjn,<span class="string">'/DOM/hs_file'</span>]);
+[o,r]=fitsphere(hs.pnt);
+load([subjn,<span class="string">'/DOM/dom.mat'</span>]);
+cfg.inwardshift=0.025;
+cfg.vol.r=r;cfg.vol.o=o;
+cfg.trials=1;
+dom_ra=ft_megrealign(cfg,dom);
+</pre><pre class="codeoutput">the input is timelock data with 271 channels and 1017 timebins
+selecting 1 trials
+selecting 1 trials
+removing 23 non-MEG channels from the data
+using headmodel specified in the configuration
+using gradiometers specified in the configuration
+using headmodel specified in the configuration
+using gradiometers specified in the configuration
+mean distance towards template gradiometers is 0.03 m
+creating dipole grid based on inward-shifted brain surface from volume conductor model
+642 dipoles inside, 0 dipoles outside brain
+the call to "ft_prepare_sourcemodel" took 0 seconds and an estimated 0 MB
+computing forward model for 642 dipoles
+Warning: The input units are unknown for points and S/unknown for conductivity 
+pruning 149 from 248, i.e. removing the 149 smallest spatial components
+computing interpolation matrix #1
+computing interpolation matrix #2
+computing interpolation matrix #3
+pruning 146 from 248, i.e. removing the 146 smallest spatial components
+realigning trial 1
+original -&gt; template             RV 53.61 %
+original             -&gt; original RV 8.71 %
+original -&gt; template -&gt; original RV 9.80 %
+Warning: showing MEG topography (RMS value over time) in the first trial only 
+adding 23 non-MEG channels back to the data (MLzA, MLyA, MLzaA, MLyaA, MLxA, MLxaA, MRzA, MRxA, MRzaA, MRxaA, MRyA, MCzA, MRyaA, MCzaA, MCyA, GzxA, MCyaA, MCxA, MCxaA, GyyA, GzyA, GxxA, GyxA)
+the call to "ft_megrealign" took 2 seconds and an estimated 1 MB
+</pre><img vspace="5" hspace="5" src="course11_07.png" alt=""> <img vspace="5" hspace="5" src="course11_08.png" alt=""> <img vspace="5" hspace="5" src="course11_09.png" alt=""> <h2>t-test per channel for one time point, realigned data<a name="7"></a></h2><pre class="codeinput"><span class="comment">% here we load grandaverage files after realignment</span>
+load <span class="string">gadom_ra</span>
+gadomra=gadom_ra;
+load <span class="string">gasub_ra</span>
+gasubra=gasub_ra;
+<span class="comment">% now statistics for 0.2ms</span>
+statPlot11(gasubra,gadomra,0.2)
+
+clear <span class="string">*ra</span>
+</pre><pre class="codeoutput">the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+selected 248 channels
+selected 1 time bins
+selected 1 frequency bins
+using "statistics_stats" for the statistical testing
+number of observations 248
+number of replications 25 and 25
+ [-----------------------------------------------------------------------/ ]
+the call to "ft_timelockstatistics" took 3 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_10.png" alt=""> <img vspace="5" hspace="5" src="course11_11.png" alt=""> <img vspace="5" hspace="5" src="course11_12.png" alt=""> <h2>cluster based permutations statistics<a name="8"></a></h2><p>Check which neghbouring channels are significantly greater / smaller for sub compared to dom. Then taking clusters of neighbours we run a permutation test to check if deviding the trials by condition is different than divide trials randomly. WHY? clustering means less comparisons, permutations means data doesn't have to be normal disyribution.</p><pre class="codeinput">load <span class="string">~/work-drafts/matlab/neighbours</span>
+
+<span class="comment">%    I calculated "neighbourhood" like this:</span>
+<span class="comment">% load '25/DOM/dom.mat';</span>
+<span class="comment">% cfg=[];</span>
+<span class="comment">% cfg.method='distance';</span>
+<span class="comment">% cfg.grad=dom.grad;</span>
+<span class="comment">% cfg.neighbourdist = 0.04; % default is 0.04m</span>
+<span class="comment">% neighbours = ft_prepare_neighbours(cfg, dom);</span>
+<span class="comment">% neighbours=neighbours(1:248);</span>
+
+cfg=[];
+cfg.neighbours = neighbours;
+cfg.latency     = [0.2 0.2];
+cfg.numrandomization = 1000;
+cfg.correctm         = <span class="string">'cluster'</span>;
+cfg.uvar        = 1; <span class="comment">% row of design matrix that contains unit variable (in this case: subjects)</span>
+cfg.ivar        = 2; <span class="comment">%</span>
+cfg.method      = <span class="string">'montecarlo'</span>;
+cfg.statistic   = <span class="string">'depsamplesT'</span>;
+cfg.design = [1:25 1:25];
+cfg.design(2,:) = [ones(1,25) ones(1,25)*2];
+
+
+
+[stat] = ft_timelockstatistics(cfg, gasub, gadom);
+neg_cluster_pvals = [stat.negclusters(:).prob];
+pos_cluster_pvals = [stat.posclusters(:).prob];
+
+<span class="comment">% realignment improve statistics? I ran:</span>
+<span class="comment">% [stat_ra] = ft_timelockstatistics(cfg, gasub_ra, gadom_ra);</span>
+<span class="comment">% neg_cluster_pvals = [stat_ra.negclusters(:).prob]</span>
+<span class="comment">% pos_cluster_pvals = [stat_ra.posclusters(:).prob]</span>
+<span class="comment">% prob was about the same</span>
+
+<span class="comment">% here we select channels of significant clusters for display</span>
+neg_signif_clust = find(neg_cluster_pvals &lt; stat.cfg.alpha);
+neg = ismember(stat.negclusterslabelmat, neg_signif_clust);
+<span class="comment">%neg=ismember(neg_signif_clust,stat.negclusterslabelmat)</span>
+datadif=gasub;
+datadif.individual=gasub.individual-gadom.individual;
+cfgp=[];
+cfgp.layout=<span class="string">'4D248.lay'</span>;
+cfgp.interactive=<span class="string">'yes'</span>;
+cfgp.xlim=[0.2 0.2];
+cfgp.highlight = <span class="string">'on'</span>;
+cfgp.highlightchannel = find(neg);
+ft_topoplotER(cfgp, datadif);colorbar;
+title([<span class="string">'Sub - Dom significant neg cluster (p='</span>,num2str(neg_cluster_pvals),<span class="string">')'</span>]);
+</pre><pre class="codeoutput">selected 248 channels
+selected 1 time bins
+selected 1 frequency bins
+using "statistics_montecarlo" for the statistical testing
+Warning: doing a two-sided test without correcting p-values or alpha-level, p-values and alpha-level will
+reflect one-sided tests per tail 
+using "statfun_depsamplesT" for the single-sample statistics
+constructing randomized design
+total number of measurements     = 50
+total number of variables        = 2
+number of independent variables  = 1
+number of unit variables         = 1
+number of within-cell variables  = 0
+number of control variables      = 0
+using a permutation resampling approach
+repeated measurement in variable 1 over 25 levels
+number of repeated measurements in each level is 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+computing a parametric threshold for clustering
+computing statistic
+estimated time per randomization is 0 seconds
+computing statistic 1 from 1000
+computing statistic 2 from 1000
+computing statistic 3 from 1000
+.
+.
+.
+computing statistic 994 from 1000
+computing statistic 995 from 1000
+computing statistic 996 from 1000
+computing statistic 997 from 1000
+computing statistic 998 from 1000
+computing statistic 999 from 1000
+computing statistic 1000 from 1000
+found 3 positive clusters in observed data
+found 1 negative clusters in observed data
+computing clusters in randomization
+computing clusters in randomization 1 from 1000
+.
+.
+.
+computing clusters in randomization 997 from 1000
+computing clusters in randomization 998 from 1000
+computing clusters in randomization 999 from 1000
+computing clusters in randomization 1000 from 1000
+using a cluster-based method for multiple comparison correction
+the returned probabilities and the thresholded mask are corrected for multiple comparisons
+the call to "ft_timelockstatistics" took 27 seconds and an estimated 144 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 24 of 25
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_13.png" alt=""> <h2>Compute planar gradient (megplanar) to reduce noise.<a name="9"></a></h2><p>Relies on dipole topography. One subject, M100.</p><pre class="codeinput">load <span class="string">1/DOM/dom</span>
+cfg=[];
+cfg.planarmethod   = <span class="string">'orig'</span>;
+cfg.neighbours     = neighbours;
+[interp] = ft_megplanar(cfg, dom);
+cfg=[];
+cfg.combinegrad  = <span class="string">'yes'</span>;
+dom_cp = ft_combineplanar(cfg, interp)
+cfgp = [];
+cfgp.xlim=[0.1 0.1];
+cfgp.layout = <span class="string">'4D248.lay'</span>;
+figure;
+ft_topoplotER(cfgp,dom_cp)
+title(<span class="string">'planar'</span>)
+figure;
+ft_topoplotER(cfgp,dom)
+title(<span class="string">'raw'</span>)
+</pre><pre class="codeoutput">the input is timelock data with 271 channels and 1017 timebins
+average number of neighbours is 7.85
+minimum distance between neighbours is   0.02 m
+maximum distance between gradiometers is   0.04 m
+processing trials
+processing trial 1 from 1
+the call to "ft_megplanar" took 1 seconds and an estimated 0 MB
+the input is timelock data with 519 channels and 1017 timebins
+Warning: The field cfg.combinegrad is forbidden, it will be removed from your configuration
+ 
+the input is timelock data with 519 channels and 1017 timebins
+the input is raw data with 271 channels and 1 trials
+the call to "ft_combineplanar" took 0 seconds and an estimated 0 MB
+
+
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 0 seconds and an estimated 0 MB
+
+
+time=[0.1 0.1]
+
+
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 0 seconds and an estimated 0 MB
+
+
+time=[0.1 0.1]
+
+
+</pre><img vspace="5" hspace="5" src="course11_14.png" alt=""> <img vspace="5" hspace="5" src="course11_15.png" alt=""> <h2>MEG planar statistics for M170<a name="10"></a></h2><pre class="codeinput">load <span class="string">gadom_cp</span>
+load <span class="string">gasub_cp</span>
+
+statPlot11(gasub_cp,gadom_cp,0.2)
+
+<span class="comment">% you can also try for M100 statPlot11(gasub_cp,gadom_cp,0.1)</span>
+<span class="comment">% it could make sense to do megrealign after meg planar but It is</span>
+<span class="comment">% impossible with fieldtrip now.</span>
+</pre><pre class="codeoutput">the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+Warning: the trial definition in the configuration is inconsistent with the actual data 
+Warning: reconstructing sampleinfo by assuming that the trials are consecutive segments of a continuous
+recording 
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+selected 248 channels
+selected 1 time bins
+selected 1 frequency bins
+using "statistics_stats" for the statistical testing
+number of observations 248
+number of replications 25 and 25
+ [-----------------------------------------------------------------------/ ]
+the call to "ft_timelockstatistics" took 3 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_16.png" alt=""> <img vspace="5" hspace="5" src="course11_17.png" alt=""> <img vspace="5" hspace="5" src="course11_18.png" alt=""> <h2>RMS for all the MEG channels<a name="11"></a></h2><p>It is possible to calculate RMS for all the channels with clustData. Here we end up with one trace per condition, easy to run a ttest for each time point. We can also calculate the area between the curves.</p><pre class="codeinput">cfg=[];
+cfg.method=<span class="string">'RMS'</span>;
+cfg.neighbours=<span class="string">'all'</span>;
+gadomRMSall=clustData(cfg,gadom);
+gasubRMSall=clustData(cfg,gasub);
+<span class="comment">% you can also calculate RMS without clustData in less moves:</span>
+<span class="comment">% subRMS=squeeze(sqrt(mean(gasub.individual.^2,2)));</span>
+<span class="comment">% domRMS=squeeze(sqrt(mean(gadom.individual.^2,2)));</span>
+
+cfgs=[];
+cfgs.method=<span class="string">'stats'</span>;
+cfgs.statistic=<span class="string">'paired-ttest'</span>;
+cfgs.design = [ones(1,25) ones(1,25)*2];
+[stat] = ft_timelockstatistics(cfgs, gasubRMSall, gadomRMSall)
+
+plot(gadomRMSall.time,squeeze(mean(gadomRMSall.individual,1)),<span class="string">'k'</span>);
+hold <span class="string">on</span>
+plot(gasubRMSall.time,squeeze(mean(gasubRMSall.individual,1)),<span class="string">'r'</span>);
+plot(stat.time(find(stat.prob&lt;0.05)),1.1*squeeze(max(mean(gasubRMSall.individual,1))),<span class="string">'k*'</span>);
+legend(<span class="string">'Dom'</span>,<span class="string">'Sub'</span>,<span class="string">'sig'</span>)
+<span class="comment">% don't close the figure</span>
+
+<span class="comment">% area under curve</span>
+timelim=[0.17 0.2];
+samp1=nearest(gadomRMSall.time,timelim(1));
+samp2=nearest(gadomRMSall.time,timelim(2));
+timeline=gadomRMSall.time(1,samp1:samp2);
+domcurve=squeeze(gadomRMSall.individual(:,1,samp1:samp2))';
+subcurve=squeeze(gasubRMSall.individual(:,1,samp1:samp2))';
+domArea=trapz(timeline,domcurve);
+subArea=trapz(timeline,subcurve);
+[~,b]=ttest(domArea,subArea)
+hsub=area(timeline,mean(subcurve,2));
+set(hsub,<span class="string">'FaceColor'</span>,<span class="string">'r'</span>,<span class="string">'EdgeColor'</span>,<span class="string">'r'</span>)
+hdom=area(timeline,mean(domcurve,2));
+set(hdom,<span class="string">'FaceColor'</span>,<span class="string">'w'</span>,<span class="string">'EdgeColor'</span>,<span class="string">'w'</span>)
+</pre><pre class="codeoutput">selected 1 channels
+selected 1017 time bins
+selected 1 frequency bins
+using "statistics_stats" for the statistical testing
+number of observations 1017
+number of replications 25 and 25
+ [------------------------------------------------------------------------\]
+the call to "ft_timelockstatistics" took 3 seconds and an estimated 0 MB
+
+stat = 
+
+      mask: [1x1017 double]
+      prob: [1x1017 double]
+    dimord: 'chan_time'
+     label: {'all'}
+      time: [1x1017 double]
+       cfg: [1x1 struct]
+
+
+b =
+
+    0.0130
+
+</pre><img vspace="5" hspace="5" src="course11_19.png" alt=""> <h2>RMS for left and right sensors<a name="12"></a></h2><pre class="codeinput">cfg=[];
+cfg.method=<span class="string">'RMS'</span>;
+cfg.neighbours=<span class="string">'LR'</span>;
+gadomRMS_LR=clustData(cfg,gadom);
+gasubRMS_LR=clustData(cfg,gasub);
+
+subRMS_L=squeeze(mean(gasubRMS_LR.individual(:,1,:),1));
+domRMS_L=squeeze(mean(gadomRMS_LR.individual(:,1,:),1));
+subRMS_R=squeeze(mean(gasubRMS_LR.individual(:,2,:),1));
+domRMS_R=squeeze(mean(gadomRMS_LR.individual(:,2,:),1));
+
+figure;
+plot(gasub.time,subRMS_L,<span class="string">'r'</span>)
+hold <span class="string">on</span>
+plot(gasub.time,domRMS_L,<span class="string">'b'</span>)
+ylim([0 1e-13]);
+plot(gasub.time,subRMS_R,<span class="string">'m'</span>)
+hold <span class="string">on</span>
+plot(gasub.time,domRMS_R,<span class="string">'c'</span>)
+legend(<span class="string">'SUB L'</span>,<span class="string">'DOM L'</span>,<span class="string">'SUB R'</span>,<span class="string">'DOM R'</span>)
+ylim([0 1e-13]);
+</pre><img vspace="5" hspace="5" src="course11_20.png" alt=""> <h2>RMS for clusters<a name="13"></a></h2><p>Here each channel is replaced with the RMS of its neighbours. This is good for finding why the RMS was significant over hemisphere or globally.</p><pre class="codeinput">cfg=[];
+cfg.neighbours=neighbours;
+cfg.method=<span class="string">'RMS'</span>;
+gadomRMS=clustData(cfg,gadom);
+gasubRMS=clustData(cfg,gasub);
+statPlot11(gasubRMS,gadomRMS,0.2)
+</pre><pre class="codeoutput">the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+selected 248 channels
+selected 1 time bins
+selected 1 frequency bins
+using "statistics_stats" for the statistical testing
+number of observations 248
+number of replications 25 and 25
+ [-----------------------------------------------------------------------/ ]
+the call to "ft_timelockstatistics" took 3 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_21.png" alt=""> <img vspace="5" hspace="5" src="course11_22.png" alt=""> <img vspace="5" hspace="5" src="course11_23.png" alt=""> <h2>Mean cluster value<a name="14"></a></h2><p>This is really smoothing of the raw signal, no RMS.</p><pre class="codeinput">cfg.method=<span class="string">'mean'</span>;
+gadomMC=clustData(cfg,gadom);
+gasubMC=clustData(cfg,gasub);
+statPlot11(gasubMC,gadomMC,0.2,[-1e-13 1e-13])
+</pre><pre class="codeoutput">the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 3 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 3 MB
+selected 248 channels
+selected 1 time bins
+selected 1 frequency bins
+using "statistics_stats" for the statistical testing
+number of observations 248
+number of replications 25 and 25
+ [-----------------------------------------------------------------------/ ]
+the call to "ft_timelockstatistics" took 3 seconds and an estimated 0 MB
+the input is timelock data with 248 channels and 1017 timebins
+averaging trials
+averaging trial 1 of 25
+.
+.
+.
+averaging trial 25 of 25
+the call to "ft_timelockanalysis" took 0 seconds and an estimated 0 MB
+reading layout from file 4D248.lay
+the call to "ft_prepare_layout" took 0 seconds and an estimated 0 MB
+the call to "ft_topoplotTFR" took 2 seconds and an estimated 0 MB
+the call to "ft_topoplotER" took 2 seconds and an estimated 0 MB
+</pre><img vspace="5" hspace="5" src="course11_24.png" alt=""> <img vspace="5" hspace="5" src="course11_25.png" alt=""> <img vspace="5" hspace="5" src="course11_26.png" alt=""> <p class="footer"><br>
+      Published with MATLAB&reg; 7.11<br></p></div><!--
+##### SOURCE BEGIN #####
+%% Group statistics, sensor level
+% here we run sensor level statistics for reading data where biased ambiguous
+% words were coupled with subordinate and dominant associations (see
+% Harpaz, Lavidor and Goldstein, accepted). we found RH activity for
+% subordinate meanings around 200ms from target word onset.
+
+cd amb
+
+%% grand average
+% number the average structures and make a string of names.
+domstr='';
+substr='';
+for subi=1:25
+    display(['loading subject ',num2str(subi)])
+    subjn=num2str(subi);
+    load ([subjn,'/DOM/dom.mat'])
+    eval(['dom',subjn,'=dom;']);
+    domstr=[domstr,',dom',subjn];
+    load ([subjn,'/SUB/sub.mat'])
+    eval(['sub',subjn,'=sub;']);
+    substr=[substr,',sub',subjn];
+end
+
+cfg=[];
+cfg.channel='MEG';
+cfg.keepindividual = 'yes';
+
+eval(['gadom=ft_timelockgrandaverage(cfg',domstr,');']);
+eval(['gasub=ft_timelockgrandaverage(cfg',substr,');']);
+clear dom* sub*
+
+
+%% plot the fields
+timepoint=0.2;
+cfg=[];
+cfg.zlim='maxmin';
+cfg.xlim=[timepoint timepoint];
+cfg.layout = '4D248.lay';
+figure;
+ft_topoplotER(cfg,gasub)
+title ('Subordinate Meanings')
+figure;
+ft_topoplotER(cfg,gadom)
+title ('Dominant Meanings')
+%% t-test per channel for one time point
+cfgs=[];
+cfgs.latency=[timepoint timepoint];
+cfgs.method='stats';
+cfgs.statistic='paired-ttest';
+cfgs.design = [ones(1,25) ones(1,25)*2];
+[stat] = ft_timelockstatistics(cfgs, gasub,gadom);
+
+datadif=gadom;
+datadif.individual=gasub.individual-gadom.individual;  
+cfg.highlight = 'on';
+cfg.highlightchannel = find(stat.prob<0.05);
+cfg.zlim='maxmin';
+figure;ft_topoplotER(cfg, datadif);
+colorbar;
+title('Sub - Dom')
+% I arranged the above script in a function 'statPlot11' to save space
+% below. run as statPlot11(gasub,gadom,0.2)
+
+%% Similarity and differences between subjects in 100ms field
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.interactive='yes';
+cfg.xlim=[0.1 0.1];
+load 1/DOM/dom
+figure;ft_topoplotER(cfg,dom);
+title('SUBJECT 1')
+load 2/DOM/dom
+figure;ft_topoplotER(cfg,dom);
+title('SUBJECT 2')
+load 8/DOM/dom
+figure;ft_topoplotER(cfg,dom);
+title('SUBJECT 8')
+
+
+%% Realign subjects correct fields for head position and size
+subjn='2';
+load '25/DOM/dom.mat';
+cfg=[];
+cfg.template={dom.grad};
+hs=ft_read_headshape([subjn,'/DOM/hs_file']);
+[o,r]=fitsphere(hs.pnt);
+load([subjn,'/DOM/dom.mat']);
+cfg.inwardshift=0.025;
+cfg.vol.r=r;cfg.vol.o=o;
+cfg.trials=1;
+dom_ra=ft_megrealign(cfg,dom);
+%% t-test per channel for one time point, realigned data
+
+% here we load grandaverage files after realignment
+load gadom_ra
+gadomra=gadom_ra;
+load gasub_ra
+gasubra=gasub_ra;
+% now statistics for 0.2ms
+statPlot11(gasubra,gadomra,0.2)
+
+clear *ra
+
+%% cluster based permutations statistics
+% Check which neghbouring channels are significantly greater / smaller for
+% sub compared to dom. Then taking clusters of neighbours we run a
+% permutation test to check if deviding the trials by condition is
+% different than divide trials randomly.
+% WHY? clustering means less comparisons, permutations means data doesn't
+% have to be normal disyribution.
+
+load ~/work-drafts/matlab/neighbours
+
+%    I calculated "neighbourhood" like this:
+% load '25/DOM/dom.mat';
+% cfg=[];
+% cfg.method='distance';
+% cfg.grad=dom.grad;
+% cfg.neighbourdist = 0.04; % default is 0.04m
+% neighbours = ft_prepare_neighbours(cfg, dom);
+% neighbours=neighbours(1:248);
+
+cfg=[];
+cfg.neighbours = neighbours;
+cfg.latency     = [0.2 0.2];
+cfg.numrandomization = 1000;
+cfg.correctm         = 'cluster';
+cfg.uvar        = 1; % row of design matrix that contains unit variable (in this case: subjects)
+cfg.ivar        = 2; %
+cfg.method      = 'montecarlo';
+cfg.statistic   = 'depsamplesT';
+cfg.design = [1:25 1:25];
+cfg.design(2,:) = [ones(1,25) ones(1,25)*2];
+
+
+
+[stat] = ft_timelockstatistics(cfg, gasub, gadom);
+neg_cluster_pvals = [stat.negclusters(:).prob];
+pos_cluster_pvals = [stat.posclusters(:).prob];
+
+% realignment improve statistics? I ran:
+% [stat_ra] = ft_timelockstatistics(cfg, gasub_ra, gadom_ra);
+% neg_cluster_pvals = [stat_ra.negclusters(:).prob]
+% pos_cluster_pvals = [stat_ra.posclusters(:).prob]
+% prob was about the same
+
+% here we select channels of significant clusters for display
+neg_signif_clust = find(neg_cluster_pvals < stat.cfg.alpha);
+neg = ismember(stat.negclusterslabelmat, neg_signif_clust);
+%neg=ismember(neg_signif_clust,stat.negclusterslabelmat)
+datadif=gasub;
+datadif.individual=gasub.individual-gadom.individual;
+cfgp=[];
+cfgp.layout='4D248.lay';
+cfgp.interactive='yes';
+cfgp.xlim=[0.2 0.2];
+cfgp.highlight = 'on';
+cfgp.highlightchannel = find(neg);
+ft_topoplotER(cfgp, datadif);colorbar;
+title(['Sub - Dom significant neg cluster (p=',num2str(neg_cluster_pvals),')']);
+
+%% Compute planar gradient (megplanar) to reduce noise.
+% Relies on dipole topography. One subject, M100.
+% 
+load 1/DOM/dom
+cfg=[];
+cfg.planarmethod   = 'orig';
+cfg.neighbours     = neighbours;
+[interp] = ft_megplanar(cfg, dom);
+cfg=[];
+cfg.combinegrad  = 'yes';
+dom_cp = ft_combineplanar(cfg, interp)
+cfgp = [];
+cfgp.xlim=[0.1 0.1];
+cfgp.layout = '4D248.lay';
+figure;
+ft_topoplotER(cfgp,dom_cp)
+title('planar')
+figure;
+ft_topoplotER(cfgp,dom)
+title('raw')
+%% MEG planar statistics for M170
+load gadom_cp
+load gasub_cp
+
+statPlot11(gasub_cp,gadom_cp,0.2)
+
+% you can also try for M100 statPlot11(gasub_cp,gadom_cp,0.1)
+% it could make sense to do megrealign after meg planar but It is
+% impossible with fieldtrip now.
+%% RMS for all the MEG channels
+% It is possible to calculate RMS for all the channels with clustData.
+% Here we end up with one trace per condition, easy to run a ttest for each
+% time point. We can also calculate the area between the curves.
+cfg=[];
+cfg.method='RMS';
+cfg.neighbours='all';
+gadomRMSall=clustData(cfg,gadom);
+gasubRMSall=clustData(cfg,gasub);
+% you can also calculate RMS without clustData in less moves:
+% subRMS=squeeze(sqrt(mean(gasub.individual.^2,2)));
+% domRMS=squeeze(sqrt(mean(gadom.individual.^2,2)));
+
+cfgs=[];
+cfgs.method='stats';
+cfgs.statistic='paired-ttest';
+cfgs.design = [ones(1,25) ones(1,25)*2];
+[stat] = ft_timelockstatistics(cfgs, gasubRMSall, gadomRMSall)
+
+plot(gadomRMSall.time,squeeze(mean(gadomRMSall.individual,1)),'k');
+hold on
+plot(gasubRMSall.time,squeeze(mean(gasubRMSall.individual,1)),'r');
+plot(stat.time(find(stat.prob<0.05)),1.1*squeeze(max(mean(gasubRMSall.individual,1))),'k*');
+legend('Dom','Sub','sig')
+% don't close the figure
+
+% area under curve
+timelim=[0.17 0.2];
+samp1=nearest(gadomRMSall.time,timelim(1));
+samp2=nearest(gadomRMSall.time,timelim(2));
+timeline=gadomRMSall.time(1,samp1:samp2);
+domcurve=squeeze(gadomRMSall.individual(:,1,samp1:samp2))';
+subcurve=squeeze(gasubRMSall.individual(:,1,samp1:samp2))';
+domArea=trapz(timeline,domcurve);
+subArea=trapz(timeline,subcurve);
+[~,b]=ttest(domArea,subArea)
+hsub=area(timeline,mean(subcurve,2));
+set(hsub,'FaceColor','r','EdgeColor','r')
+hdom=area(timeline,mean(domcurve,2));
+set(hdom,'FaceColor','w','EdgeColor','w')
+%% RMS for left and right sensors
+cfg=[];
+cfg.method='RMS';
+cfg.neighbours='LR';
+gadomRMS_LR=clustData(cfg,gadom);
+gasubRMS_LR=clustData(cfg,gasub);
+
+subRMS_L=squeeze(mean(gasubRMS_LR.individual(:,1,:),1));
+domRMS_L=squeeze(mean(gadomRMS_LR.individual(:,1,:),1));
+subRMS_R=squeeze(mean(gasubRMS_LR.individual(:,2,:),1));
+domRMS_R=squeeze(mean(gadomRMS_LR.individual(:,2,:),1));
+
+figure;
+plot(gasub.time,subRMS_L,'r')
+hold on
+plot(gasub.time,domRMS_L,'b')
+ylim([0 1e-13]);
+plot(gasub.time,subRMS_R,'m')
+hold on
+plot(gasub.time,domRMS_R,'c')
+legend('SUB L','DOM L','SUB R','DOM R')
+ylim([0 1e-13]);
+
+%% RMS for clusters
+% Here each channel is replaced with the RMS of its neighbours. This is
+% good for finding why the RMS was significant over hemisphere or globally.
+cfg=[];
+cfg.neighbours=neighbours;
+cfg.method='RMS';
+gadomRMS=clustData(cfg,gadom);
+gasubRMS=clustData(cfg,gasub);
+statPlot11(gasubRMS,gadomRMS,0.2)
+
+%% Mean cluster value
+% This is really smoothing of the raw signal, no RMS.
+cfg.method='mean';
+gadomMC=clustData(cfg,gadom);
+gasubMC=clustData(cfg,gasub);
+statPlot11(gasubMC,gadomMC,0.2,[-1e-13 1e-13])
+
+
+
+
+##### SOURCE END #####
+--></body></html>
