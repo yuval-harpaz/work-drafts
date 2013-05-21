@@ -1,6 +1,7 @@
+function course10_SAMNwts(foi)
 cd /media/YuvalExtDrive/VM/Data
 load somsens/dataShort
-foi=11;
+
 [SAMHeader, ~, ActWgts]=readWeights('somsens/SAM/Raw,1-70Hz,Global.wts');
 cohlr=zeros(length(ActWgts),1);
 for Xi=-12:0.5:12
@@ -17,7 +18,10 @@ for Xi=-12:0.5:12
                 SAMHeader.ZStart SAMHeader.ZEnd],...
                 100.*SAMHeader.StepSize,0);
             if ~isempty(find(ActWgts(indR,:))) && ~isempty(find(ActWgts(indL,:)))
-                !echo 2 > somsens/SAM/LR.txt
+                !echo 5 > somsens/SAM/LR.txt
+                !echo "-0.5 0 5.5" >> somsens/SAM/LR.txt
+                !echo "7 -2.5 0" >> somsens/SAM/LR.txt 
+                !echo "7 3.0 0" >> somsens/SAM/LR.txt
                 eval(['!echo "',num2str(Xi),' ',num2str(Yi),' ',num2str(Zi),'" >> somsens/SAM/LR.txt'])
                 eval(['!echo "',num2str(Xi),' ',num2str(-Yi),' ',num2str(Zi),'" >> somsens/SAM/LR.txt'])
                 !SAMNwts -r somsens -d hb_c,rfhp0.1Hz -m RawN -c Global -t LR.txt
@@ -51,5 +55,5 @@ cd somsens
 cfg=[];
 cfg.step=5;
 cfg.boxSize=[-120 120 -90 90 -20 150];
-cfg.prefix='CohNLR11Hz';
+cfg.prefix=['CohN5LR',num2str(foi),'Hz'];
 VS2Brik(cfg,cohlr)
