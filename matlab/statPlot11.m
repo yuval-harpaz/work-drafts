@@ -10,7 +10,12 @@ if isempty(cfg.zlim)
 end
 cfg.xlim=[timepoint timepoint];
 cfg.layout = '4D248.lay';
-ft_topoplotER(cfg,data1,data2)
+figure;
+ft_topoplotER(cfg,data1);
+title(inputname(1))
+figure;
+ft_topoplotER(cfg,data2);
+title(inputname(2))
 
 cfgs=[];
 cfgs.latency=[timepoint timepoint];
@@ -26,4 +31,6 @@ cfg.highlightchannel = find(stat.prob<0.05);
 cfg.zlim='maxmin';
 figure;ft_topoplotER(cfg, datadif);
 colorbar;
+title([inputname(1),'-',inputname(2)])
+
 end
