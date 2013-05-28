@@ -1,4 +1,4 @@
-function ambPlotStat1(prefix,lims,method,loc)
+function ambPlotStat12(prefix,lims,method,loc)
 if ~exist('method','var')
     method=[];
 end
