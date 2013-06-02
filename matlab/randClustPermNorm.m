@@ -1,37 +1,30 @@
-function [critClustSize,critT]=randClustPerm(n)
+function [critClustSize,critT]=randClustPermNorm(n)
+cd /home/yuval/Data/perm
 clustSize=zeros(n,1);
 if exist('tMinMax.txt','file')
     !rm tMinMax.txt
 end
+if exist('Post_Pre+tlrc.BRIK','file')
+    !rm Post_Pre_Norm+tlrc*
+end
+!ls quad*01 -d > ls.txt
+LSA=importdata('ls.txt');
+!ls quad*02 -d > ls.txt
+LSB=importdata('ls.txt');
 for permi=1:n
     if exist('TTnew+tlrc.BRIK','file')
         !rm TTnew+tlrc*
     end
-    rnd1=round(rand(1,9)+1);
+    rnd1=round(rand(1,length(LSA))+1);
     rnd2=rnd1*-1+3;
-    
-    
-    command = ['~/abin/3dttest++ -paired -no1sam -mask ~/SAM_BIU/docs/MASKbrain+tlrc ',...
-        '-setA V1 ',...
-        'sub05v1 quad050',num2str(rnd1(1)),'/alpha2+tlrc ',...
-        'sub06v1 quad060',num2str(rnd1(2)),'/alpha2+tlrc ',...
-        'sub07v1 quad070',num2str(rnd1(3)),'/alpha2+tlrc ',...
-        'sub09v1 quad090',num2str(rnd1(4)),'/alpha2+tlrc ',...
-        'sub10v1 quad100',num2str(rnd1(5)),'/alpha2+tlrc ',...
-        'sub14v1 quad140',num2str(rnd1(6)),'/alpha2+tlrc ',...
-        'sub15v1 quad150',num2str(rnd1(7)),'/alpha2+tlrc ',...
-        'sub16v1 quad160',num2str(rnd1(8)),'/alpha2+tlrc ',...
-        'sub18v1 quad180',num2str(rnd1(9)),'/alpha2+tlrc ',...
-        '-setB V2 ',...
-        'sub05v2 quad050',num2str(rnd2(1)),'/alpha2+tlrc ',...
-        'sub06v2 quad060',num2str(rnd2(2)),'/alpha2+tlrc ',...
-        'sub07v2 quad070',num2str(rnd2(3)),'/alpha2+tlrc ',...
-        'sub09v2 quad090',num2str(rnd2(4)),'/alpha2+tlrc ',...
-        'sub10v2 quad100',num2str(rnd2(5)),'/alpha2+tlrc ',...
-        'sub14v2 quad140',num2str(rnd2(6)),'/alpha2+tlrc ',...
-        'sub15v2 quad150',num2str(rnd2(7)),'/alpha2+tlrc ',...
-        'sub16v2 quad160',num2str(rnd2(8)),'/alpha2+tlrc ',...
-        'sub18v2 quad180',num2str(rnd2(9)),'/alpha2+tlrc'];
+    setA='-setA r1 ';
+    setB='-setB r2 ';
+    for subi=1:33
+        setA=[setA,LSA{subi},'r1 ',LSA{subi},'/normp',num2str(rnd1(subi)),'+tlrc '];
+        setB=[setB,LSB{subi},'r1 ',LSB{subi},'/normp',num2str(rnd2(subi)),'+tlrc '];
+    end
+
+    command = ['~/abin/3dttest++ -paired -no1sam -mask ~/SAM_BIU/docs/MASKbrain+tlrc ',setA,setB];
     [~, ~] = unix(command);
     
     % !~/abin/3dExtrema -volume -closure -data_thr 3 TTnew+tlrc[1]
@@ -71,7 +64,19 @@ tList=sort(tList,'descend');
 critT=tList(ceil(0.05*n*2));
 
 
+rnd1=ones(1,length(LSA));
+rnd2=rnd1+1;
 
+setA='-setA r1 ';
+setB='-setB r2 ';
+for subi=1:33
+    setA=[setA,LSA{subi},'r1 ',LSA{subi},'/normp',num2str(rnd1(subi)),'+tlrc '];
+    setB=[setB,LSB{subi},'r1 ',LSB{subi},'/normp',num2str(rnd2(subi)),'+tlrc '];
+end
+% making the real ttest
+command = ['~/abin/3dttest++ -paired -no1sam -prefix Post_Pre_Norm -mask ~/SAM_BIU/docs/MASKbrain+tlrc ',setA,setB];
+[~, ~] = unix(command);
+end
 
 
 % if exist('tV1V2+tlrc.BRIK')
