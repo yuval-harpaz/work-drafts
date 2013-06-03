@@ -1,5 +1,5 @@
-function [critClustSize,critT]=randClustPermPostPre42(n)
-cd /home/yuval/Data/perm
+function [critClustSize,critT]=randClustPermPostPre42(n,tThresh)
+%cd /home/yuval/Data/perm
 clustSize=zeros(n,1);
 if exist('tMinMax.txt','file')
     !rm tMinMax.txt
@@ -19,7 +19,7 @@ for permi=1:n
     rnd2=rnd1*-1+3;
     setA='-setA r1 ';
     setB='-setB r2 ';
-    for subi=1:33
+    for subi=1:length(LSA)
         setA=[setA,LSA{subi},'r1 ',LSA{subi},'/alpha',num2str(rnd1(subi)),'+tlrc '];
         setB=[setB,LSB{subi},'r1 ',LSB{subi},'/alpha',num2str(rnd2(subi)),'+tlrc '];
     end
@@ -31,11 +31,12 @@ for permi=1:n
     % !~/abin/3dExtrema -volume -closure -data_thr 3 -minima TTnew+tlrc[1]
     % !~/abin/3dExtrema -volume -closure -data_thr 3 -minima -output min TTnew+tlrc[1]
     !~/abin/3dBrickStat -min -max TTnew+tlrc'[1]' >> tMinMax.txt
-    !~/abin/3dcalc -a TTnew+tlrc'[1]' -exp 'ispositive(a-3)*a' -prefix pos
-    !~/abin/3dcalc -a TTnew+tlrc'[1]' -exp '-1*isnegative(a+3)*a' -prefix neg
+    eval(['!~/abin/3dcalc -a TTnew+tlrc''','[1]''',' -exp ''','ispositive(a-',num2str(tThresh),')*a''',' -prefix pos'])
+    eval(['!~/abin/3dcalc -a TTnew+tlrc''','[1]''',' -exp ''','isnegative(a+',num2str(tThresh),')*a''',' -prefix neg'])
+    %!~/abin/3dcalc -a TTnew+tlrc'[1]' -exp '-1*isnegative(a+3)*a' -prefix neg
     
-    !~/abin/3dclust -quiet -1clip 3 5 125 neg+tlrc > negClust.txt
-    !~/abin/3dclust -quiet -1clip 3 5 125 pos+tlrc > posClust.txt
+    eval(['!~/abin/3dclust -quiet -1clip ',num2str(tThresh),' 5 125 neg+tlrc > negClust.txt'])
+    eval(['!~/abin/3dclust -quiet -1clip ',num2str(tThresh),' 5 125 pos+tlrc > posClust.txt'])
     negClust=importdata('negClust.txt');
     posClust=importdata('posClust.txt');
     if iscell(negClust)
@@ -49,14 +50,14 @@ for permi=1:n
         posClustSize=posClust(1)/125;
     end
     
-    clustSize(permi,1)=max([negClustSize,posClustSize]);
+    clustSize(permi,1:2)=[negClustSize,posClustSize];
     !rm neg+tlrc*
     !rm pos+tlrc*
 end
-
+clustSize=[clustSize(:,1);clustSize(:,2)];
 clustSize=sort(clustSize,'descend');
 % take the 5% greatest volumes (in voxels) as critical cluster size
-critClustSize=clustSize(ceil(0.05*n));
+critClustSize=clustSize(ceil(0.05*n*2));
 % take the 5% extreme (max and -1*min) t values as criticat t
 tList=importdata('tMinMax.txt');
 tList=[-tList(:,1);tList(:,2)];
@@ -69,7 +70,7 @@ rnd2=rnd1+1;
 
 setA='-setA r1 ';
 setB='-setB r2 ';
-for subi=1:33
+for subi=1:length(LSA)
     setA=[setA,LSA{subi},'r1 ',LSA{subi},'/alpha',num2str(rnd1(subi)),'+tlrc '];
     setB=[setB,LSB{subi},'r1 ',LSB{subi},'/alpha',num2str(rnd2(subi)),'+tlrc '];
 end
