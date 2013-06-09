@@ -212,4 +212,7 @@ legend('MEG','EEG');
 figure;
 plot(time(1:10172),E1)
 title('channel E1 (Fp1), first 10sec')
+movefile([run,'/',megFN],[run,'_',megFN]);
+movefile([run,'/','rw_',megFN],[run,'/',megFN]);
+display(['orig file is ./',run,'_',megFN]);
 

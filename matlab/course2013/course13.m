@@ -1,16 +1,34 @@
-function [critClustSize,critT]=randClustPermPostPre42(n,tThresh)
-%cd /home/yuval/Data/perm
-clustSize=zeros(n,1);
+%% Random permutations for multiple comparisons
+% Here we perform dependent sample ttest for every voxel. we have two
+% measurements per subject, one before and one after some task (alpha1 and
+% alpha2. We run the ttest in the end but first we compote the ttest with
+% random run order, so for subject 1 we take alpha1 - alpha2 and for
+% subject 2 the other way around. then we see if we still have main effect,
+% and what size of clusters we get if we mask with a fixed threshold. We
+% run it n times and make a distribution of the maximum t value and maximum
+% cluster size. In the end we see if the real ttest yielded an extreme t
+% value anywhere or whether the clusters are extremely big.
+
+%% Set N permutations and Threshold
+n=100;
+tThresh=2.044;
+
+%% Run the permutations
+clustSize=zeros(n,2);
 if exist('tMinMax.txt','file')
     !rm tMinMax.txt
 end
-if exist('Post_Pre+tlrc.BRIK','file')
+if exist('Post_Pre_Norm+tlrc.BRIK','file')
     !rm Post_Pre+tlrc*
 end
-!ls quad* -d > ls.txt
+if exist('neg+tlrc.BRIK','file')
+    !rm neg+tlrc*
+    !rm pos+tlrc*
+end
+
+!ls quad*01 -d > ls.txt
 LSA=importdata('ls.txt');
-% !ls quad*02 -d > ls.txt
-% LSB=importdata('ls.txt');
+!rm ls
 for permi=1:n
     if exist('TTnew+tlrc.BRIK','file')
         !rm TTnew+tlrc*
@@ -23,18 +41,14 @@ for permi=1:n
         setA=[setA,LSA{subi},'r1 ',LSA{subi},'/alpha',num2str(rnd1(subi)),'+tlrc '];
         setB=[setB,LSA{subi},'r1 ',LSA{subi},'/alpha',num2str(rnd2(subi)),'+tlrc '];
     end
-
+    % next two lines run 3dttest++, one permutation
     command = ['~/abin/3dttest++ -paired -no1sam -mask ~/SAM_BIU/docs/MASKbrain+tlrc ',setA,setB];
     [~, ~] = unix(command);
-    
-    % !~/abin/3dExtrema -volume -closure -data_thr 3 TTnew+tlrc[1]
-    % !~/abin/3dExtrema -volume -closure -data_thr 3 -minima TTnew+tlrc[1]
-    % !~/abin/3dExtrema -volume -closure -data_thr 3 -minima -output min TTnew+tlrc[1]
+    % read min and max t value
     !~/abin/3dBrickStat -min -max TTnew+tlrc'[1]' >> tMinMax.txt
+    % compute volume of largest positive and negative clusters
     eval(['!~/abin/3dcalc -a TTnew+tlrc''','[1]''',' -exp ''','ispositive(a-',num2str(tThresh),')*a''',' -prefix pos'])
     eval(['!~/abin/3dcalc -a TTnew+tlrc''','[1]''',' -exp ''','isnegative(a+',num2str(tThresh),')*a''',' -prefix neg'])
-    %!~/abin/3dcalc -a TTnew+tlrc'[1]' -exp '-1*isnegative(a+3)*a' -prefix neg
-    
     eval(['!~/abin/3dclust -quiet -1clip ',num2str(tThresh),' 5 125 neg+tlrc > negClust.txt'])
     eval(['!~/abin/3dclust -quiet -1clip ',num2str(tThresh),' 5 125 pos+tlrc > posClust.txt'])
     negClust=importdata('negClust.txt');
@@ -49,10 +63,10 @@ for permi=1:n
     else
         posClustSize=posClust(1)/125;
     end
-    
     clustSize(permi,1:2)=[negClustSize,posClustSize];
     !rm neg+tlrc*
     !rm pos+tlrc*
+    !rm *Clust.txt
 end
 clustSize=[clustSize(:,1);clustSize(:,2)];
 clustSize=sort(clustSize,'descend');
@@ -63,8 +77,8 @@ tList=importdata('tMinMax.txt');
 tList=[-tList(:,1);tList(:,2)];
 tList=sort(tList,'descend');
 critT=tList(ceil(0.05*n*2));
-
-
+!rm tMinMax.txt
+%% Making the real ttest
 rnd1=ones(1,length(LSA));
 rnd2=rnd1+1;
 
@@ -77,30 +91,12 @@ end
 % making the real ttest
 command = ['~/abin/3dttest++ -paired -no1sam -prefix Post_Pre -mask ~/SAM_BIU/docs/MASKbrain+tlrc ',setA,setB];
 [~, ~] = unix(command);
-end
+% now open AFNI and view Post_Pre+tlrc.
+% to see if you have sig voxels check the range of the overlay (see arrow0). Note, there
+% are two images there, means difference (brik[0]) and t values (brik[1]).
+% choose [1] in Define Overlay (Arrow1).
+% to see if you have large clusters set the threshold to tThresh (arrow with no number), click on
+% clusterize (arrow2), set (arrow3), Rpt (arrow4). Look at the list for
+% cluster size (arrow6).
+!~/abin/afni -dset ~/SAM_BIU/docs/temp+tlrc
 
-
-% if exist('tV1V2+tlrc.BRIK')
-%     !rm tV1V2+tlrc.*
-% end
-% unix(['~/abin/3dttest++ -paired -prefix tV1V2 -no1sam -mask ~/SAM_BIU/docs/MASKbrain+tlrc ',...
-%     '-setA V1 ',...
-%     'sub05v1 quad0501/alpha2+tlrc ',...
-%     'sub06v1 quad0601/alpha2+tlrc ',...
-%     'sub07v1 quad0701/alpha2+tlrc ',...
-%     'sub09v1 quad0901/alpha2+tlrc ',...
-%     'sub10v1 quad1001/alpha2+tlrc ',...
-%     'sub14v1 quad1401/alpha2+tlrc ',...
-%     'sub15v1 quad1501/alpha2+tlrc ',...
-%     'sub16v1 quad1601/alpha2+tlrc ',...
-%     'sub18v1 quad1801/alpha2+tlrc ',...
-%     '-setB V2 ',...
-%     'sub05v2 quad0502/alpha2+tlrc ',...
-%     'sub06v2 quad0602/alpha2+tlrc ',...
-%     'sub07v2 quad0702/alpha2+tlrc ',...
-%     'sub09v2 quad0902/alpha2+tlrc ',...
-%     'sub10v2 quad1002/alpha2+tlrc ',...
-%     'sub14v2 quad1402/alpha2+tlrc ',...
-%     'sub15v2 quad1502/alpha2+tlrc ',...
-%     'sub16v2 quad1602/alpha2+tlrc ',...
-%     'sub18v2 quad1802/alpha2+tlrc']);
