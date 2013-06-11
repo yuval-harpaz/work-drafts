@@ -26,6 +26,7 @@ else
     
     cfg                  = [];
     cfg.covariance       = 'yes';
+    cfg.covariancewindow = [-inf 0];
     cfg.removemean       = 'yes';
     cfg.keeptrials='no';
     if ~avg
@@ -40,7 +41,7 @@ else
     cfg8.method = method;
     cfg8.grid= grid;
     cfg8.vol    = vol;
-    cfg8.lambda = 0.05;
+    cfg8.lambda =1.2e9;
     %cfg.channel={'MEG','MEGREF'};
     cfg8.keepfilter='yes';
     source = ft_sourceanalysis(cfg8, cov);
