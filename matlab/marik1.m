@@ -24,7 +24,7 @@ trl=find(trig==2);
 cfg=[];
 cfg.trl=trl'-102;
 cfg.trl(:,2)=trl+306;
-cfg.trl(:,3)=102;
+cfg.trl(:,3)=-102;
 cfg.dataset=fileName1;
 cfg.demean='yes';
 cfg.baselinewindow=[-0.1 0];
