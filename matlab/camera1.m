@@ -1,4 +1,4 @@
-cd /home/yuval/Data/camera
+cd /home/yuval/Data/marik/camera
 fileName1='1/c,rfhp0.1Hz';
 fileName2='2/c,rfhp0.1Hz';
 hdr1=ft_read_header(fileName1);
@@ -19,23 +19,24 @@ legend(Measurement_head_coil_w_labels.Trajectories.Labeled.Labels)
 t1=mean(cam(1:4,:,1:1000),3); % R chick, Nose, upper lip
 t1fix = [t1(:,2) t1(:,1) t1(:,3)]/1000;
 t1meg=hdr1.orig.user_block_data{1,12}.pnt([12:15],:);
-M1 = spm_eeg_inv_rigidreg(t1meg',t1fix')
+%M1 = spm_eeg_inv_rigidreg(t1meg',t1fix')
+M1=makeTrans(t1fix,t1meg)
 
 P1hy=t1fix';
 P1hy(4,:)=1;
 alignedP1hy = M1 * P1hy;
 
-
+t1New=transPnt(t1fix,M1)
  camera.pnt=t1fix;
  test=ft_transform_geometry(inv(M1), camera)
 % 
 % 
 % estimateRigidTransform(t1meg,t1fix)
-
+figure;
 plot3pnt(hs1.pnt,'b.')
 hold on
 plot3pnt(t1meg,'k.')
-
+plot3pnt(t1New,'ro')
 %plot3(alignedP1hy(1,:),alignedP1hy(2,:),alignedP1hy(3,:),'.r')
 plot3pnt(alignedP1hy(1:4,1:4)','ro')
 

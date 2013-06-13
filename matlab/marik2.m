@@ -43,7 +43,7 @@ cfg.gridsearch='yes';
 dip = ft_dipolefitting(cfg, liAvg);
 ft_plot_dipole(dip.dip.pos,dip.dip.mom,'units','mm','color','black')
 
-%% MNE
+%% MNE 1
 cfg                  = [];
 cfg.covariance       = 'yes';
 cfg.removemean       = 'no';
@@ -63,6 +63,57 @@ bnd.tri=mesh.tess_ctx.face;
 figure;
 ft_plot_mesh(bnd, 'vertexcolor', source.avg.pow(:,155));
 
+%% MNE 2
+cd /home/yuval/Data/camera/2;
+load headmodel
+load leadfield
+
+cfg                  = [];
+cfg.covariance       = 'yes';
+cfg.removemean       = 'no';
+cfg.covariancewindow = [-0.1 0];
+cfg.channel='MEG';
+cov=ft_timelockanalysis(cfg, li2Avg);
+cfg=[];
+cfg.method = 'mne';
+cfg.grid = leadfield;
+cfg.vol = vol;
+% cfg.mne.snr = 1e-20;
+cfg.mne.lambda=1e10;
+cov.grad=liAvg.grad;
+source = ft_sourceanalysis(cfg,cov);
+bnd.pnt=mesh.tess_ctx.vert;
+bnd.tri=mesh.tess_ctx.face;
+figure;
+ft_plot_mesh(bnd, 'vertexcolor', source.avg.pow(:,155));
+
+%% mixed model MNE
+cd ..
+clear
+load avgBoth
+load grad496
+load mesh
+load vol
+load leadfield
+
+cfg                  = [];
+cfg.covariance       = 'yes';
+cfg.removemean       = 'no';
+cfg.covariancewindow = [-0.1 0];
+cfg.channel='MEG';
+cov=ft_timelockanalysis(cfg,avgBoth);
+cfg=[];
+cfg.method = 'mne';
+cfg.grid = leadfield;
+cfg.vol = vol;
+% cfg.mne.snr = 1e-20;
+cfg.mne.lambda=1e11;
+cov.grad=grad;
+source = ft_sourceanalysis(cfg,cov);
+bnd.pnt=mesh.tess_ctx.vert;
+bnd.tri=mesh.tess_ctx.face;
+figure;
+ft_plot_mesh(bnd, 'vertexcolor', source.avg.pow(:,155));
 
 %% loreta?
 

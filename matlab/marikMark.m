@@ -34,13 +34,35 @@ cfg.bpfreq=[3 30];
 cfg.channel='MEG';
 cfg.feedback='no';
 cfg.padding = 1;
-leftInd=ft_preprocessing(cfg);
-% cfg=[];
-% cfg.method='summary';
-% cfg.channel='MEG';
-% cfg.alim=1e-12;
-% leftIndCln=ft_rejectvisual(cfg, leftInd);
-liAvg=ft_timelockanalysis([],leftIndCln);
+Ind=ft_preprocessing(cfg);
+
+
+
+
+% cfgc            = [];
+% %cfgc.method='pca';
+% cfgc.numcomponent=20;
+% comp           = ft_componentanalysis(cfgc, Ind);
+% 
+% %see the components and find the artifact
+% cfgb=[];
+% cfgb.layout='4D248.lay';
+% cfgb.channel = {comp.label{1:5}};
+% cfgbo=ft_databrowser(cfgb,comp);
+
+cfg=[];
+cfg.method='summary';
+cfg.channel='MEG';
+cfg.alim=1e-12;
+IndCln=ft_rejectvisual(cfg, Ind);
+iAvg=ft_timelockanalysis([],IndCln);
+t=0.052;
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.xlim=[t t];
+cfg.interactive='yes';
+figure;
+ft_topoplotER(cfg,iAvg);
 %% read and reject artifacts run2
 trig=readTrig_BIU(fileName2);
 trig=clearTrig(trig);
@@ -57,38 +79,35 @@ cfg.bpfreq=[3 30];
 cfg.channel={'MEG'};
 cfg.feedback='no';
 cfg.padding = 1;
-leftInd2=ft_preprocessing(cfg);
-% cfg=[];
-% cfg.method='summary';
-% cfg.channel='MEG';
-% cfg.alim=1e-12;
-% leftInd2Cln=ft_rejectvisual(cfg, leftInd2);
-li2Avg=ft_timelockanalysis([],leftInd2);
+Ind2=ft_preprocessing(cfg);
+cfg=[];
+cfg.method='summary';
+cfg.channel='MEG';
+cfg.alim=1e-12;
+Ind2Cln=ft_rejectvisual(cfg, Ind2);
+i2Avg=ft_timelockanalysis([],Ind2Cln);
 
 % fix bad A164, A185
-i163=find(ismember(liAvg.label,'A163'));
-i185=find(ismember(liAvg.label,'A185'));
-i203=find(ismember(liAvg.label,'A203'));
-i136=find(ismember(liAvg.label,'A136'));
-i164=find(ismember(liAvg.label,'A164'));
-i186=find(ismember(liAvg.label,'A186'));
-li2Avg.avg(i185,:)=(li2Avg.avg(i163,:)+li2Avg.avg(i203,:))./2;
+i163=find(ismember(iAvg.label,'A163'));
+i185=find(ismember(iAvg.label,'A185'));
+i203=find(ismember(iAvg.label,'A203'));
+i136=find(ismember(iAvg.label,'A136'));
+i164=find(ismember(iAvg.label,'A164'));
+i186=find(ismember(iAvg.label,'A186'));
+i2Avg.avg(i185,:)=(i2Avg.avg(i163,:)+i2Avg.avg(i203,:))./2;
 %li2Avg.avg(i185,:)=li2Avg.avg(i185,:)+1e-15.*(rand(size(li2Avg.avg(i185,:)))-0.5);
-li2Avg.avg(i164,:)=(li2Avg.avg(i136,:)+li2Avg.avg(i186,:))./2;
-
-
-
+i2Avg.avg(i164,:)=(i2Avg.avg(i136,:)+i2Avg.avg(i186,:))./2;
 
 t=0.052;
 cfg=[];
 cfg.layout='4D248.lay';
 cfg.xlim=[t t];
-cfg.interactive='yes';
+%cfg.interactive='yes';
 figure;
-ft_topoplotER(cfg,li2Avg);
+ft_topoplotER(cfg,i2Avg);
 figure;
-ft_topoplotER(cfg,liAvg);
-
+ft_topoplotER(cfg,iAvg);
+save averages iAvg i2Avg
 %% create headmodels
 cd 1
 [vol,grid,~,M1]=headmodel_BIU([],[],5,[],'localspheres');
@@ -119,23 +138,24 @@ grad.coilpos(chanN+1:2*chanN,:)=vol2.cfg.grad.coilpos;
 for chi=1:chanN
     vol.label{chanN+chi,1}=[vol1.label{chi,1},'B'];
 end
-
-avgBoth=rmfield(liAvg,'dof');
+load averages
+avgBoth=rmfield(iAvg,'dof');
 avgBoth=rmfield(avgBoth,'cfg');
-avgBoth.avg=[liAvg.avg;li2Avg.avg];
-avgBoth.var=[liAvg.var;li2Avg.var];
+avgBoth.avg=[iAvg.avg;i2Avg.avg];
+avgBoth.var=[iAvg.var;i2Avg.var];
 avgBoth.grad=ft_convert_units(grad,'mm');
 for chi=1:248
-    avgBoth.label{248+chi,1}=[liAvg.label{chi,1},'B'];
+    avgBoth.label{248+chi,1}=[iAvg.label{chi,1},'B'];
 end
-avgBoth.grad.tra=liAvg.grad.tra;
-avgBoth.grad.tra(271+1:271*2,276+1:276*2)=liAvg.grad.tra;
+avgBoth.grad.tra=iAvg.grad.tra;
+avgBoth.grad.tra(271+1:271*2,276+1:276*2)=iAvg.grad.tra;
 save avgBoth avgBoth
+save vol vol
 %% dipole fit
 
-cd /home/yuval/Data/camera/1;
+cd 1;
 load headmodel
-load ../leftIndAvgs
+load ../averages
 liAvg.grad=ft_convert_units(liAvg.grad,'mm');
 cfg = [];
 cfg.latency = [t t];  % specify latency window around M50 peak
@@ -164,17 +184,21 @@ dip = ft_dipolefitting(cfg, li2Avg);
 ft_plot_dipole(dip.dip.pos/1000,dip.dip.mom/1000,'units','m','color','green');
 
 %% remove refs from grad
-load grad
+grad=iAvg.grad;
 megi=ismember(grad.chantype,'meg');
-grad.chanori=grad.chanori(megi,:);
-grad.chanpos=grad.chanpos(megi,:);
-grad.chantype=grad.chantype(megi,:);
-grad.chanunit=grad.chanunit(megi,:);
-grad.coilori=grad.coilori(megi,:);
-grad.coilpos=grad.coilpos(megi,:);
-grad.label=grad.label(megi,:);
-grad.tra=eye(248*2);
 
+grad.chanori=[grad.chanori(megi,:);grad.chanori(megi,:)];
+grad.chanpos=[grad.chanpos(megi,:);grad.chanpos(megi,:)];
+grad.chantype=grad.chantype(megi,:);
+grad.chantype(249:496)=grad.chantype;
+grad.chanunit=grad.chanunit(megi,:);
+grad.chanunit(249:496)=grad.chanunit;
+grad.coilori=[grad.coilori(megi,:);grad.coilori(megi,:)];
+grad.coilpos=[grad.coilpos(megi,:);grad.coilpos(megi,:)];
+
+grad.label=avgBoth.label;
+grad.tra=eye(248*2);
+grad=ft_convert_units(grad,'mm')
 save grad496 grad
 %% hybrid model dipole fit
 cd /home/yuval/Data/camera
@@ -192,4 +216,34 @@ cfg.gridsearch='yes';
 cfg.channel     = avgBoth.label;
 dip = ft_dipolefitting(cfg, avgBoth);
 ft_plot_dipole(dip.dip.pos/1000,dip.dip.mom/1000,'units','m','color','blue');
+
+load ctx
+ctx=[lh;rh];
+cfg = [];
+%cfg.grad = ft_convert_units(stdAvg.grad,'mm');
+cfg.channel ='MEG';
+cfg.grid.pos = ctx;
+cfg.grid.inside = [1:size(ctx,1)]';
+cfg.vol = vol;
+cfg.grad=grad;
+leadfield = ft_prepare_leadfield(cfg);
+
+cfg                  = [];
+cfg.covariance       = 'yes';
+cfg.removemean       = 'no';
+cfg.covariancewindow = [-0.1 0.3];
+cfg.channel='MEG';
+cov=ft_timelockanalysis(cfg, avgBoth);
+
+cfg=[];
+cfg.method = 'mne';
+cfg.grid = leadfield;
+cfg.vol = vol;
+cfg.mne.lambda = 1e8;
+cov.grad=grad;
+source = ft_sourceanalysis(cfg,cov);
+figure;
+scatter3(ctx(:,1),ctx(:,2),ctx(:,3),30,source.avg.pow(:,155),'fill')
+
+
 
