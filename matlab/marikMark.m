@@ -216,7 +216,7 @@ cfg.gridsearch='yes';
 cfg.channel     = avgBoth.label;
 dip = ft_dipolefitting(cfg, avgBoth);
 ft_plot_dipole(dip.dip.pos/1000,dip.dip.mom/1000,'units','m','color','blue');
-
+%% mne
 load ctx
 ctx=[lh;rh];
 cfg = [];
@@ -231,7 +231,7 @@ leadfield = ft_prepare_leadfield(cfg);
 cfg                  = [];
 cfg.covariance       = 'yes';
 cfg.removemean       = 'no';
-cfg.covariancewindow = [-0.1 0.3];
+cfg.covariancewindow = [-0.1 0];
 cfg.channel='MEG';
 cov=ft_timelockanalysis(cfg, avgBoth);
 
@@ -239,11 +239,180 @@ cfg=[];
 cfg.method = 'mne';
 cfg.grid = leadfield;
 cfg.vol = vol;
-cfg.mne.lambda = 1e8;
+cfg.mne.lambda = 1e9;
 cov.grad=grad;
 source = ft_sourceanalysis(cfg,cov);
 figure;
-scatter3(ctx(:,1),ctx(:,2),ctx(:,3),30,source.avg.pow(:,155),'fill')
+scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,source.avg.pow(:,155),'fill')
+axis tight
+view(200, 30)
+%view(3)
+% lh only
+% scatter3(ctx(1:6237,1),ctx(1:6237,2),ctx(1:6237,3),30,source.avg.pow(1:6237,155),'fill')
+% axis tight
+% view(200, 30)
+% 
+% scatter3(ctx(6238:end,1),ctx(6238:end,2),ctx(6238:end,3),30,source.avg.pow(6238:end,155),'fill')
+% axis tight
+% view(180, 30)
+
+%% one by one
+load averages
+load 1/headmodel;
+load ctx
+ctx=[lh;rh];
+cfg = [];
+%cfg.grad = ft_convert_units(stdAvg.grad,'mm');
+cfg.channel ='MEG';
+cfg.grid.pos = ctx;
+cfg.grid.inside = [1:size(ctx,1)]';
+cfg.vol = vol;
+cfg.grad=ft_convert_units(iAvg.grad,'mm');
+leadfield = ft_prepare_leadfield(cfg);
+
+cfg                  = [];
+cfg.covariance       = 'yes';
+cfg.removemean       = 'no';
+cfg.covariancewindow = [-0.1 0];
+cfg.channel='MEG';
+cov=ft_timelockanalysis(cfg, iAvg);
+
+cfg=[];
+cfg.method = 'mne';
+cfg.grid = leadfield;
+cfg.vol = vol;
+cfg.mne.lambda = 1e9;
+cov.grad=ft_convert_units(iAvg.grad,'mm');
+source = ft_sourceanalysis(cfg,cov);
+figure;
+scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,source.avg.pow(:,155),'fill')
+axis tight
+view(200, 30)
+
+load 2/headmodel;
+cfg = [];
+%cfg.grad = ft_convert_units(stdAvg.grad,'mm');
+cfg.channel ='MEG';
+cfg.grid.pos = ctx;
+cfg.grid.inside = [1:size(ctx,1)]';
+cfg.vol = vol;
+cfg.grad=ft_convert_units(i2Avg.grad,'mm');
+leadfield = ft_prepare_leadfield(cfg);
+cfg                  = [];
+cfg.covariance       = 'yes';
+cfg.removemean       = 'no';
+cfg.covariancewindow = [-0.1 0];
+cfg.channel='MEG';
+cov=ft_timelockanalysis(cfg, i2Avg);
+
+
+cfg=[];
+cfg.method = 'mne';
+cfg.grid = leadfield;
+cfg.vol = vol;
+cfg.mne.lambda = 1e9;
+cov.grad=ft_convert_units(i2Avg.grad,'mm');
+source = ft_sourceanalysis(cfg,cov);
+figure;
+scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,source.avg.pow(:,155),'fill')
+axis tight
+view(200, 30)
+
+%% beamforming 
+cd /home/yuval/Data/marik/mark
+load ctx
+load leadfield.mat
+load vol
+load grad496
+load avgBoth
+ctx=[lh;rh];
+
+cfg                  = [];
+cfg.covariance       = 'yes';
+cfg.removemean       = 'no';
+cfg.covariancewindow = [-0.1 0.3];
+cfg.channel='MEG';
+cov=ft_timelockanalysis(cfg, avgBoth);
+
+cfg=[];
+cfg.method = 'sam';
+cfg.grid = leadfield;
+cfg.vol = vol;
+cfg.sam.lambda = 0.05;
+cfg.fixedori='gareth';
+cov.grad=grad;
+s = ft_sourceanalysis(cfg, cov);
+sN=length(s.avg.mom);
+s.avg.pow=zeros(1,sN);
+s.avg.norm=zeros(1,sN);
+for si=1:sN
+    if ~isempty(s.avg.mom{1,si})
+        s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
+        %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
+    end
+end
+
+figure;
+noori=s.avg.pow./s.avg.noise;
+scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,noori,'fill')
+axis tight
+view(200, 30)
+
+%% fixed ori
+load ctxdip
+clear grid
+grid.pos=[lhpnt;rhpnt];
+grid.mom=[lhori;rhori];
+grid.inside=1:length(grid.mom);
+cfg=[];
+cfg.method = 'sam';
+cfg.grid = grid;
+cfg.vol = vol;
+cfg.sam.lambda = 0.05;
+cfg.fixedori='set';
+s = ft_sourceanalysis(cfg, cov);
+sN=length(s.avg.mom);
+s.avg.pow=zeros(1,sN);
+s.avg.norm=zeros(1,sN);
+for si=1:sN
+    if ~isempty(s.avg.mom{1,si})
+        s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
+        %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
+    end
+end
+fixedori=s.avg.pow./s.avg.noise;
+figure;
+scatter3(grid.pos(:,1),grid.pos(:,2),grid.pos(:,3),20,fixedori,'fill')
+axis tight
+view(200, 30)
+
+
+
+clear grid
+grid.pos=[lhpnt;rhpnt];
+%grid.mom=[lhori;rhori];
+grid.inside=1:length(grid.pos);
+cfg=[];
+cfg.method = 'sam';
+cfg.grid = grid;
+cfg.vol = vol;
+cfg.sam.lambda = 0.05;
+cfg.fixedori='gareth';
+s = ft_sourceanalysis(cfg, cov);
+sN=length(s.avg.mom);
+s.avg.pow=zeros(1,sN);
+s.avg.norm=zeros(1,sN);
+for si=1:sN
+    if ~isempty(s.avg.mom{1,si})
+        s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
+        %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
+    end
+end
+fixedori=s.avg.pow./s.avg.noise;
+figure;
+scatter3(grid.pos(:,1),grid.pos(:,2),grid.pos(:,3),20,fixedori,'fill')
+axis tight
+view(200, 30)
 
 
 
