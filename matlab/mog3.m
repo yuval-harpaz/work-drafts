@@ -63,6 +63,7 @@ cfg.channel='EEG';
 avgEEG=ft_timelockanalysis(cfg,eegpca);
 avgEEG.time=avgEEG.time-endSaccS/1024;
 avgEEG=correctBL(avgEEG,[-0.1,0])
+figure;
 cfg=[];
 cfg.layout='WG32.lay';
 cfg.interactive='yes';
@@ -92,6 +93,116 @@ ft_multiplotER(cfg,avgWBW)
 save avgWBW avgWBW
 % FIXME - correct for diode;
 %% MEG
+cd /home/yuval/Data/alice/maor
+load seg1
+megFN='c,rfhp0.1Hz';
+megFN=['xc,hb,lf_',megFN];
+trig=readTrig_BIU(megFN);
+trig=clearTrig(trig);
+startSmeg=find(trig==2);
+endSmeg=find(trig==18,1); % was supposed to be 20
+megSR=(endSmeg-startSmeg)/((endS-startS)/1024);
+trl=round((samps(:,1)-startS)/1024*megSR)+startSmeg;
+trl=[trl-203,trl+610,-203*ones(size(trl))];
+
+
+
+
+cfg=[];
+cfg.channel='MEG';%{'HEOG','VEOG'};
+cfg.demean='yes';
+cfg.bpfilter='yes';
+cfg.bpfreq=[1 40];
+cfg.padding=0.7;
+cfg.trl=trl;
+cfg.dataset=megFN;
+meg=ft_preprocessing(cfg);
+meg.trialinfo=samps(:,2);
+
+
+
+cfg=[];
+%cfg.channel='MEG';
+cfg.trials=find(samps(:,2)==1);
+avgMEG=ft_timelockanalysis(cfg,meg);
+avgMEG.time=avgMEG.time-endSaccS/1024;
+
+% avgMEG=correctBL(avgMEG,[-0.2,-0.1])
+figure;
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.interactive='yes';
+ft_multiplotER(cfg,avgMEG)
+
+
+
+save seg1 avgEEG samps endSaccS avgMEG
+
+
+% word by word
+time0=find(trig==50)';
+cfg=[];
+% cfg.channel='EEG';%{'HEOG','VEOG'};
+cfg.demean='yes';
+%cfg.blcwindow=[-0.1 0];
+cfg.bpfilter='yes';
+cfg.bpfreq=[1 40];
+cfg.dataset=megFN;
+cfg.padding=0.7;
+cfg.channel={'MEG','TRIGGER'};
+cfg.trl=[time0-203,time0+614,-203*ones(length(time0),1)];
+meg=ft_preprocessing(cfg);
+
+cfg=[];
+cfg.method='pca';
+comp           = ft_componentanalysis(cfg, meg);
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.channel = {comp.label{1:5}};
+cfgo=ft_databrowser(cfg,comp);
+ca=ft_timelockanalysis([],comp);
+plot(ca.avg(1,:),'g')
+% cfg = [];
+% cfg.component = 1; % change
+% cfg.feedback='no';
+% megca = ft_rejectcomponent(cfg, comp);
+cfg=[];
+cfg.method='pca';
+cfg.channel='MEG';
+comp           = ft_componentanalysis(cfg, meg);
+ca=ft_timelockanalysis([],comp);
+
+y=[ca.avg(1,163),ca.avg(1,343)];
+avgComp=[y(1)*ones(1,162),ca.avg(1,163:343),y(2)*ones(1,length(avgWBWmeg.time)-343)];
+plot(avgComp)
+%avgComp=comp.topo(2:end,1)'*avgWBWmeg.avg(2:end,:);
+
+artifact=repmat(comp.topo(2:end,1),1,length(avgWBWmeg.time)).*repmat(ca.avg(1,:),248,1);
+avgMegCln=avgWBWmeg;
+avgMegCln.avg(2:end,:)=avgWBWmeg.avg(2:end,:)-artifact;
+% cfg=[];
+% cfg.method='summary';
+% cfg.channel='MEG';
+% megcln=ft_rejectvisual(cfg,meg);
+cfg=[];
+%cfg.channel='MEG';
+avgWBWmeg=ft_timelockanalysis(cfg,meg);
+
+cfg = [];
+cfg.component = 1; % change
+cfg.feedback='no';
+avgWBWmegCa = ft_rejectcomponent(cfg, comp,avgWBWmeg);
+
+
+
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.interactive='yes';
+figure;
+ft_multiplotER(cfg,avgMegCln)
+save avgWBWmeg avgWBWmeg
+
+%% old stuff
 
 % see the components and find the HB and MOG artifact
 % remember the numbers of the bad components and close the data browser
@@ -167,3 +278,46 @@ hold on
 plot(MOGraw.time{1,1}(1,t),MOGraw.trial{1,1}(221,t),'b')
 
 plot(MOGraw.time{1,1}(1,t),MOGraw.trial{1,1}(1:248,t))
+
+
+
+
+% load mog/comp_V_H
+% compTrace=[];
+% for i=1:find(meg.trialinfo==1)%length(meg.trial)
+%     compTrace(i,1:814)=comp_V_H(1,:)*meg.trial{1,i};
+% end
+% figure;
+% plot(meg.time{1,1},mean(compTrace,1));
+% 
+% % pca
+% cfg=[];
+% cfg.method='pca';
+% comp           = ft_componentanalysis(cfg, meg);
+% cfg=[];
+% cfg.layout='4D248.lay';
+% cfg.channel = {comp.label{1:5}};
+% cfgo=ft_databrowser(cfg,comp);
+% cfg=[];
+% cfg.trials=find(meg.trialinfo==1);
+% avgComp=ft_timelockanalysis(cfg,comp);
+% plot(avgComp.time,avgComp.avg(1:5,:))
+% legend('1','2','3','4','5')
+% LRcomp=1;
+% [~,endSaccS]=max(abs(avgComp.avg(LRcomp,205:307)));
+% 
+% cfg = [];
+% cfg.component = LRcomp; % change
+% megpca = ft_rejectcomponent(cfg, comp);
+% 
+% 
+% cfg=[];
+% cfg.trl=[1,find(trig==18,1),1];
+% cfg.demean='yes';
+% cfg.lpfilter='yes';
+% cfg.lpfreq=40;
+% cfg.channel='MEG';
+% cfg.dataset=megFN;
+% megcont=ft_preprocessing(cfg);
+% MOG=comp_V_H*megcont.trial{1,1};
+% plot(1:length(MOG),1e11*MOG,'g')
