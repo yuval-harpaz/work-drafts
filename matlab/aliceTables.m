@@ -35,9 +35,20 @@ hold on
 plot(avgEEG.time([startE100,startE170,startE300,startE400,endE400]),rmsEEG([startE100,startE170,startE300,startE400,endE400]),'ro')
 
 %% calculate area for whole head RMS
+EEGtable=zeros(9,4);
 for segi=2:2:18
     segStr=num2str(segi);
     load (['files/seg',segStr])
     rms=sqrt(mean(avgEEG.avg.*avgEEG.avg,1));
-    
+    EEGtable(segi/2,1)=trapz(rms(startE100:startE170));
+    EEGtable(segi/2,2)=trapz(rms(startE170:startE300));
+    EEGtable(segi/2,3)=trapz(rms(startE300:startE400));
+    EEGtable(segi/2,4)=trapz(rms(startE400:endE400));
 end
+plot(EEGtable([1 2 4 6 7 8],:)','b')
+hold on
+plot(EEGtable(3,:),'r')
+plot(EEGtable(5,:),'g')
+plot(EEGtable(9,:),'k')
+legend('1','2','4','6','7','8','3 news','5 tamil','9 loud')
+save tableWH EEGtable

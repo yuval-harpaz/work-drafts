@@ -7,7 +7,29 @@ tmplt=temp./sqrt(sum(temp.*temp)); % normalize template
 [SNR,SigX,sigSign]=fitTemp(eog,tmplt,leng+1);
 SNRsigned=SNR.*sigSign./max(SNR);
 SigX=SigX.*sigSign./max(SigX);
+eog=eog-mean(eog);
 eogNorm=eog./max(abs(eog));
+% check if left eye position gets greater volt than right
+LeftPosW=false; %words
+LeftPosR=false; %rows
+
+if mean(SNRsigned(find(~isnan(SNRsigned))))>0
+    LeftPosW=true;
+end
+if mean(SigX(find(~isnan(SigX))))<0
+    LeftPosR=true;
+end
+if LeftPosW==LeftPosR
+    if ~LeftPosW
+        SigX=-SigX;
+        SNRsigned=-SNRsigned;
+    end
+else
+    error('cannot tell if left gets positiv H EOG values')
+end
+        
+    
+figure;
 plot(SNRsigned)
 hold on
 plot(SigX,'k')
