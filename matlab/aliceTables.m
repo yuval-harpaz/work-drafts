@@ -3,6 +3,9 @@ cd (['/home/yuval/Data/alice/',subFold])
 if ~exist('files/seg18.mat','file')
     error('seg18 not found, run alice1')
 end
+if ~exist('avgReduced.mat','file')
+    error('avgReduced not found')
+end
 %% average across segments
 avgEEGall=zeros(32,820);
 avgMEGall=zeros(248,814);

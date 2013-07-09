@@ -1,12 +1,18 @@
-function alice1(subFold)
+function alice1(subFold,thrWord)
 cd /home/yuval/Data/alice
 cd(subFold)
 %% clean HB
 try
-    LSclean=ls('*hb*');
+    LSclean=ls('*lf*');
     megFNc=LSclean(1:end-1);
 catch
     LSclean=[];
+end
+if ~exist('thrWord')
+    thrWord=[];
+end
+if isempty(thrWord)
+    thrWord=1.5;
 end
 LSraw=ls('c,rf*');
 megFN=LSraw(1:end-1);
@@ -18,7 +24,7 @@ if isempty(LSclean)
         'byFFT',0,...
         'HeartBeat',[],...
         'outLierMargin',30);
-    LSclean=ls('*hb*')
+    LSclean=ls('*lf*')
     megFNc=LSclean(1:end-1);
 end
 %% find events and prepare stuff
@@ -90,11 +96,13 @@ if ~exist('./files/topoEOG.mat','file')
     % cfg.continuous='yes';
     % cfg.blocksize=1;
     % cfgo=ft_databrowser(cfg,comp);
-    r=corr([comp.trial{1,1}(1,:)',eog.trial{1,1}(indV,startSeeg-500:endSeeg+500)']);
-    if abs(r(1,2)<0.75)
+    r=corr([comp.trial{1,1}(1:5,:)',eog.trial{1,1}(indV,startSeeg-500:endSeeg+500)']);
+    r=abs(r(1:5,6));
+    [maxcor,rowi]=max(abs(r(1:end-1,end)));
+    if maxcor<0.75
         error('no correlation between pca1 and V EOG')
     end
-    topoV=comp.topo(:,1);
+    topoV=comp.topo(:,rowi);
     % H
     startSeeg=round(evt(find(evt(:,3)==214,1,'first'))*eog.fsample);
     endSeeg=round(evt(find(evt(:,3)==216,1,'last'))*eog.fsample);
@@ -123,11 +131,14 @@ if ~exist('./files/topoEOG.mat','file')
     % cfg.continuous='yes';
     % cfg.blocksize=1;
     % cfgo=ft_databrowser(cfg,comp);
-    r=corr([comp.trial{1,1}(1,:)',eog.trial{1,1}(indH,startSeeg-500:endSeeg+500)']);
-    if abs(r(1,2))<0.75
+    
+    r=corr([comp.trial{1,1}(1:5,:)',eog.trial{1,1}(indH,startSeeg-500:endSeeg+500)']);
+    r=abs(r(1:5,6));
+    [maxcor,rowi]=max(abs(r(1:end-1,end)));
+    if maxcor<0.75
         error('no correlation between pca1 and H EOG')
     end
-    topoH=comp.topo(:,1);
+    topoH=comp.topo(:,rowi);
     save files/indEOG indV indH
     save files/topoEOG topoH topoV
 end
@@ -155,11 +166,14 @@ if ~exist('./files/topoMOG.mat','file')
     % cfg.blocksize=1;
     % cfgo=ft_databrowser(cfg,comp);
     load ~/ft_BIU/matlab/plotwts
+    wts.label=upDown.label;
+    cfg=[];
+    cfg.layout='4D248.lay';
     figure1=figure('position',[1,1,1500,500]);
     for compi=1:5
         wts.avg=comp.topo(:,compi);
         subplot(1,5,compi)
-        ft_topoplotER([],wts);
+        ft_topoplotER(cfg,wts);
     end
     answer=inputdlg('ENTER Comp Number for VERTICAL')
     compnum = str2num(answer{1});
@@ -228,7 +242,7 @@ for piskai=2:2:18
         endSeeg0=str2num(answer{1,1})*1024;
         close
         eogSeg=eog.trial{1,1}(indH,startSeeg:endSeeg0);
-        [wordS,rowS]=findSaccade(eogSeg,2,1.5);
+        [wordS,rowS]=findSaccade(eogSeg,2,thrWord);
         samps=sortrows([wordS,rowS;ones(size(wordS)),3*ones(size(rowS))]');
         samps(:,1)=samps(:,1)+startSeeg-1;
         cfg=[];
@@ -254,6 +268,7 @@ for piskai=2:2:18
         hold on
         plot(endSaccS/1024,compAvg.avg(1,nearest(compAvg.time,endSaccS/1024)),'ro')
         title('Heog COMP and the end of the saccade (red o)')
+        
         cfg=[];
         cfg.channel='EEG';
         cfg.trials=find(samps(:,2)==1);
