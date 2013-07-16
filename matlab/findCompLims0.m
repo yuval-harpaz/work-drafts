@@ -1,4 +1,4 @@
-function [Itroughs,Ipeaks,avgTC,timeCourse]=findCompLims(cfg,varargin)
+function [Itroughs,Ipeaks,avgTC,timeCourse]=findCompLims0(cfg,varargin)
 % Detect limits of event related components based on minimum points
 % Use as
 %   [times] = findCompLims(cfg, avg1, avg2, avg3, ...)
@@ -83,7 +83,7 @@ for avgi=1:length(varargin)
                 if r(ri,chani)<-0.25
                     data4mean(chani,:)=-data4mean(chani,:);
                 end
-            end
+            end       
             timeCourse(avgi,:)=abs(mean(data4mean));
         case 'svd'
             cfgc=[];
@@ -103,9 +103,6 @@ else
     avgTC=timeCourse;
 end
 [peaks, Ipeaks] = findPeaks(avgTC,cfg.zThr, 50, []);
-if isempty(peaks)
-    error('no peaks! check threshold, check notAfter, do something!')
-end
 % keep peaks that are between requested limits
 after=find(Ipeaks>sampNB);
 peaks=peaks(after);
@@ -113,108 +110,49 @@ Ipeaks=Ipeaks(after);
 before=find(Ipeaks<sampNA);
 peaks=peaks(before);
 Ipeaks=Ipeaks(before);
-%% look for troughs FIXME
-der=zeros(size(avgTC));
-der(2:end-1)=diff(diff(avgTC./max(avgTC)));
-maxy=max(avgTC);
-for peaki=1:length(peaks);
-    % check the latest: sampNB, maxDist or previous peak
-    startI=Ipeaks(peaki)-maxDist;
-    if sampNB>startI
-        startI=sampNB;
-    end
-    if peaki>1
-        if Ipeaks(peaki-1)>startI
-            startI=Ipeaks(peaki-1);
+%% look for troughs
+
+for troughi=1:length(peaks)+1;
+    if troughi==1 % from zero to first peak
+        if sampNB>Ipeaks(1)-maxDist
+            startI=sampNB;
+        else
+            startI=Ipeaks(1)-maxDist;
         end
-    end
-    % check the earliest: sampNA, maxDist or next peak
-    endI=Ipeaks(peaki)+maxDist-1;
-    if sampNA<endI
-        endI=sampNA;
-    end
-    if peaki<length(peaks)
-        if Ipeaks(peaki+1)<endI
-            endI=Ipeaks(peaki+1);
+        [miny,minyI]=min(avgTC(startI:Ipeaks(1)));
+        minyI=minyI+startI-1;
+        troughs(troughi)=miny;
+        Itroughs(troughi)=minyI;
+    elseif troughi==length(peaks)+1
+        if length(avgData.time)-Ipeaks(end)<maxDist
+            endI=length(avgData.time);
+            %maxDist=length(avgData.time)-Ipeaks(end);
+        else
+            endI=Ipeaks(end)+maxDist-1;
         end
-    end
-    % look for peaks in -avgTC (troughs)
-    X=-avgTC(startI:endI);
-    [miny, minyI] = findPeaks(X,0, 10, []);
-    minyI=minyI+startI-1;
-    nearZero=find(-miny<maxy/20);
-    if isempty(nearZero);
-        trgh1=[];
-        trgh2=[];
+        [miny,minyI]=min(avgTC(Ipeaks(end):endI));
+        minyI=minyI+Ipeaks(end)-1;
+        troughs(troughi)=miny;
+        Itroughs(troughi)=minyI;
     else
-        miny=miny(nearZero);
-        minyI=minyI(nearZero);
-        trgh1=find(minyI<Ipeaks(peaki),1,'last');
-        trgh2=find(minyI>Ipeaks(peaki),1);
+        Istart=Ipeaks(troughi-1);
+        if Ipeaks(troughi)-Ipeaks(troughi-1)<maxDist
+            Iend=Ipeaks(troughi);
+        else
+            Iend=Ipeaks(troughi-1)+maxDist;
+        end
+        [miny,minyI]=min(avgTC(Istart:Iend));
+        minyI=minyI+Ipeaks(troughi-1)-1;
+        troughs(troughi)=miny;
+        Itroughs(troughi)=minyI;
     end
-    if isempty(trgh1)
-   
-        [troughs(peaki,1),Itroughs(peaki,1)]=min(avgTC(startI:Ipeaks(peaki)));
-        Itroughs(peaki,1)=Itroughs(peaki,1)+startI-1;
-        warning('no trough detected by find peaks, taking min')
-        disp(['before peak no. ',num2str(peaki),' at time ',num2str(avgData.time(Itroughs(peaki,1)))]);
-    else
-        Itroughs(peaki,1)=minyI(trgh1);
-        troughs(peaki,1)=avgTC(Itroughs(peaki,1));
-    end
-    if isempty(trgh2)
-        
-        [troughs(peaki,2),Itroughs(peaki,2)]=min(avgTC(Ipeaks(peaki):endI));
-        Itroughs(peaki,2)=Itroughs(peaki,2)+Ipeaks(peaki)-1;
-        warning('no trough detected by find peaks, taking min')
-        disp(['after peak no. ',num2str(peaki),' at time ',num2str(avgData.time(Itroughs(peaki,2)))]);
-    else
-        Itroughs(peaki,2)=minyI(trgh2);
-        troughs(peaki,2)=avgTC(Itroughs(peaki,2));
-    end
-    %[miny,minyI]=min(avgTC(startI: endI));
-    %minyI=minyI+startI-1;
-    %         troughs(peaki)=miny;
-    %         Itroughs(troughi)=minyI;
-    %     elseif troughi==length(peaks)+1
-    %         if length(avgData.time)-Ipeaks(end)<maxDist
-    %             endI=length(avgData.time);
-    %             %maxDist=length(avgData.time)-Ipeaks(end);
-    %         else
-    %             endI=Ipeaks(end)+maxDist-1;
-    %         end
-    %         [miny,minyI]=min(avgTC(Ipeaks(end):endI));
-    %         minyI=minyI+Ipeaks(end)-1;
-    %         troughs(troughi)=miny;
-    %         Itroughs(troughi)=minyI;
-    %     else
-    %         Istart=Ipeaks(troughi-1);
-    %         if Ipeaks(troughi)-Ipeaks(troughi-1)<maxDist
-    %             Iend=Ipeaks(troughi);
-    %         else
-    %             Iend=Ipeaks(troughi-1)+maxDist;
-    %         end
-    %         [miny,minyI]=min(avgTC(Istart:Iend));
-    %         minyI=minyI+Ipeaks(troughi-1)-1;
-    %         troughs(troughi)=miny;
-    %         Itroughs(troughi)=minyI;
-    %     end
 end
 figure;
 plot(avgData.time,avgTC)
 hold on
-plot(avgData.time(Ipeaks),peaks,'r.')
-plot(avgData.time(Itroughs(:,1)),troughs(:,1),'go')
-plot(avgData.time(Itroughs(:,2)),troughs(:,2),'kx')
-
-legend('timecourse','peaks','troughs before','troughs after')
-%     function [miny,minyI]=findTrough(avgTC,sampLim)
-%         [miny,minyI]=min(avgTC(sampLim(1):sampLim(2)));
-%         [miny, minyI] = findPeaks(avgTC,cfg.zThr, 50, []);
-%         minyI=minyI+startI-1;
-%         troughs(peaki)=miny;
-%         % Itroughs(troughi)=minyI;
-%     end
+plot(avgData.time(Ipeaks),peaks,'ro')
+plot(avgData.time(Itroughs),troughs,'ko')
+legend('timecourse','peaks','troughs')
 end
 
 

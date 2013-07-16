@@ -21,14 +21,13 @@ aliceReduceAvg(subFolder)
 aliceAlpha(subFolder)
 aliceWbW(subFolder)
 
-alicePlots
+open alicePlots
 
-times=findCompLims('rms',[],avgE2);
-timeCourse=findCompLims('yzero',[],avgE2,avgE4,avgE6,avgE8,avgE10,avgE12,avgE14,avgE16,avgE18);
-timeCourseO=findCompLims('yzero',{'O1','O2','Oz'},avgE2,avgE4,avgE6,avgE8,avgE10,avgE12,avgE14,avgE16,avgE18);
-timeCourseO=findCompLims('absMean',{'O1','O2','Oz'},avgE2,avgE4,avgE6,avgE8,avgE10,avgE12,avgE14,avgE16,avgE18);
+open aliceTestCompLimMethod
+% 
+% times=findCompLims('rms',[],avgE2);
+% timeCourse=findCompLims('yzero',[],avgE2,avgE4,avgE6,avgE8,avgE10,avgE12,avgE14,avgE16,avgE18);
+% timeCourseO=findCompLims('yzero',{'O1','O2','Oz'},avgE2,avgE4,avgE6,avgE8,avgE10,avgE12,avgE14,avgE16,avgE18);
+% timeCourseO=findCompLims('absMean',{'O1','O2','Oz'},avgE2,avgE4,avgE6,avgE8,avgE10,avgE12,avgE14,avgE16,avgE18);
 
-cfg=[];
-cfg.method='svd';
-cfg.notBefore=0.05;
-times=findCompLims(cfg,avgE2);
+
