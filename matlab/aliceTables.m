@@ -1,57 +1,46 @@
-function aliceTables(subFold)
-cd (['/home/yuval/Data/alice/',subFold])
-if ~exist('files/seg18.mat','file')
-    error('seg18 not found, run alice1')
+function aliceTables
+cd /home/yuval/Copy/MEGdata/alice
+load comps
+for subi=1:length(comps.C100)
+    subFold=sf{1,subi};
+    cd (['/home/yuval/Data/alice/',subFold])
+    load avgReduced
+    table=zeros(9,4);
+    start100=comps.C100(subi,1);
+    start100E=nearest(avgE2.time,start100);
+    start100M=nearest(avgM2.time,start100);
+    end100=comps.C100(subi,2);
+    end100E=nearest(avgE2.time,end100);
+    end100M=nearest(avgM2.time,end100);
+    start170=comps.C170(subi,1);
+    start170E=nearest(avgE2.time,start170);
+    start170M=nearest(avgM2.time,start170);
+    end170=comps.C170(subi,2);
+    end170E=nearest(avgE2.time,end170);
+    end170M=nearest(avgM2.time,end170);
+    %if ~exist('./files/tablesWH.mat','file')
+        for segi=2:2:18
+            segStr=num2str(segi);
+            eval(['avgEEG=avgE',segStr,';']);
+            eval(['avgMEG=avgM',segStr,';']);
+            % calculate area for whole head RMS
+            rmsE=sqrt(mean(avgEEG.avg.*avgEEG.avg,1));
+            rmsM=sqrt(mean(avgMEG.avg.*avgMEG.avg,1));
+            table(segi/2,1)=trapz(rmsE(start100E:end100E));
+            table(segi/2,2)=trapz(rmsE(start170E:end170E));
+            table(segi/2,3)=trapz(rmsM(start100M:end100M));
+            table(segi/2,4)=trapz(rmsM(start170M:end170M));
+        end
+        save files/tablesWH table
+    %end
 end
-if ~exist('avgReduced.mat','file')
-    error('avgReduced not found')
+% legend('1','2','4','6','7','8','3 news','5 tamil','9 loud')
+for subi=1:length(comps.C100)
+    subFold=sf{1,subi};
+    cd (['/home/yuval/Data/alice/',subFold])
+    load files/tablesWH
+    X(subi,1)=table(5,2);
+    X(subi,2)=(table(4,4)+table(6,4))/2;
 end
-%% average across segments
-avgEEGall=zeros(32,820);
-avgMEGall=zeros(248,814);
-for segi=2:2:18
-    segStr=num2str(segi);
-    load (['files/seg',segStr])
-    avgEEGall=avgEEGall+avgEEG.avg;
-    avgMEGall=avgMEGall+avgMEG.avg;
-end
-avgEEGall=(avgEEGall+avgEEG.avg)./9;
-avgMEGall=(avgMEGall+avgMEG.avg)./9;
+[~,p,~,stats] = ttest2(X(:,1),X(:,2))   
 
-%% detect minima as component bounderies
-rmsEEG=sqrt(mean(avgEEGall.*avgEEGall,1));
-% plot(avgEEG.time,mean(abs(avgEEGall)))
-% hold on
-
-[~,startE100]=min(rmsEEG(nearest(avgEEG.time,0):nearest(avgEEG.time,0.1)));
-startE100=startE100+nearest(avgEEG.time,0)-1;
-[~,startE170]=min(rmsEEG(nearest(avgEEG.time,0.1):nearest(avgEEG.time,0.17)));
-startE170=startE170+nearest(avgEEG.time,0.1)-1;
-[~,startE300]=min(rmsEEG(nearest(avgEEG.time,0.17):nearest(avgEEG.time,0.3)));
-startE300=startE300+nearest(avgEEG.time,0.17)-1;
-[~,startE400]=min(rmsEEG(nearest(avgEEG.time,0.3):nearest(avgEEG.time,0.4)));
-startE400=startE400+nearest(avgEEG.time,0.3)-1;
-endE400=find(diff(rmsEEG(nearest(avgEEG.time,0.45):end))>-0.0055,1)+nearest(avgEEG.time,0.45);
-figure;
-plot(avgEEG.time,rmsEEG)
-hold on
-plot(avgEEG.time([startE100,startE170,startE300,startE400,endE400]),rmsEEG([startE100,startE170,startE300,startE400,endE400]),'ro')
-
-%% calculate area for whole head RMS
-EEGtable=zeros(9,4);
-for segi=2:2:18
-    segStr=num2str(segi);
-    load (['files/seg',segStr])
-    rms=sqrt(mean(avgEEG.avg.*avgEEG.avg,1));
-    EEGtable(segi/2,1)=trapz(rms(startE100:startE170));
-    EEGtable(segi/2,2)=trapz(rms(startE170:startE300));
-    EEGtable(segi/2,3)=trapz(rms(startE300:startE400));
-    EEGtable(segi/2,4)=trapz(rms(startE400:endE400));
-end
-plot(EEGtable([1 2 4 6 7 8],:)','b')
-hold on
-plot(EEGtable(3,:),'r')
-plot(EEGtable(5,:),'g')
-plot(EEGtable(9,:),'k')
-legend('1','2','4','6','7','8','3 news','5 tamil','9 loud')
-save tableWH EEGtable

@@ -113,7 +113,7 @@ Ipeaks=Ipeaks(after);
 before=find(Ipeaks<sampNA);
 peaks=peaks(before);
 Ipeaks=Ipeaks(before);
-%% look for troughs FIXME
+%% look for troughs
 der=zeros(size(avgTC));
 der(2:end-1)=diff(diff(avgTC./max(avgTC)));
 maxy=max(avgTC);

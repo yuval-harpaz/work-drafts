@@ -1,67 +1,69 @@
 function aliceAlpha(subFold)
 cd /home/yuval/Data/alice
 cd(subFold)
-LSclean=ls('*lf*');
-megFNc=LSclean(1:end-1);
-load LRpairsEEG
-LRpairsEEG=LRpairs;
-load LRpairs
-load files/triggers
-load files/evt
-for piskai=2:2:18
-    % EEG
-    load(['files/seg',num2str(piskai)])
-    sampBeg=samps(find(samps(:,2)==1,1),1);
-    sampEnd=samps(find(samps(:,2)==1,1,'last'),1);
-    samps1s=sampBeg:1024:sampEnd;
-    trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
-    [eegFr,eegLR,eegCoh]=pow(trl,LRpairsEEG);
-    % title(num2str(piskai))
-    eval(['eegFr',num2str(piskai),'=eegFr'])
-    eval(['eegLR',num2str(piskai),'=eegLR'])
-    eval(['eegCoh',num2str(piskai),'=eegCoh'])
-    % MEG
-    startSeeg=round(evt(find(evt(:,3)==piskai),1)*1024);
-    endSeeg=round(evt(find(evt(:,3)==piskai)+1,1)*1024);
-    startSmeg=trigS(find(trigV==piskai));
-    endSmeg=trigS(find(trigV==piskai)+1);
-    megSR=(endSmeg-startSmeg)/((endSeeg-startSeeg)/1024);
-    if round(megSR)~=1017
-        error('problem detecting MEG sampling rate')
+if ~exist('./fr.mat','file')
+    LSclean=ls('*lf*');
+    megFNc=LSclean(1:end-1);
+    load LRpairsEEG
+    LRpairsEEG=LRpairs;
+    load LRpairs
+    load files/triggers
+    load files/evt
+    for piskai=2:2:18
+        % EEG
+        load(['files/seg',num2str(piskai)])
+        sampBeg=samps(find(samps(:,2)==1,1),1);
+        sampEnd=samps(find(samps(:,2)==1,1,'last'),1);
+        samps1s=sampBeg:1024:sampEnd;
+        trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
+        [eegFr,eegLR,eegCoh]=pow(trl,LRpairsEEG);
+        % title(num2str(piskai))
+        eval(['eegFr',num2str(piskai),'=eegFr'])
+        eval(['eegLR',num2str(piskai),'=eegLR'])
+        eval(['eegCoh',num2str(piskai),'=eegCoh'])
+        % MEG
+        startSeeg=round(evt(find(evt(:,3)==piskai),1)*1024);
+        endSeeg=round(evt(find(evt(:,3)==piskai)+1,1)*1024);
+        startSmeg=trigS(find(trigV==piskai));
+        endSmeg=trigS(find(trigV==piskai)+1);
+        megSR=(endSmeg-startSmeg)/((endSeeg-startSeeg)/1024);
+        if round(megSR)~=1017
+            error('problem detecting MEG sampling rate')
+        end
+        trlMEG=round((trl(:,1)-startSeeg)/1024*megSR)+startSmeg;
+        trlMEG(:,2)=trlMEG+1017;
+        trlMEG(:,3)=zeros(length(trl),1);
+        [megFr,megLR,megCoh]=pow(trlMEG,LRpairs);
+        eval(['megFr',num2str(piskai),'=megFr'])
+        eval(['megLR',num2str(piskai),'=megLR'])
+        eval(['megCoh',num2str(piskai),'=megCoh'])
     end
-    trlMEG=round((trl(:,1)-startSeeg)/1024*megSR)+startSmeg;
-    trlMEG(:,2)=trlMEG+1017;
-    trlMEG(:,3)=zeros(length(trl),1);
-    [megFr,megLR,megCoh]=pow(trlMEG,LRpairs);
-    eval(['megFr',num2str(piskai),'=megFr'])
-    eval(['megLR',num2str(piskai),'=megLR'])
-    eval(['megCoh',num2str(piskai),'=megCoh'])
+    load files/evt
+    for resti=[100,102];
+        % EEG
+        sampBeg=round(evt(find(evt(:,3)==resti),1)*1024);
+        sampEnd=sampBeg+60*1024;
+        samps1s=sampBeg:1024:sampEnd-1;
+        trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
+        [eegFr,eegLR,eegCoh]=pow(trl,LRpairsEEG);
+        % title(num2str(resti))
+        eval(['eegFr',num2str(resti),'=eegFr'])
+        eval(['eegLR',num2str(resti),'=eegLR'])
+        eval(['eegCoh',num2str(resti),'=eegCoh'])
+        % MEG
+        sampBeg=trigS(find(trigV==resti));
+        sampEnd=sampBeg+60*1017.23;
+        samps1s=sampBeg:1017:sampEnd-100;
+        trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
+        [megFr,megLR,megCoh]=pow(trl,LRpairs);
+        % title(num2str(resti))
+        eval(['megFr',num2str(resti),'=megFr'])
+        eval(['megLR',num2str(resti),'=megLR'])
+        eval(['megCoh',num2str(resti),'=megCoh'])
+    end
+    clear eegFr eegLR eegCoh megFr megLR megCoh
+    save fr eegFr* eegLR* eegCoh* megFr* megLR* megCoh*
 end
-load files/evt
-for resti=[100,102];
-    % EEG
-    sampBeg=round(evt(find(evt(:,3)==resti),1)*1024);
-    sampEnd=sampBeg+60*1024;
-    samps1s=sampBeg:1024:sampEnd-1;
-    trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
-    [eegFr,eegLR,eegCoh]=pow(trl,LRpairsEEG);
-    % title(num2str(resti))
-    eval(['eegFr',num2str(resti),'=eegFr'])
-    eval(['eegLR',num2str(resti),'=eegLR'])
-    eval(['eegCoh',num2str(resti),'=eegCoh'])
-    % MEG
-    sampBeg=trigS(find(trigV==resti));
-    sampEnd=sampBeg+60*1017.23;
-    samps1s=sampBeg:1017:sampEnd-100;
-    trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
-    [megFr,megLR,megCoh]=pow(trl,LRpairs);
-    % title(num2str(resti))
-    eval(['megFr',num2str(resti),'=megFr'])
-    eval(['megLR',num2str(resti),'=megLR'])
-    eval(['megCoh',num2str(resti),'=megCoh'])  
-end
-clear eegFr eegLR eegCoh megFr megLR megCoh 
-save fr eegFr* eegLR* eegCoh* megFr* megLR* megCoh*
 
 
 
