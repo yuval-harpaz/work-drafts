@@ -50,7 +50,9 @@ else
 end
 cfg.xlim=xlim;
 cfg.layout = '4D248.lay';
-
+if length(data1.label)<35
+    cfg.layout = 'WG32.lay'
+end
 
 cfgs=[];
 

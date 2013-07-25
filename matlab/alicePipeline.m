@@ -24,8 +24,55 @@ open aliceCompLimSub
 comps=aliceCompLimSub2;
 %% calculating area
 aliceTables
-% test tamil effect for M100
-[p,stats]=aliceStats(1);
+aliceTables('LR');
+aliceTables('Post');
+aliceTables('PostLR');
+% ci=1 for N100, 2 for N170, 3 for M100, 4 for M170
+% test tamil effect for N100, whole head rms.
+[p,stats,X]=aliceStats(1,'z','tablesPost','tamil')
+[p,stats,X]=aliceStats(3,'z','tablesPost','tamil')
+[p,stats,X]=aliceStats(1,'z','tablesWH','loud')
+[p,stats,X]=aliceStats(2,'z','tablesR','loud','U')
+[p,stats,X]=aliceStats(1,'z','tablesPost','WBW')
+[p,stats,X]=aliceStats(3,'z','tablesPost','WBW')
+[p,stats,X]=aliceStats(2,'z','tablesPost','WBW')
+[p,stats,X]=aliceStats(1,'z','tablesWH')
+[p,stats,X]=aliceStats(1,'','tablesLR')
+
+[p,stats,X]=aliceStats(1,'z','tablesPost','tamil','U')
+[p,stats,X]=aliceStats(3,'z','tablesPost','tamil','U')
+[p,stats,X]=aliceStats(1,'z','tablesWH','loud','U')
+
+%% LR
+aliceLR
+aliceGA('LR')
+aliceGA('LRalice')
+cd /home/yuval/Copy/MEGdata/alice/ga
+stat=statPlot('GavgE10LR','GavgE8_12LR',[0.17 0.17],[],'paired-ttest') % tamil
+stat=statPlot('GavgE10LR','GavgE8_12LR',[0.1 0.1],[],'paired-ttest')
+stat=statPlot('GavgE20LR','GavgE2_4LR',[0.1 0.1],[],'paired-ttest') % WbW
+stat=statPlot('GavgE20LR','GavgE2_4LR',[0.17 0.17],[],'paired-ttest')
+stat=statPlot('GavgE18LR','GavgE16LR',[0.17 0.17],[],'paired-ttest')
+stat=statPlot('GavgM18LR','GavgM16LR',[0.17 0.17],[],'paired-ttest')
+stat=statPlot('GavgM10LR','GavgM8_12LR',[0.17 0.17],[],'paired-ttest') % tamil
+
+%stat=statPlot('GavgM10LR','GavgM8_12LR',[0.17 0.17],[],'paired-ttest') % tamil
+load /home/yuval/Copy/MEGdata/alice/ga/GavgEaliceLR.mat
+load /home/yuval/Copy/MEGdata/alice/ga/GavgMaliceLR.mat
+cfg=[];
+cfg.layout='4D248.lay';
+cfg.xlim=[0.17 0.17];
+figure;
+ft_topoplotER(cfg,GavgMaliceLR)
+cfg=[];
+cfg.layout='WG32.lay';
+cfg.xlim=[0.17 0.17];
+figure;
+ft_topoplotER(cfg,GavgEaliceLR)
+
+aliceTtest0('GavgMaliceLR',0.17,0);
+aliceTtest0('GavgMaliceLR',0.17,1);
+
 %% old
 
 alice1('maor')
