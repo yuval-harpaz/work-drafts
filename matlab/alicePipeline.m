@@ -1,4 +1,11 @@
+%% exploring results
+% evoked response
 
+open aliceStatExplore1
+
+
+
+%% subject by subject
 subfolder='mark';
 alice2(subFolder);
 aliceReduceAvg(subFolder);
@@ -45,8 +52,10 @@ aliceTables('PostLR');
 
 %% LR
 aliceLR
+aliceLR1('alice')
 aliceGA('LR')
 aliceGA('LRalice')
+aliceLR1('6101820')
 cd /home/yuval/Copy/MEGdata/alice/ga
 stat=statPlot('GavgE10LR','GavgE8_12LR',[0.17 0.17],[],'paired-ttest') % tamil
 stat=statPlot('GavgE10LR','GavgE8_12LR',[0.1 0.1],[],'paired-ttest')
@@ -71,7 +80,60 @@ figure;
 ft_topoplotER(cfg,GavgEaliceLR)
 
 aliceTtest0('GavgMaliceLR',0.17,0);
+
 aliceTtest0('GavgMaliceLR',0.17,1);
+
+aliceTtest0('GavgM20LR',0.17,1); % Word bt Word
+aliceTtest0('GavgM20LR',0.1,1);
+aliceTtest0('GavgE20LR',0.17,1);
+aliceTtest0('GavgE20LR',0.1,1);
+
+%% Freq LR differences
+aliceGA('frLR')
+aliceGA('frLRalice')
+aliceGA('frLRrest')
+aliceGA('frLRwbw')
+
+
+stat=statPlot('GavgFrM20LR','GavgFrMrestLR',[9 9],[-3e-27 3e-27],'paired-ttest') % rest
+stat=statPlot('GavgFrM20LR','GavgFrMaliceLR',[9 9],[-3e-27 3e-27],'paired-ttest') % rest
+
+
+stat=statPlot('GavgFrM2LR','GavgFrM100LR',[10 10],[-3e-27 3e-27],'paired-ttest') % rest
+aliceTtest0('GavgFrM100LR',10,1);
+
+open aliceStatExplore
+
+%% Fr differences
+aliceGA('fr')
+aliceGA('frAlice')
+aliceGA('frRest')
+
+
+
+stat=statPlot('GavgFrMrest','GavgFrMalice',[9 9],[0 1e-26],'paired-ttest')
+stat=statPlot('GavgFrErest','GavgFrEalice',[9 9],[0 5],'paired-ttest')
+stat=statPlot('GavgFrM20','GavgFrMrest',[9 9],[0 1e-26],'paired-ttest')
+
+stat=statPlot('GavgFrM8','GavgFrM10',[10 10],[0 1e-26],'paired-ttest') 
+stat=statPlot('GavgFrM102','GavgFrM100',[9 9],[0 1e-26],'paired-ttest') 
+stat=statPlot('GavgFrE100','GavgFrE2',[9 9],[0 5],'paired-ttest')
+stat=statPlot('GavgFrErest','GavgFrE2',[9 9],[0 5],'paired-ttest')
+%% coh
+aliceGA('coh')
+stat=statPlot('GavgCohM10','GavgCohMalice',[9 9],[0 1],'paired-ttest')
+stat=statPlot('GavgCohE10','GavgCohEalice',[9 9],[0 1],'paired-ttest')
+stat=statPlot('GavgCohMrest','GavgCohMalice',[9 9],[0 1],'paired-ttest')
+
+%% N400
+aliceTtest0('GavgEaliceLR1',0.36,1);
+aliceTtest0('GavgMaliceLR1',0.36,1);
+alicePlotLR(0.36)
+
+alicePlotLR(0.17)
+% see plotN400.m
+
+
 
 %% old
 

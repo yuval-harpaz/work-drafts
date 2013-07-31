@@ -3,8 +3,14 @@ if ischar(gaData)
     load (gaData)
     eval(['gaData=',gaData,';']);
 end
-xSamp=nearest(gaData.time,xlim)
-[~,p] = ttest(gaData.individual(:,:,xSamp));
+if isfield(gaData,'time')
+    xSamp=nearest(gaData.time,xlim)
+    [~,p] = ttest(gaData.individual(:,:,xSamp));
+else
+    xSamp=nearest(gaData.freq,xlim)
+    [~,p] = ttest(gaData.powspctrm(:,:,xSamp));
+end
+
 cfg=[];
 if strcmp(gaData.label{1,1},'Fp1')
     cfg.layout='WG32.lay';
@@ -13,12 +19,18 @@ else
 end
 cfg.xlim=[xlim xlim];
 % cfg.marker  =  'labels';
-cfg.highlight          = 'labels';                
+cfg.highlight          = 'marker';
 cfg.highlightchannel   =  gaData.label(p<0.05);
+cfg.interactive='yes';
 if ~mirror
-    avg=mean(gaData.individual(:,:,xSamp));
-    gaData.individual(:,avg<0,xSamp)=0;
+    if isfield(gaData,'individual')
+        avg=mean(gaData.individual(:,:,xSamp));
+        gaData.individual(:,avg<0,xSamp)=0;
+    else
+        avg=mean(gaData.powspctrm(:,:,xSamp));
+        gaData.powspctrm(:,avg<0,xSamp)=0;
+    end
     cfg.zlim=[-max(avg) max(avg)];
 end
-figure;
+%figure;
 ft_topoplotER(cfg,gaData)
