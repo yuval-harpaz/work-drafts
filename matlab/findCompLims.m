@@ -4,8 +4,8 @@ function [Itroughs,Ipeaks,avgTC,timeCourse]=findCompLims(cfg,varargin)
 %   [times] = findCompLims(cfg, avg1, avg2, avg3, ...)
 %
 % avg1 is a fieldtrip structure. put many if you want to use more than one
-%   subject or conditions
-% cfg.chans is optional for restricting the search for a channel selection (say
+%   subject or conditions. can be average or grand average.
+% cfg.channel is optional for restricting the search for a channel selection (say
 %   posterior for visual components)
 %   e.g., cfg.channel = {'A1', 'A10', 'A11', 'A12', 'A13', 'A14', 'A26', 'A27', 'A28', 'A29', 'A30', 'A31', 'A45', 'A46', 'A47', 'A48', 'A49', 'A50', 'A51', 'A52', 'A53', 'A70', 'A71', 'A72', 'A73', 'A74', 'A75', 'A76', 'A77', 'A78', 'A79', 'A80', 'A99', 'A100', 'A101', 'A102', 'A103', 'A104', 'A105', 'A106', 'A107', 'A108', 'A109', 'A110', 'A111', 'A131', 'A132', 'A133', 'A134', 'A135', 'A136', 'A137', 'A138', 'A139', 'A140', 'A141', 'A142', 'A143', 'A158', 'A159', 'A160', 'A161', 'A162', 'A163', 'A164', 'A165', 'A166', 'A167', 'A168', 'A169', 'A170', 'A171', 'A180', 'A181', 'A182', 'A183', 'A184', 'A185', 'A186', 'A187', 'A188', 'A189', 'A190', 'A191', 'A192', 'A198', 'A199', 'A200', 'A201', 'A202', 'A203', 'A204', 'A205', 'A206', 'A207', 'A208', 'A209', 'A214', 'A215', 'A216', 'A217', 'A218', 'A219', 'A220', 'A221', 'A222', 'A223', 'A224', 'A225', 'A226', 'A233', 'A234', 'A235', 'A236', 'A237', 'A238', 'A239', 'A240', 'A241', 'A242', 'A243', 'A244'};
 % cfg.method can be:
