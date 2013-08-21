@@ -203,8 +203,49 @@ end
 
 % estimate noise by weights and by weights+noisecov
 aliceNoiseEstimate(sf)
+% move mri to tlrc
+% !@auto_tlrc -base ~/SAM_BIU/docs/temp+tlrc -input ortho+orig -no_ss
 % make images
 load /home/yuval/Copy/MEGdata/alice/ga/GavgMalice
-aliceImage(GavgMalice,[0.0885 0.0885],'alice089_')
+aliceImage(GavgMalice,[0.0885 0.0885],'alice089') % NOTE COMMENT BELOW
+aliceImage(GavgMalice,[0.179 0.179],'alice179')
+aliceImage(GavgMalice,[-0.2 -0.1],'noise')
+aliceImage(GavgMalice,[0.210 0.210],'alice210')
 
+% RUN ./alice2tlrc after every line above
+
+aliceAvgTlrc('alice179')
+aliceAvgTlrc('alice089')
+aliceAvgTlrc('alice210')
+aliceAvgTlrc('noise')
+
+!~/abin/afni -dset ~/SAM_BIU/docs/temp+tlrc &
+
+% compare left - right voxels
+
+aliceLRtlrc('alice210',1)
+
+% ttest
+setA='-setA r1 ';
+for subi=1:8
+    setA=[setA,sf{subi},'r1 alice210LRdif_',num2str(subi),'+tlrc '];
+end
+command = ['~/abin/3dttest++ -no1sam -prefix aliceLRt ',setA];
+eval(['!',command])
+
+[t,v]=alicePermute(prefix);
+% normalize (divide by std)
+aliceNormSTD('alice210LRdif')
+[t,v]=alicePermute([prefix,'N']); % clust size sig !!!
+[t,v]=alicePermuteFour(prefix);
+
+aliceLRtlrc('alice179',1)
+[t,v]=alicePermute('alice179LRdif',true);
+aliceNormSTD('alice179LRdif')
+[t,v]=alicePermute('alice179LRdifN');
+
+aliceLRtlrc('alice089',1)
+[t,v]=alicePermute('alice089LRdif',true);
+aliceNormSTD('alice089LRdif')
+[t,v]=alicePermute('alice089LRdifN'); % clust size and t sig !!!
 
