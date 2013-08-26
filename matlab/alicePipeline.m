@@ -249,3 +249,39 @@ aliceLRtlrc('alice089',1)
 aliceNormSTD('alice089LRdif')
 [t,v]=alicePermute('alice089LRdifN'); % clust size and t sig !!!
 
+alicePermutePaired('alice210','noise')
+% setA-setB
+
+alicePermutePaired('alice179','noise')
+
+alicePermutePaired('alice089','noise')
+
+% ALPHA
+aliceAlphaSAM('inbal');
+aliceMaxAlpha('Nalice');
+% run alice2tlrc
+aliceMaxAlpha('Nrest');
+
+for subi=1:8
+    cd(['/home/yuval/Copy/MEGdata/alice/',sf{subi}])
+    fn=ls('xc*');
+    fn=fn(1:end-1);
+    cd ..
+    if ~exist([sf{subi},'/SAM/general,7-13Hz/alla.cov'],'file')
+        eval (['!SAMcov64 -r ',sf{subi},' -d ',fn,' -m alpha -v'])
+    end
+    if ~exist([sf{subi},'/hull.shape'],'file')
+        copyfile ([sf{subi},'/MRI/hull.shape'],[sf{subi},'/'])
+    end
+    if ~exist([sf{subi},'/SAM/general,3-35Hz,alla.wts'],'file')
+        eval (['!SAMwts64 -r ',sf{subi},' -d ',fn,' -m general -c alla -v'])
+    end
+end
+
+for subi=1:8
+    masktlrc(['NrestMax_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+end
+for subi=1:8
+    masktlrc(['alphaMax_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+end
+alicePermutePaired('NrestMax','alphaMax')
