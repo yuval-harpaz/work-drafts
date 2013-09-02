@@ -415,6 +415,28 @@ switch file
             save (['/home/yuval/Copy/MEGdata/alice/ga/GavgM',segStr],['GavgM',segStr])
             save (['/home/yuval/Copy/MEGdata/alice/ga/GavgE',segStr],['GavgE',segStr])
         end
-        
+    case '4812'
+        strE='';strM='';
+        for segi=[4 8 12] % 20 for WBW
+            for subi=1:length(comps.C100)
+                subStr=num2str(subi);
+                subFold=sf{1,subi};
+                cd (['/home/yuval/Data/alice/',subFold])
+                segStr=num2str(segi);
+                load avgReduced
+                eval(['avgEalice=avgE',segStr]);
+                eval(['avgMalice=avgM',segStr]);
+                eval(['avgEalice',subStr,'=avgEalice;'])
+                eval(['avgMalice',subStr,'=avgMalice;'])
+                strE=[strE,',avgEalice',subStr];
+                strM=[strM,',avgMalice',subStr];
+            end
+            cfg=[];
+            cfg.keepindividual='yes';
+            eval(['GavgE',segStr,'=ft_timelockgrandaverage(cfg',strE,');'])
+            eval(['GavgM',segStr,'=ft_timelockgrandaverage(cfg',strM,');'])
+            save (['/home/yuval/Copy/MEGdata/alice/ga/GavgM',segStr],['GavgM',segStr])
+            save (['/home/yuval/Copy/MEGdata/alice/ga/GavgE',segStr],['GavgE',segStr])
+        end        
 end
 cd /home/yuval/Copy/MEGdata/alice/ga

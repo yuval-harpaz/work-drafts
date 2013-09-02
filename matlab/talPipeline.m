@@ -164,3 +164,4 @@ table=talCohList1(chan,freq);
 talGApow
 talpowFigs
 talPowNorm
+talPowGAplot(file,freq)

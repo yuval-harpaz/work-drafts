@@ -1,4 +1,10 @@
-function aliceImage(Gavg,xlim,prefix)
+function aliceImage(Gavg,xlim,prefix,wts)
+if ~exist('wts','var')
+    wts='';
+end
+if isempty(wts)
+    wts='general,3-35Hz,alla.wts';
+end
 %xlim=[0.0885-0.03 0.0885+0.03];
 sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
 !echo "cd /home/yuval/Copy/MEGdata/alice" > ~/alice2tlrc
@@ -6,7 +12,7 @@ for subi=1:8
     cd(['/home/yuval/Copy/MEGdata/alice/',sf{subi}])
     %load ('SAM/general,3-35Hz,alla.wts')
     cd SAM
-    [~, ~, ActWgts]=readWeights('general,3-35Hz,alla.wts');
+    [~, ~, ActWgts]=readWeights(wts);
     cd ..
     load SAM/noiseNormCov
     samples=[nearest(Gavg.time,xlim(1)),nearest(Gavg.time,xlim(2))];

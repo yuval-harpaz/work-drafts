@@ -225,6 +225,9 @@ aliceAvgTlrc('noise')
 
 aliceLRtlrc('alice210',1)
 
+
+
+
 % ttest
 setA='-setA r1 ';
 for subi=1:8
@@ -262,21 +265,21 @@ aliceMaxAlpha('Nalice');
 % run alice2tlrc
 aliceMaxAlpha('Nrest');
 
-for subi=1:8
-    cd(['/home/yuval/Copy/MEGdata/alice/',sf{subi}])
-    fn=ls('xc*');
-    fn=fn(1:end-1);
-    cd ..
-    if ~exist([sf{subi},'/SAM/general,7-13Hz/alla.cov'],'file')
-        eval (['!SAMcov64 -r ',sf{subi},' -d ',fn,' -m alpha -v'])
-    end
-    if ~exist([sf{subi},'/hull.shape'],'file')
-        copyfile ([sf{subi},'/MRI/hull.shape'],[sf{subi},'/'])
-    end
-    if ~exist([sf{subi},'/SAM/general,3-35Hz,alla.wts'],'file')
-        eval (['!SAMwts64 -r ',sf{subi},' -d ',fn,' -m general -c alla -v'])
-    end
-end
+% for subi=1:8
+%     cd(['/home/yuval/Copy/MEGdata/alice/',sf{subi}])
+%     fn=ls('xc*');
+%     fn=fn(1:end-1);
+%     cd ..
+%     if ~exist([sf{subi},'/SAM/general,7-13Hz/alla.cov'],'file')
+%         eval (['!SAMcov64 -r ',sf{subi},' -d ',fn,' -m alpha -v'])
+%     end
+%     if ~exist([sf{subi},'/hull.shape'],'file')
+%         copyfile ([sf{subi},'/MRI/hull.shape'],[sf{subi},'/'])
+%     end
+%     if ~exist([sf{subi},'/SAM/general,3-35Hz,alla.wts'],'file')
+%         eval (['!SAMwts64 -r ',sf{subi},' -d ',fn,' -m general -c alla -v'])
+%     end
+% end
 
 for subi=1:8
     masktlrc(['NrestMax_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
@@ -285,3 +288,79 @@ for subi=1:8
     masktlrc(['alphaMax_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
 end
 alicePermutePaired('NrestMax','alphaMax')
+
+aliceTlrc('Nalice');
+aliceTlrc('Nrest');
+% mask
+alicePermutePairedF('Nrest','Nalice',9)
+
+%% freesurfer
+% run in terminal "ortho2FS aliceLiron"
+aliceMeshHesh('liron')
+sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
+for i=1:length(sf)
+    aliceMeshHesh(sf{i})
+    pause
+end
+
+%% wts by band
+sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
+for subi=1:8
+    cd(['/home/yuval/Copy/MEGdata/alice/',sf{subi}])
+    fn=ls('xc*');
+    fn=fn(1:end-1);
+    cd ..
+    if ~exist([sf{subi},'/SAM/alpha,7-13Hz/alla.cov'],'file')
+        eval (['!SAMcov64 -r ',sf{subi},' -d ',fn,' -m alpha -v'])
+    end
+    if ~exist([sf{subi},'/hull.shape'],'file')
+        copyfile ([sf{subi},'/MRI/hull.shape'],[sf{subi},'/'])
+    end
+    if ~exist([sf{subi},'/SAM/alpha,7-13Hz,alla.wts'],'file')
+        eval (['!SAMwts64 -r ',sf{subi},' -d ',fn,' -m alpha -c alla -v'])
+    end
+end
+
+load /home/yuval/Copy/MEGdata/alice/ga/GavgMalice
+
+%aliceImage(GavgMalice,[0.210 0.210],'alice210','alpha,7-13Hz,alla.wts')
+for subi=2:8
+    aliceAlphaSAM(sf{subi},'alpha,7-13Hz,alla.wts');
+end
+% aliceMaxAlpha('N7-13alice');
+% % run alice2tlrc
+% aliceMaxAlpha('N7-13rest');
+aliceTlrc('N7-13Hzalice');
+aliceTlrc('N7-13Hzrest');
+% % mask
+% for subi=1:8
+%     masktlrc(['N7-13Hzalice_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+%     masktlrc(['N7-13Hzrest_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+% end
+permute.label={'t-threshold','critical t','critical cluster size'}
+[critT,critClustSize]=alicePermutePairedF('N7-13Hzrest','N7-13Hzalice',9,3);
+permute.results(1,1:3)=[3,critT,critClustSize];
+[critT,critClustSize]=alicePermutePairedF('N7-13Hzrest','N7-13Hzalice',9,3.5);
+permute.results(2,1:3)=[3.5,critT,critClustSize];
+[critT,critClustSize]=alicePermutePairedF('N7-13Hzrest','N7-13Hzalice',9,4);
+permute.results(3,1:3)=[4,critT,critClustSize];
+save N7-13Hzrest_N7-13Hzalice permute
+permute.label
+permute.results
+
+%% F-test for Tamil and word by word
+aliceGA('4812');
+load /home/yuval/Copy/MEGdata/alice/ga/GavgM10
+aliceImage(GavgM10,[0.210 0.210],'seg10M210');
+load /home/yuval/Copy/MEGdata/alice/ga/GavgM8
+aliceImage(GavgM8,[0.210 0.210],'seg8M210');
+load /home/yuval/Copy/MEGdata/alice/ga/GavgM12
+aliceImage(GavgM12,[0.210 0.210],'seg12M210');
+aliceTlrc('seg8M210');
+aliceTlrc('seg10M210');
+aliceTlrc('seg12M210');
+
+prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,3)
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,3.5)
+
