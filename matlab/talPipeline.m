@@ -153,6 +153,9 @@ pat='/media/Elements/MEG/tal';
 % load([pat,'/subs46'])
 chan='A198';freq=10;
 table=talCohList1(chan,freq);
+table10=talCohList1(chans10Hz,10);
+table4=talCohList1(chans4Hz,4);
+figure;talAvgCoh4Plot(10,chans10Hz);
 
 [list,labels]=talPowList1(chan,freq);
 

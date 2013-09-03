@@ -7,58 +7,69 @@ load('talResults/Coh/cohLRv1post_D')
 group={'D','CQ','CV'};
 conds={'cohLRv1pre_';'cohLRv1post_';'cohLRv2pre_';'cohLRv2post_'};
 cd talResults/Coh
-for gri=1:3
-    for condi=1:4
-        load([conds{condi},group{gri}])
-        eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
-        grSize=num2str(grSize);
-        eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
-    end
-end
+
+
+[D,CQ,CV]=getData(conds,group,chi,freq);
+% 
+% for gri=1:3
+%     for condi=1:4
+%         load([conds{condi},group{gri}])
+%         eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
+%         grSize=num2str(grSize);
+%         eval([group{gri},'(1:',grSize,',',num2str(condi),')=mean(',conds{condi},group{gri},'.powspctrm(:,[',num2str(chi),'],',num2str(freq),'),2);']);
+%     end
+% end
 
 table=[D;CQ;CV];
 clear CQ CV D
 conds={'cohLRv1pre_';'cohLRv2pre_'};
 cd ../timeProdCoh
-
-for gri=1:3
-    for condi=1:2
-        load([conds{condi},group{gri}])
-        eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
-        grSize=num2str(grSize);
-        eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
-    end
-end
+[D,CQ,CV]=getData(conds,group,chi,freq);
+% for gri=1:3
+%     for condi=1:2
+%         load([conds{condi},group{gri}])
+%         eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
+%         grSize=num2str(grSize);
+%         eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
+%     end
+% end
 
 table(:,5:6)=[D;CQ;CV];
-%clear CQ CV D
+clear CQ CV D
 cd ../oneBackCoh/W
-
-for gri=1:3
-    for condi=1:2
-        load([conds{condi},group{gri}])
-        eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
-        grSize=num2str(grSize);
-        eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
-    end
-end
-table(:,7:8)=[D;CQ;CV];
-%clear CQ CV D
+[D,CQ,CV]=getData(conds,group,chi,freq);
+% for gri=1:3
+%     for condi=1:2
+%         load([conds{condi},group{gri}])
+%         eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
+%         grSize=num2str(grSize);
+%         eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
+%     end
+% end
+table(1:size([D;CQ;CV],1),7:8)=[D;CQ;CV]; % a missing subject
+clear CQ CV D
 
 cd ../../oneBackCoh/NW
+[D,CQ,CV]=getData(conds,group,chi,freq);
+% for gri=1:3
+%     for condi=1:2
+%         load([conds{condi},group{gri}])
+%         eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
+%         grSize=num2str(grSize);
+%         eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
+%     end
+% end
+table(1:size([D;CQ;CV],1),9:10)=[D;CQ;CV];
 
+function [D,CQ,CV]=getData(conds,group,chi,freq)
 for gri=1:3
-    for condi=1:2
+    for condi=1:length(conds)
         load([conds{condi},group{gri}])
         eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
         grSize=num2str(grSize);
-        eval([group{gri},'(1:',grSize,',',num2str(condi),')=',conds{condi},group{gri},'.powspctrm(:,',num2str(chi),',',num2str(freq),');']);
+        eval([group{gri},'(1:',grSize,',',num2str(condi),')=mean(',conds{condi},group{gri},'.powspctrm(:,[',num2str(chi),'],',num2str(freq),'),2);']);
     end
 end
-table(:,9:10)=[D;CQ;CV];
-
-
-
 
 % %% 4Hz
 % freq='4';

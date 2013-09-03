@@ -1,21 +1,21 @@
-function [critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,tThresh)
+function [critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,fThresh)
 % setA-setB
 cd /home/yuval/Copy/MEGdata/alice/func
 sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
-if ~exist('tThresh','var')
-    tThresh=[];
+if ~exist('fThresh','var')
+    fThresh=[];
 end
-if isempty(tThresh)
-    tThresh=3;%2.044;
+if isempty(fThresh)
+    fThresh=3;%2.044;
 end
 
 
-if exist('fMax.txt','file')
-    !rm fMax.txt
-end
-if exist('fMaxReal.txt','file')
-    !rm fMaxReal.txt
-end
+%if exist('fMax.txt','file')
+    !rm fMax*.txt
+%end
+%if exist('fMaxReal.txt','file')
+    !rm fMaxReal*.txt
+%end
 if exist([prefix1,'_',prefix2,'_',prefix3,'+tlrc.BRIK'],'file')
     eval(['!rm ',prefix1,'_',prefix2,'_',prefix3,'+tlrc*'])
 end
@@ -54,30 +54,36 @@ for permi=1:length(M)
     str = [str, ' -ftr FTnew'];
     %     eval(['!',str])
     [~, ~] = unix(str);
-    eval(['!~/abin/3dcalc -a FTnew+tlrc''','[1]''',' -exp ''','ispositive(a-',num2str(tThresh),')*a''',' -prefix pos'])
-    eval(['!~/abin/3dclust -quiet -1clip ',num2str(tThresh),' 5 125 pos+tlrc > posClust.txt'])
-    posClust=importdata('posClust.txt');
-    if iscell(posClust)
-        posClustSize=0;
-    else
-        posClustSize=posClust(1)/125;
-    end
-    !rm pos+tlrc*
-    !rm *Clust.txt
-    % read max f value
-    if permi==length(M)
-        !~/abin/3dBrickStat -max FTnew+tlrc'[1]' >> fMaxReal.txt
-        clustSizeReal=posClustSize;
-    else
-        !~/abin/3dBrickStat -max FTnew+tlrc'[1]' >> fMax.txt
-        % compute volume of largest positive and negative clusters
-        clustSize(permi,1)=posClustSize;
+    for thri=1:length(fThresh)
+        eval(['!~/abin/3dcalc -a FTnew+tlrc''','[1]''',' -exp ''','ispositive(a-',num2str(fThresh(thri)),')*a''',' -prefix pos'])
+        eval(['!~/abin/3dclust -quiet -1clip ',num2str(fThresh(thri)),' 5 125 pos+tlrc > posClust.txt'])
+        posClust=importdata('posClust.txt');
+        if iscell(posClust)
+            posClustSize=0;
+        else
+            posClustSize=posClust(1)/125;
+        end
+        !rm pos+tlrc*
+        !rm *Clust.txt
+        % read max f value
+        if permi==length(M)
+            if thri==1
+                !~/abin/3dBrickStat -max FTnew+tlrc''','[1]''',' >> fMaxReal.txt
+            end
+            clustSizeReal(thri)=posClustSize;
+        else
+            if thri==1
+                !~/abin/3dBrickStat -max FTnew+tlrc''','[1]''',' >> fMax.txt
+            end
+            % compute volume of largest positive and negative clusters
+            clustSize(permi,thri)=posClustSize;
+        end
     end
 end
 clustSize=sort(clustSize,'descend');
 % take the 5% greatest volumes (in voxels) as critical cluster size
-critClustSize=clustSize(ceil(0.05*(permi-1)));
-% take the 5% extreme (max and -1*min) t values as criticat t
+critClustSize=clustSize(ceil(0.05*(permi-1)),:);
+% take the 5% extreme f values as criticat f
 fList=importdata('fMax.txt');
 for fi=1:length(fList)
     flist(fi)=str2num(fList{fi}(1:8));
@@ -96,15 +102,22 @@ if fReal>critF
     sig{1}='*';
     nothing=false;
 end
-if clustSizeReal>critClustSize
+if sum(clustSizeReal>critClustSize)>0
     sig{2}='*';
     nothing=false;
 end
-
-disp(['critical F value = ',num2str(critF)]);
-disp(['extreme F value is: ',num2str(fReal(1)),' ',sig{1}])
-disp(['critical cluster size is = ',num2str(critClustSize)]);
-disp(['largest cluster is: ',num2str(clustSizeReal(1)),' ',sig{2}])
+threshDisp='';
+for thri=1:length(fThresh)
+    threshDisp=[threshDisp,num2str(fThresh(thri)),'  '];
+end
+disp('===========================================')
+disp(['critical F value      : ',num2str(critF)]);
+disp(['the largets F value   : ',num2str(fReal),' ',sig{1}])
+disp('===========================================')
+disp(['F threshold             :    ', threshDisp])
+disp(['critical cluster size   :    ', num2str(critClustSize)]);
+disp(['largest cluster         :    ', num2str(clustSizeReal),' ',sig{2}])
+disp('===========================================')
 disp('')
 if nothing
     disp('NOTHING!!!')

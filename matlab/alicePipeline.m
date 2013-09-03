@@ -362,5 +362,7 @@ aliceTlrc('seg12M210');
 
 prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
 [critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,3)
-[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,3.5)
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4]);
+
+
 

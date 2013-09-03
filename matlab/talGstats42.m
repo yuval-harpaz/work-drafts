@@ -1,7 +1,9 @@
-
+function talGstats42(pref)
+if ~exist('pref','var')
+    pref='alpha';
+end
 load /media/Elements/MEG/tal/subs46
-gr=groups(groups>0);
-pref='alpha';
+gr=groups(groups>0); %#ok<NASGU>
 ppc={'pre','post'};
 
 % subs1=subsV1(find(gr==1)); % Dyslexia Quad

@@ -99,7 +99,11 @@ LR.label=LR.label([1:68 70:132 134:246]);
 % LRrest.label{247}='A204';
 % LRrest.powspctrm(1,248,:)=(LRrest.powspctrm(1,a73i,:)+LRrest.powspctrm(1,a75i,:))./2;
 % LRrest.label{248}='A74';
-
+for labeli=1:length(highlight)
+    [~,pairi]=ismember(highlight{labeli},LRpairs);
+    highlight{end+1}=LRpairs{pairi,2};
+end
+    
 cfg=[];
 cfg.layout='4D248.lay';
 cfg.xlim=[freq freq];
@@ -109,7 +113,7 @@ if ~exist('highlight','var')
     cfg.marker='labels';
     cfg.interactive='yes';
 else
-    cfg.highlight          = 'labels';           
+    cfg.highlight          = 'on';%'labels';           
     cfg.highlightchannel   = highlight;
     cfg.highlightsymbol='o';
     cfg.highlightfontsize=12;
