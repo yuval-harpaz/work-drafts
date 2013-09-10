@@ -1,4 +1,4 @@
-function [critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,fThresh,endFstr)
+function [critF,critClustSize]=alicePermuteAnova2(prefix1,prefix2,prefix3,fThresh,endFstr)
 % prefix- put 3 names of files per subject as prefixes
 % fThresh- F thresholds for clustering per permutation ([3 3.5 4])
 % endFstr add contrast, bucket etc for real F test. example:
@@ -16,7 +16,7 @@ if ~exist('endFstr')
     endFstr='';
 end
 if isempty(endFstr)
-    endFstr='-ftr FTnew';
+    endFstr='-fa FTnew';
 end
 %if exist('fMax.txt','file')
     !rm fMax*.txt
@@ -24,8 +24,8 @@ end
 %if exist('fMaxReal.txt','file')
     !rm fMaxReal*.txt
 %end
-if exist([prefix1,'_',prefix2,'_',prefix3,'+tlrc.BRIK'],'file')
-    eval(['!rm ',prefix1,'_',prefix2,'_',prefix3,'+tlrc*'])
+if exist(['A2_',prefix1,'_',prefix2,'_',prefix3,'+tlrc.BRIK'],'file')
+    eval(['!rm A2_',prefix1,'_',prefix2,'_',prefix3,'+tlrc*'])
 end
 if exist('pos+tlrc.BRIK','file')
     !rm pos+tlrc*
@@ -52,16 +52,16 @@ for permi=1:length(M)
     if exist('./FTnew+tlrc.BRIK','file')
         !rm FTnew+tlrc*
     end
-    str='~/abin/3dANOVA -levels 3';
+    str=['~/abin/3dANOVA2 -type 3 -alevels 3 -blevels ',num2str(n),' -mask ~/SAM_BIU/docs/MASKctx+tlrc'];
     for condi=1:3
         for subi=1:n
-            str=[str,' -dset ',num2str(condi),' ',conds{combs(M(permi,subi),condi)},'_',num2str(subi),'+tlrc'];
+            str=[str,' -dset ',num2str(condi),' ',num2str(subi),' ',conds{combs(M(permi,subi),condi)},'_',num2str(subi),'+tlrc'];
         end
     end
     if permi==length(M)
         str = [str,' ',endFstr];
     else
-        str = [str, ' -ftr FTnew'];
+        str = [str, ' -fa FTnew'];
     end
     %     eval(['!',str])
     [~, ~] = unix(str);
@@ -133,11 +133,11 @@ disp('')
 if nothing
     disp('NOTHING!!!')
 end
-eval(['!mv FTnew+tlrc.BRIK ',prefix1,'_',prefix2,'_',prefix3,'+tlrc.BRIK'])
-eval(['!mv FTnew+tlrc.HEAD ',prefix1,'_',prefix2,'_',prefix3,'+tlrc.HEAD'])
+eval(['!mv FTnew+tlrc.BRIK A2_',prefix1,'_',prefix2,'_',prefix3,'+tlrc.BRIK'])
+eval(['!mv FTnew+tlrc.HEAD A2_',prefix1,'_',prefix2,'_',prefix3,'+tlrc.HEAD'])
 % make log
 !echo =========================================== >> log.txt
-eval(['!echo ',prefix1,'_',prefix2,'_',prefix3,'+tlrc >> log.txt'])
+eval(['!echo A2_',prefix1,'_',prefix2,'_',prefix3,'+tlrc >> log.txt'])
 eval(['!echo critical F value      : ',num2str(critF),' >> log.txt']);
 eval(['!echo the largets F value   : ',num2str(fReal),' >> log.txt'])
 eval(['!echo F threshold             :    ', threshDisp,' >> log.txt'])

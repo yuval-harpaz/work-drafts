@@ -415,9 +415,9 @@ switch file
             save (['/home/yuval/Copy/MEGdata/alice/ga/GavgM',segStr],['GavgM',segStr])
             save (['/home/yuval/Copy/MEGdata/alice/ga/GavgE',segStr],['GavgE',segStr])
         end
-    case '4812'
+    case '24812'
         strE='';strM='';
-        for segi=[4 8 12] % 20 for WBW
+        for segi=[2 4 8 12] 
             for subi=1:length(comps.C100)
                 subStr=num2str(subi);
                 subFold=sf{1,subi};

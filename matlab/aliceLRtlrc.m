@@ -22,6 +22,8 @@ for subi=1:8
     Vsymm=double(Vlr+V>0);
     WriteBrik (Vdif, InfoNewTSOut, OptTSOut);
 end
-if avg
-    aliceAvgTlrc([prefix,'LRdif'],1)
+if exist('avg','var')
+    if avg
+        aliceAvgTlrc([prefix,'LRdif'],1)
+    end
 end

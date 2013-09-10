@@ -349,7 +349,7 @@ permute.label
 permute.results
 
 %% F-test for Tamil and word by word
-aliceGA('4812');
+aliceGA('24812');
 load /home/yuval/Copy/MEGdata/alice/ga/GavgM10
 aliceImage(GavgM10,[0.210 0.210],'seg10M210');
 load /home/yuval/Copy/MEGdata/alice/ga/GavgM8
@@ -361,8 +361,81 @@ aliceTlrc('seg10M210');
 aliceTlrc('seg12M210');
 
 prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
-[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,3)
+%[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,3)
 [critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4]);
 
 
+load /home/yuval/Copy/MEGdata/alice/ga/GavgM2
+aliceImage(GavgM2,[0.210 0.210],'seg2M210');
+load /home/yuval/Copy/MEGdata/alice/ga/GavgM4
+aliceImage(GavgM4,[0.210 0.210],'seg4M210');
+load /home/yuval/Copy/MEGdata/alice/ga/GavgM20
+aliceImage(GavgM20,[0.210 0.210],'seg20M210');
+aliceTlrc('seg2M210');
+aliceTlrc('seg4M210');
+aliceTlrc('seg20M210');
+% ./alice2tlrc
+for subi=1:8
+    masktlrc(['seg2M210_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    masktlrc(['seg20M210_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    masktlrc(['seg4M210_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+end
+prefix1='seg2M210';prefix2='seg20M210';prefix3='seg4M210';
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4]);
+
+timest='089';
+time=str2num(timest)/1000;
+aliceImage(GavgM2,[time time],['seg2M',timest]);
+aliceImage(GavgM4,[time time],['seg4M',timest]);
+aliceImage(GavgM20,[time time],['seg20M',timest]);
+aliceTlrc(['seg2M',timest]);% ./alice2tlrc
+aliceTlrc(['seg4M',timest]);% ./alice2tlrc
+aliceTlrc(['seg20M',timest]);% ./alice2tlrc
+for subi=1:8
+    masktlrc(['seg2M',timest,'_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    masktlrc(['seg20M',timest,'_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    masktlrc(['seg4M',timest,'_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+end
+prefix1=['seg2M',timest];prefix2=['seg20M',timest];prefix3=['seg4M',timest];
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4]);
+
+timest='179';
+time=str2num(timest)/1000;
+aliceImage(GavgM2,[time time],['seg2M',timest]);
+aliceImage(GavgM4,[time time],['seg4M',timest]);
+aliceImage(GavgM20,[time time],['seg20M',timest]);
+aliceTlrc(['seg2M',timest]);% ./alice2tlrc
+aliceTlrc(['seg4M',timest]);% ./alice2tlrc
+aliceTlrc(['seg20M',timest]);% ./alice2tlrc
+for subi=1:8
+    masktlrc(['seg2M',timest,'_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    masktlrc(['seg20M',timest,'_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    masktlrc(['seg4M',timest,'_',num2str(subi),'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+end
+prefix1=['seg2M',timest];prefix2=['seg20M',timest];prefix3=['seg4M',timest];
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4]);
+
+timest='210';
+endFstr='-ftr F -contr  1 -1  1 Alice_WBW -mean 1 alice1 -mean 2 WBW -mean 3 alice2 -bucket FTnew';
+prefix1='seg2M210';prefix2='seg20M210';prefix3='seg4M210';
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4],endFstr);
+
+prefix1=['seg8M',timest];prefix2=['seg10M',timest];prefix3=['seg12M',timest];
+endFstr='-ftr F -contr  1 -1  1 Alice_Tamil -mean 1 alice1 -mean 2 tamil -mean 3 alice2 -bucket FTnew';
+[critF,critClustSize]=alicePermuteAnova(prefix1,prefix2,prefix3,[3 3.5 4],endFstr);
+
+%% repeated measures ANOVA
+prefix1='seg2M210';prefix2='seg20M210';prefix3='seg4M210';
+[critF,critClustSize]=alicePermuteAnova2(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],'-fa F -acontr 1 -2 1 Alice_WBW -amean 1 alice1 -amean 2 WBW -amean 3 alice2 -bucket FTnew');
+prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
+[critF,critClustSize]=alicePermuteAnova2(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],'-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket FTnew');
+
+for segi=[4 20 8 10 12];aliceLRtlrc(['seg',num2str(segi),'M210']);end
+prefix1='seg2M210LRdif';prefix2='seg20M210LRdif';prefix3='seg4M210LRdif';
+[critF,critClustSize]=alicePermuteAnova2(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],'-fa F -acontr 1 -2 1 Alice_WBW -amean 1 alice1 -amean 2 WBW -amean 3 alice2 -bucket FTnew');
+prefix1='seg8M210LRdif';prefix2='seg10M210LRdif';prefix3='seg12M210LRdif';
+[critF,critClustSize]=alicePermuteAnova2(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],'-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket FTnew');
+
+prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
+[critF,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_WBW -amean 1 alice1 -amean 2 WBW -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3],'-acontr 1 -2 1 TTnew');
 

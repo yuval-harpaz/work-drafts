@@ -20,13 +20,27 @@ load subpath; cd(subpath);
 % cd <paste address here>
 % afni
 %%
-pat='/media/My Passport/MEG/tal';
-talMove2tlrcH(subs,cond,pat)
-pref='alpha';
+% pref='alpha';
+pref='gamma';
 talSAM_H(subs,pref,'eyesClosed',cond)
-SVL='alpha,7-13Hz,eyesClosed-NULL,P,Zp.svl';
-talFunc2tlrcH(subs,cond,SVL,pref)
+%pat='/media/My Passport/MEG/tal';
+pat='/media/Elements/MEG/tal';
+% talMove2tlrcH(subs,cond,pat)
+%SVL='alpha,7-13Hz,eyesClosed-NULL,P,Zp.svl';
 
+SVL='gamma,25-45Hz,eyesClosed-NULL,P,Zp.svl';
+talFunc2tlrcH(subs,cond,SVL,pref)
+talMvResultsH(subs,cond,pref)
+talGstats42('gamma');
+
+pref='theta';
+subs={'quad38','quad39','quad40','quad41','quad42','quad3802','quad3902','quad4002','quad4102','quad4202'};
+talSAM_H(subs,pref,'eyesClosed',cond)
+SVL='theta,3-7Hz,eyesClosed-NULL,P,Zp.svl';
+talFunc2tlrcH(subs,cond,SVL,pref)
+display('run ~/func2tlrc.txt')
+talMvResultsH(subs,cond,pref)
+talGstats42('theta');
 %% hilbert envelope correlations
 coords=[ -40 -18 -8;40 -18 -8;... %   LR hippo, Wink 2006
 -49 17 17;49 17 17;... %        Broca
