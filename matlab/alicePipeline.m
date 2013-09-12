@@ -436,6 +436,16 @@ prefix1='seg2M210LRdif';prefix2='seg20M210LRdif';prefix3='seg4M210LRdif';
 prefix1='seg8M210LRdif';prefix2='seg10M210LRdif';prefix3='seg12M210LRdif';
 [critF,critClustSize]=alicePermuteAnova2(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],'-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket FTnew');
 
+% permute t contrast
 prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
-[critF,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,[3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_WBW -amean 1 alice1 -amean 2 WBW -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3],'-acontr 1 -2 1 TTnew');
+[critF,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,[2 2.5 3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3],'-acontr 1 -2 1 TTnew');
+prefix1='seg8M210LRdif';prefix2='seg10M210LRdif';prefix3='seg12M210LRdif'
+[critF,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,[2 2.5 3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3],'-acontr 1 -2 1 TTnew');
+prefix1='seg2M210';prefix2='seg20M210';prefix3='seg4M210';
+[critF,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,[2 2.5 3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_WBW -amean 1 alice1 -amean 2 WBW -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3],'-acontr 1 -2 1 TTnew');
+prefix1='seg2M210LRdif';prefix2='seg20M210LRdif';prefix3='seg4M210LRdif';
+[critF,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,[2 2.5 3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_WBW -amean 1 alice1 -amean 2 WBW -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3],'-acontr 1 -2 1 TTnew');
 
+% 4
+prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
+[critF,critClustSize]=alicePermute4Anova2contr(prefix1,prefix2,prefix3,[2 2.5 3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3,'_4'],'-acontr 1 -2 1 TTnew');

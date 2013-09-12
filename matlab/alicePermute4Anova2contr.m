@@ -1,4 +1,4 @@
-function [critT,critClustSize]=alicePermuteAnova2contr(prefix1,prefix2,prefix3,tThresh,endFstr,permContr)
+function [critT,critClustSize]=alicePermute4Anova2contr(prefix1,prefix2,prefix3,tThresh,endFstr,permContr)
 % prefix- put 3 names of files per subject as prefixes
 % tThresh- T thresholds for clustering per permutation ([3 3.5 4])
 % endFstr add contrast, bucket etc for real F test. example:
@@ -41,12 +41,56 @@ if strcmp(prefix2,'seg10M210')
     n=7; % bad Mark!
 end
 
-combs=[1 2 3;1 3 2;2 1 3;2 3 1;3 1 2; 3 2 1];
-M=randi(6,1000,n);
-eqcond=(M(:,1)==M(:,2)) + (M(:,1)==M(:,3)) + (M(:,1)==M(:,4)) + (M(:,1)==M(:,5)) + (M(:,1)==M(:,6));
-if ~isempty(find(eqcond==6))
-    M(eqcond==6,:)=[]; % remove perutation, equal to real comparison
+M = (dec2bin(0:(2^n)-1)=='1');
+M4=M(find(sum(M')==4),:);
+if n==7
+    M3=M(find(sum(M')==3),:);
+    M=[M3;M4];
+else
+    M=M4;
 end
+notM=abs(1-M);
+Mrand=notM.*randi([2 5],size(M))+M;
+
+combs=[1 2 3;1 3 2;2 1 3;2 3 1;3 1 2; 3 2 1]; % 6 possible orders for 3 conditions
+% M = dec2base(0:(6^n)-1,6); % the possible arrangements for n subjects by 6 orders
+% M1 = M=='0'; % first index is zero here
+% M6 = M=='5'; % one and six are "true", real cond 2 is in the middle
+% Mtrue=M6+M1;
+% M4=M(find(sum(Mtrue')==4),:);
+% if n==7
+%     M3=M(find(sum(Mtrue')==3),:);
+%     Mstr=[M3;M4];
+% else
+%     Mstr=M4;
+% end
+% M=ones(size(Mstr));
+% for digiti=1:5
+%     M=M+digiti*(Mstr==num2str(digiti));
+% end
+% M1=Mstr=='0';
+%     M3=M(find(sum(M')==3),:);
+% 
+% 
+%  M = dec2base(0:(3^7)-1,3);
+% M1 = M=='2';
+% M6 = M=='1'; 
+% M=M(2:2^(n-1),:);
+% if n==8
+%     M=M(find(sum(M')==4),:);
+% elseif n==7
+%     M4=M(find(sum(M')==4),:);
+%     M3=M(find(sum(M')==3),:);
+%     M=[M4;M3];
+% end
+% M=M+1;
+
+% M=randi(6,1000,n);
+% eqcond=(M(:,1)==M(:,2)) + (M(:,1)==M(:,3)) + (M(:,1)==M(:,4)) + (M(:,1)==M(:,5)) + (M(:,1)==M(:,6));
+% if ~isempty(find(eqcond==6))
+%     M(eqcond==6,:)=[]; % remove permutation, equal to real comparison
+% end
+M=Mrand;
 M(end+1,:)=1;
 
 clustSize=zeros(length(M)-1,1);
@@ -134,10 +178,10 @@ for thri=1:length(tThresh)
 end
 diary ('log.txt');
 disp('===========================================');
-disp(['A2_',prefix1,'_',prefix2,'_',prefix3,'+tlrc']);
-disp(['critical T value  (two sided)    : ',num2str(critT(1))]);
-disp(['critical T value  (one sided)    : ',num2str(critT(2))]);
-disp(['the largets T value              : ',num2str(max(abs(tReal)))])
+disp(['A2_',prefix1,'_',prefix2,'_',prefix3,'_4+tlrc'])
+disp(['critical T value  (two sided)      : ',num2str(critT(1))]);
+disp(['critical T value  (one sided)      : ',num2str(critT(2))]);
+disp(['the largets T value                : ',num2str(max(abs(tReal)))])
 disp(['T threshold                        :    ', threshDisp]);
 disp(['critical cluster size (two sided)  :    ', num2str(critClustSize(1,:))]);
 disp(['critical cluster size (one sided)  :    ', num2str(critClustSize(2,:))]);
