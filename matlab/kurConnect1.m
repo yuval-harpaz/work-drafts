@@ -1,3 +1,78 @@
+%% b028 two foci connectivity
+% Anterior (lesion) [8.5 2 5.5], Parietal [-1 4.5 8.5]
+
+% make the VS
+cd ~/Data/kurtosis/b028
+cd SAM
+[SAMHeader, ActIndex, ActWgts]=readWeights('Spikes,20-70Hz,Global.wts');
+
+ind=voxIndex([8.5 2 5.5;-1 4.5 8.5],[-10 10 -9 9 0 15],0.5)
+cd ../
+fn='c,rfhp1.0Hz,ee';
+hdr=ft_read_header(fn);
+cfg=[];
+cfg.dataset=fn;
+cfg.trl=[1 hdr.nSamples 0];
+cfg.bpfreq=[20 70];
+cfg.bpfilter='yes';
+cfg.channel='MEG';
+data=ft_preprocessing(cfg);
+vs=ActWgts(ind,:)*data.trial{1,1};
+figure;plot(data.time{1,1},vs);
+[c,lags]=xcorr(vs(1,:),vs(2,:),1000); % negative when first line is active before second line
+figure;plot(lags,c)
+[~,maxcor]=max(abs(c));
+antBeforePar=round(1000*(-lags(maxcor)/hdr.Fs)); % lag in ms (15ms)
+temp=zeros(1,68);
+temp(end-6:end)=[1 2 3 4 5 6 7];
+start=find(temp,1);
+tempBlc = temp-mean(temp);
+tmplt=tempBlc./sqrt(sum(tempBlc.*tempBlc));
+[SNR1,SigX1,sigSign1]=fitTemp(vs(1,:),tmplt,start,0);
+[SNR2,SigX2,sigSign2]=fitTemp(vs(2,:),tmplt,start,0);
+figure;
+plot(data.time{1,1},vs(1,:)./max(vs(1,:)));
+hold on
+plot(data.time{1,1},SNR1.*sigSign1./max(SNR1),'k');
+
+[peaks1, Ipeaks1] = findPeaks(SNR1,3, round(678/4));
+figure;
+plot(vs')
+hold on
+plot(Ipeaks1,vs(1,Ipeaks1),'ro')
+
+[peaks2, Ipeaks2] = findPeaks(SNR2,3, round(678/4));
+events1=zeros(1,length(SNR1));
+events2=events1;
+events1(Ipeaks1)=1;
+events2(Ipeaks2)=1;
+
+smfc=33;
+[c,lags]=xcorr(smooth(events1,smfc),smooth(events2,smfc),10000);
+plot(lags,c);
+
+
+smfc=678;
+[c1,lags]=xcorr(smooth(events1,smfc),smooth(events1,smfc),10000);
+c2=xcorr(smooth(events2,smfc),smooth(events2,smfc),10000);
+c1_2=xcorr(smooth(events1,smfc),smooth(events2,smfc),10000);
+figure;
+plot(lags,c1);
+hold on
+plot(lags,c2,'k');plot(lags,c1_2,'r');
+legend('Ant Ant','Post Post','Ant Post')
+
+
+smfc=5;
+[c,lags]=xcorr(smooth(abs(vs(1,:)),smfc),smooth(abs(vs(2,:)),smfc),10000);
+plot(lags,c);
+
+
+
+% Signal = (sum(vs.*tmplt))^2;
+% Total = sum(data.*data);
+% Error = Total - Signal;
+% SNR=Signal/Error;
 %% find events and baseline for freq analysis
 
 cd /home/yuval/Copy/MEGdata/b272/2
