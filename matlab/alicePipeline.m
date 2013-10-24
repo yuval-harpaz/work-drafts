@@ -449,3 +449,99 @@ prefix1='seg2M210LRdif';prefix2='seg20M210LRdif';prefix3='seg4M210LRdif';
 % 4
 prefix1='seg8M210';prefix2='seg10M210';prefix3='seg12M210';
 [critF,critClustSize]=alicePermute4Anova2contr(prefix1,prefix2,prefix3,[2 2.5 3 3.5 4 4.5 5 5.5 6],['-fa F -acontr 1 -2 1 Alice_Tamil -amean 1 alice1 -amean 2 Tamil -amean 3 alice2 -bucket ','A2_',prefix1,'_',prefix2,'_',prefix3,'_4'],'-acontr 1 -2 1 TTnew');
+
+%% plan B
+% ignore single blocks
+% focus on rest and alice
+% check laterality for different freqs (alice, rest, rest-alice) and evoked (alice only)
+% normalize: first exclude regions with low signal, then divide R/(R-L).
+% color in red the active side.
+
+%% B alice
+load /home/yuval/Copy/MEGdata/alice/ga/GavgMalice
+aliceImageB(GavgMalice,[0.05 0.45],'Balice','');
+aliceLRtlrcB('Balice','div',0.05);
+aliceLRtlrcB('Balice','dif');
+alicePermuteB('BaliceLRdif');
+!mv BaliceLRdif_CT* OP/
+!mv BaliceLRdif_C* OP/
+!mv BaliceLRdif_T* OP/
+!rm BaliceLRdif_c* BaliceLRdif_t*
+alicePermuteB('BaliceLRdiv');
+
+%% check sensor level LR for EEG and MEG
+% averaged data, alice
+[p,x,labels]=aliceTtest0B('GavgEaliceLR1',false);
+p(p<0)=1;
+txt='';
+for chi=1:32
+    txt(chi,1:5)=' ';
+    txt(chi,1:length(labels{chi,1}))=labels{chi,1};
+    sig=find(p(chi,673:1083)<0.05)+672;
+    chstr=num2str(x(sig));
+    if ~ isempty(chstr)
+        txt(chi,6:length(chstr)+5)=chstr;
+    end
+end
+
+% freq analysis
+aliceTtest0B('GavgFrEaliceLR');
+[p,x,labels]=aliceTtest0B('GavgFrEaliceLR',false);
+p(p<0)=1;
+txt='';
+for chi=1:32
+    txt(chi,1:5)=' ';
+    txt(chi,1:length(labels{chi,1}))=labels{chi,1};
+    sig=find(p(chi,:)<0.05);
+    chstr=num2str(round(x(sig)));
+    if ~ isempty(chstr)
+        txt(chi,6:length(chstr)+5)=chstr;
+    end
+end
+disp(txt)
+
+[p,x,labels]=aliceTtest0B('GavgFrMaliceLR',false);
+p(p<0)=1;
+txt='';
+for chi=1:248
+    txt(chi,1:5)=' ';
+    txt(chi,1:length(labels{chi,1}))=labels{chi,1};
+    sig=find(p(chi,:)<0.05);
+    chstr=num2str(round(x(sig)));
+    if ~ isempty(chstr)
+        txt(chi,6:length(chstr)+5)=chstr;
+    end
+end
+disp(txt)
+
+[p,x,labels]=aliceTtest0B('GavgFrErestLR',false);
+p(p<0)=1;
+txt='';
+for chi=1:32
+    txt(chi,1:5)=' ';
+    txt(chi,1:length(labels{chi,1}))=labels{chi,1};
+    sig=find(p(chi,:)<0.05);
+    chstr=num2str(round(x(sig)));
+    if ~ isempty(chstr)
+        txt(chi,6:length(chstr)+5)=chstr;
+    end
+end
+disp(txt)
+
+[p,x,labels]=aliceTtest0B('GavgFrMrestLR',false);
+p(p<0)=1;
+txt='';
+for chi=1:248
+    txt(chi,1:5)=' ';
+    txt(chi,1:length(labels{chi,1}))=labels{chi,1};
+    sig=find(p(chi,:)<0.05);
+    chstr=num2str(round(x(sig)));
+    if ~ isempty(chstr)
+        txt(chi,6:length(chstr)+5)=chstr;
+    end
+end
+disp(txt)
+
+
+%% find components common for EEG and MEG alpha
+aliceAlphaB('liron')
