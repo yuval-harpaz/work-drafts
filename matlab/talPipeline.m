@@ -182,3 +182,17 @@ talGApow
 talpowFigs
 talPowNorm
 talPowGAplot(file,freq)
+%% 29.10.13
+cd /media/Elements/MEG/talResults/Coh
+load LRchans
+%load LRpairs
+chans=Lchannel;
+chans(60:118)=Rchannel;
+freq=10;
+
+talStatPlot('cohLRv1pre_D','cohLRv1pre_C',[freq freq],[0 1],'ttest2',chans',1);
+talStatPlot('cohLRv2pre_D','cohLRv2pre_C',[freq freq],[0 1],'ttest2',chans',1);
+
+
+talStatPlot('cohLRv2pre_D','cohLRv2post_D',[freq freq],[0 1],'paired-ttest',chans',1);
+talStatPlot('cohLRv2pre_D','cohLRv1pre_C',[freq freq],[0 1],'ttest2',chans',1);
