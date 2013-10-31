@@ -196,3 +196,12 @@ talStatPlot('cohLRv2pre_D','cohLRv2pre_C',[freq freq],[0 1],'ttest2',chans',1);
 
 talStatPlot('cohLRv2pre_D','cohLRv2post_D',[freq freq],[0 1],'paired-ttest',chans',1);
 talStatPlot('cohLRv2pre_D','cohLRv1pre_C',[freq freq],[0 1],'ttest2',chans',1);
+
+
+talStatPlot('cohLRv1pre_D','cohLRv1pre_CQ',[freq freq],[0 1],'ttest2',chans',1);
+talStatPlot('cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],'ttest2',chans',1);
+talStatPlot('cohLRv2pre_D','cohLRv2post_D',[freq freq],[0 1],'paired-ttest',chans',1);
+talStatPlot('cohLRv2pre_D','cohLRv1pre_CQ',[freq freq],[0 1],'ttest2',chans',1);
+
+talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.05);
+talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.001);
