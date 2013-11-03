@@ -468,6 +468,10 @@ alicePermuteB('BaliceLRdif');
 !mv BaliceLRdif_T* OP/
 !rm BaliceLRdif_c* BaliceLRdif_t*
 alicePermuteB('BaliceLRdiv');
+!mv BaliceLRdif_CT* OP/
+!mv BaliceLRdif_C* OP/
+!mv BaliceLRdif_T* OP/
+!rm BaliceLRdif_c* BaliceLRdif_t*
 
 %% check sensor level LR for EEG and MEG
 % averaged data, alice
@@ -545,3 +549,5 @@ disp(txt)
 
 %% find components common for EEG and MEG alpha
 aliceAlphaB('liron')
+aliceAlphaB1('liron')
+aliceAlphaB2(102,12);

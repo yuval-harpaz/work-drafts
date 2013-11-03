@@ -16,7 +16,7 @@ for subi=1:8
         case 'dif'
             Vout=V-Vlr;
         case 'div'
-            Vout=V./(V-Vlr);
+            Vout=(V-Vlr)./V;
     end
     Vout(1:16,:,:)=0;
     if ~isempty(maskFac)
