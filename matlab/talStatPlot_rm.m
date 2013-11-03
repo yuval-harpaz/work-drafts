@@ -43,6 +43,7 @@ end
 
 %% repeated measure anova (2x2)
 P=ones(length(data1.label),3);
+geiger=1;
 for chani=1:length(chans)
     [~,chi]=ismember(chans{chani,1},data1.label);
     dyslexia=[data1.powspctrm(:,chi,xlim(1)),data3.powspctrm(:,chi,xlim(1))];
@@ -53,13 +54,16 @@ for chani=1:length(chans)
     %[p, table] = anova_rm({dyslexia control});
     p = anova_rm({dyslexia control},'off');
     P(chi,:)=p([1 2 4]);
-%     if p(4)<0.05 || strcmp(data1.label{chi},'A210')
+    if p(2)<pthr %|| strcmp(data1.label{chi},'A210')
 %         disp(data1.label{chi})
 %         means=[mean(dyslexia(:,1)),mean(control(:,1)),mean(dyslexia(:,2)),mean(control(:,2))];
 %         disp([title1(end-6:end),' ',title2(end-6:end),' ',title3(end-6:end),' ',title4(end-6:end)])
 %         disp(means)
 %         pause
-%     end
+        [~,table]=anova_rm({dyslexia control},'off');
+        Fs(geiger)=table{3,5};
+        geiger=geiger+1;
+    end
 end
 labels={'Time','Group','Interaction'};
 
@@ -84,6 +88,7 @@ for pli=1:4
     eval(['titlei=title',num2str(pli)])
     title(strrep(titlei,'_',' '));
 end
+Fs
 function [title,data]=getparts(data) %#ok<DEFNU>
 load(data)
 if isempty(findstr('/',data))

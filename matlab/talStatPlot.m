@@ -1,4 +1,4 @@
-function [stat,figure1]=talStatPlot(data1,data2,xlim,zlim,ttype,chans,midline);
+function [stat,figure1]=talStatPlot(data1,data2,xlim,zlim,ttype,chans,midline); %#ok<INUSD>
 % independent sample ttest (two groups)
 %  stat=statPlot('cohLRv1pre_DM','cohLRv1pre_CM',[10 10],[],'ttest2')
 
