@@ -1,5 +1,5 @@
 
-function aliceLRtlrcB(prefix,method,maskFac)
+function aliceLRtlrcB(prefix,method,maskFac,tlrcmask)
 %
 %sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
 cd /home/yuval/Copy/MEGdata/alice/func/B
@@ -30,5 +30,7 @@ for subi=1:8
     OptTSOut.verbose = 1;
     OptTSOut.View = '+tlrc';
     WriteBrik (Vout, Info, OptTSOut);
-    %    masktlrc([OptTSOut.Prefix,'+tlrc'],'~/SAM_BIU/docs/MASKctx+tlrc')
+    if exist('tlrcmask','var')
+        masktlrc([OptTSOut.Prefix,'+tlrc'],['~/SAM_BIU/docs/',tlrcmask,'+tlrc'])
+    end
 end

@@ -468,10 +468,10 @@ alicePermuteB('BaliceLRdif');
 !mv BaliceLRdif_T* OP/
 !rm BaliceLRdif_c* BaliceLRdif_t*
 alicePermuteB('BaliceLRdiv');
-!mv BaliceLRdif_CT* OP/
-!mv BaliceLRdif_C* OP/
-!mv BaliceLRdif_T* OP/
-!rm BaliceLRdif_c* BaliceLRdif_t*
+!mv BaliceLRdiv_CT* OP/
+!mv BaliceLRdiv_C* OP/
+!mv BaliceLRdiv_T* OP/
+!rm BaliceLRdiv_c* BaliceLRdiv_t*
 
 %% check sensor level LR for EEG and MEG
 % averaged data, alice
@@ -548,6 +548,37 @@ disp(txt)
 
 
 %% find components common for EEG and MEG alpha
-aliceAlphaB('liron')
-aliceAlphaB1('liron')
-aliceAlphaB2(102,12);
+aliceAlphaB('liron')  % check alpha MEG and EEG
+aliceAlphaB1('liron') % check alpha freq and channel, MEG only
+aliceAlphaB2(102,12); % check alpha MEG by freq, can pick different conditions
+[figure1,labels]=aliceAlphaB3(10); % figure of all subjects averaged
+[figure1,labels]=aliceAlphaB3eeg(10) % figure of all subjects averaged
+[figure1,labels]=aliceAlphaB3eeg(11)
+
+%% freq analysis for source level
+aliceAlphaBsam(10)
+aliceAlphaBdics(10)
+aliceAlphaBpcc(10)
+aliceAlphaBmne([10 11])
+aliceAlphaBsam1(10)
+aliceAlphaBsam1(11);
+cd /home/yuval/Copy/MEGdata/alice/func/B
+for fni=1:8
+    str=num2str(fni);
+    eval(['!3dcalc -prefix Brest1_',str,' -a rest1_10HzAwts_',str,'+tlrc -b rest1_11HzAwts_',str,'+tlrc -exp ''','(a+b)/2'''])
+end
+aliceLRtlrcB('Brest1','div',0.05,'MASKbrainSymm');
+alicePermuteB('Brest1LRdiv',0);
+!mv Brest1LRdiv_CT* OP/
+!mv Brest1LRdiv_C* OP/
+!mv Brest1LRdiv_T* OP/
+!rm Brest1LRdiv_c* Brest1LRdiv_t*
+[~, V, Info, ~] = BrikLoad ('Brest1LRdivttest+tlrc');
+Vlr=-1*flipdim(V,1);
+Vnew=Vlr+V;
+Vnew(Vnew<0)=0;
+OptTSOut.Scale = 1;
+OptTSOut.verbose = 1;
+OptTSOut.View = '+tlrc';
+OptTSOut.Prefix='Brest1';
+WriteBrik (Vnew, Info, OptTSOut);
