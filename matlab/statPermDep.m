@@ -1,4 +1,4 @@
-function [stat,figure1]=statPlot(data1,data2,xlim,zlim,ttype,alpha);
+function [stat,figure1]=statPermDep(data1,data2,xlim,zlim,ttype,alpha);
 % independent sample ttest (two groups)
 %  stat=statPlot('cohLRv1pre_DM','cohLRv1pre_CM',[10 10],[],'ttest2')
 
@@ -53,7 +53,7 @@ elseif isfield(data1,'powspctrm')
 else
     error('needs data.individual or data.powspctrm')
 end
-cfg.xlim=xlim;
+cfg.xlim=[xlim xlim];;
 cfg.layout = '4D248.lay';
 if length(data1.label)<35
     cfg.layout = 'WG32.lay'
@@ -68,26 +68,42 @@ if strcmp(ttype,'paired-ttest')
 else
     eval(['cfgs.design = [ones(1,size(data1.',dataMat,',1)) ones(1,size(data2.',dataMat,',1))*2];'])
 end
+%% permutations
+cfgs.feedback='no';
 if isfield(data1,'powspctrm')
-    cfgs.frequency=xlim;
+    cfgs.frequency=[xlim xlim];
+    for permi=1:1000
+        DATA1=data1;
+        DATA2=data2;
+        switchsub=find(round(rand(1,size(DATA1.powspctrm,1))));
+        DATA1.powspctrm(switchsub,:,:)=data2.powspctrm(switchsub,:,:);
+        DATA2.powspctrm(switchsub,:,:)=data1.powspctrm(switchsub,:,:);
+        [stat] = ft_freqstatistics(cfgs, DATA1,DATA2);
+        minp(permi)=min(stat.prob);
+        disp(['permutation no. ',num2str(permi)])
+    end
     [stat] = ft_freqstatistics(cfgs, data1,data2);
 else
-    cfgs.latency=xlim;
+    cfgs.latency=[xlim xlim];
     [stat] = ft_timelockstatistics(cfgs, data1,data2);
 end
+%load neighbours
+minp=sort(minp);
 
-datadif=data1;
-if isfield(data1,'powspctrm')
-    if strcmp(ttype,'paired-ttest')
-        datadif.powspctrm=data1.powspctrm-data2.powspctrm;
-    else
-        datadif.powspctrm=mean(data1.powspctrm,1)-mean(data2.powspctrm,1);
-    end
-else
-    datadif.individual=data1.individual-data2.individual;
-end
+critP=minp(1000*alpha); % one sided
+
+% datadif=data1;
+% if isfield(data1,'powspctrm')
+%     if strcmp(ttype,'paired-ttest')
+%         datadif.powspctrm=data1.powspctrm-data2.powspctrm;
+%     else
+%         datadif.powspctrm=mean(data1.powspctrm,1)-mean(data2.powspctrm,1);
+%     end
+% else
+%     datadif.individual=data1.individual-data2.individual;
+% end
 cfg.highlight = 'labels';
-cfg.highlightchannel = find(stat.prob<alpha);
+cfg.highlightchannel = find(stat.prob<critP);
 %cfg.zlim='maxmin';
 %cfg.marker='labels';
 % figure;ft_topoplotER(cfg,data1)

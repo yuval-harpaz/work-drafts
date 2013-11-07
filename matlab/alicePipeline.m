@@ -582,3 +582,49 @@ OptTSOut.verbose = 1;
 OptTSOut.View = '+tlrc';
 OptTSOut.Prefix='Brest1';
 WriteBrik (Vnew, Info, OptTSOut);
+
+%% Amygdala experiment
+aliceAmyg(10);
+%% tal control groups
+aliceTal(10); % figs
+aliceTal1% grand average different freqs
+cd ~/Data/tal
+
+stat=statPlot('Open','Closed',[10 10],[0 1e-26],'paired-ttest',0.05);
+[stat,figure1]=statPermDep('Open','Closed',10,[0 1e-26],'paired-ttest',0.05);
+
+% LR
+[stat,figure1]           =statPermDepLR('Open',10,[0 1e-26],'paired-ttest',0.05);
+[stat,figure1,minp,critP]=statPermDepLR('Closed',10,[0 1e-26],'paired-ttest',0.05);
+[stat,figure1,minp,critP]=statPermDepLR('Closed',11,[0 1e-26],'paired-ttest',0.05);
+[stat,figure1,minp,critP]=statPermDepLR('Open',11,[0 1e-26],'paired-ttest',0.05);
+% LR by cluster
+[stat,figure1]=aliceClustPlot('Open',10,[0 1e-26],'paired-ttest');
+[stat,figure1]=aliceClustPlot('Closed',10,[0 1e-26],'paired-ttest');
+
+[stat,figure1]=aliceClustPlot('Open',11,[0 1e-26],'paired-ttest');
+
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',11,[0 1e-26],'paired-ttest','max');
+sum((Rp-Lp)>0)/25
+sum((Ra-La)>0)/25
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',11,[0 1e-26],'paired-ttest','mean');
+sum((Rp-Lp)>0)/25
+sum((Ra-La)>0)/25
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',10,[0 1e-26],'paired-ttest','max');
+sum((Rp-Lp)>0)/25
+sum((Ra-La)>0)/25
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',10,[0 1e-26],'paired-ttest','mean');
+sum((Rp-Lp)>0)/25
+sum((Ra-La)>0)/25
+
+
+[stat,figure1,R,L]=aliceHemPlot('Open',10,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/25
+[stat,figure1,R,L]=aliceHemPlot('Open',10,[0 1e-26],'paired-ttest','max');
+sum((R-L)>0)/25
+[stat,figure1,R,L]=aliceHemPlot('Closed',10,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/25
+[stat,figure1,R,L]=aliceHemPlot('Closed',11,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/25
+[stat,figure1,R,L]=aliceHemPlot('Open',11,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/25
