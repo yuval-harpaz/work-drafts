@@ -58,10 +58,8 @@ end
         
 [h,p,ci,ant]=ttest(R,L);
 ant.p=p;
-[h,p,ci,post]=ttest(R,L);
-post.p=p;
-stat.ant=ant;
-stat.post=post;
+
+stat.hem=ant;
 
 cfg=[];
 if exist('zlim','var')
@@ -81,7 +79,7 @@ cfg.xlim=[xlim xlim];;
 cfg.layout = '4D248.lay';
 cfg.highlight = 'on';
 cfg.highlightchannel = antpost;
-cfg.comment=['post p=',num2str(stat.post.p),' ant p=',num2str(stat.ant.p)];
+cfg.comment=['p=',num2str(stat.hem.p)];
 figure1=figure;
 ft_topoplotER(cfg,data1)
 title(strrep(title1,'_',' '));

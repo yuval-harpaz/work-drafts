@@ -628,3 +628,34 @@ sum((R-L)>0)/25
 sum((R-L)>0)/25
 [stat,figure1,R,L]=aliceHemPlot('Open',11,[0 1e-26],'paired-ttest','mean');
 sum((R-L)>0)/25
+%% AviBP, 
+open aliceC
+
+cd /home/yuval/Copy/MEGdata/AviBP
+stat=statPlot('Open','Closed',[10 10],[0 1e-26],'paired-ttest',0.05);
+[stat,figure1]           =statPermDepLR('Open',10,[0 1e-26],'paired-ttest',0.05);
+[stat,figure1,minp,critP]=statPermDepLR('Closed',10,[0 1e-26],'paired-ttest',0.05);
+[stat,figure1,minp,critP]=statPermDepLR('Closed',11,[0 1e-26],'paired-ttest',0.05);
+[stat,figure1,minp,critP]=statPermDepLR('Open',11,[0 1e-26],'paired-ttest',0.05);
+
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',10,[0 1e-26],'paired-ttest','mean');
+sum((Rp-Lp)>0)/length(R)
+sum((Ra-La)>0)/length(R)
+[stat,figure1,R,L]=aliceHemPlot('Closed',11,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/length(R)
+[stat,figure1,R,L]=aliceHemPlot('Open',11,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/length(R)
+
+%% AviMa
+cd /home/yuval/Copy/MEGdata/alpha/AviMa
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',10,[0 1e-26],'paired-ttest','mean');
+sum((Rp-Lp)>0)/length(Ra)
+sum((Ra-La)>0)/length(Ra)
+
+[stat,figure1,R,L]=aliceHemPlot('Open',11,[0 1e-26],'paired-ttest','mean');
+sum((R-L)>0)/length(R)
+
+%% sumary tables
+[results,subjects]=aliceTablesC;
+[results50,subjects50]=aliceTablesC;
+[results,subjects]=aliceTablesCmax;
