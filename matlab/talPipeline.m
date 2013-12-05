@@ -1,3 +1,5 @@
+
+
 load ~/work-drafts/matlab/pathBIU;path(pathBIU);
 subs={'quad38'};
 talSetPathH(subs)
@@ -213,3 +215,12 @@ table=talCohList1(chan,freq);
 
 talStatPlotFds('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.01);
 
+%% back to z from p
+talLogPtoZ('alpha1')
+cd /media/Elements/MEG/talResults
+!3dttest -prefix alphaz_pre2_D_CQ -set1 quad0502/alpha1z+tlrc quad0602/alpha1z+tlrc quad0702/alpha1z+tlrc quad0902/alpha1z+tlrc quad1002/alpha1z+tlrc quad1402/alpha1z+tlrc quad1502/alpha1z+tlrc quad1602/alpha1z+tlrc quad1802/alpha1z+tlrc quad3802/alpha1z+tlrc -set2 quad01b/alpha1z+tlrc quad0202/alpha1z+tlrc quad0302/alpha1z+tlrc quad0402/alpha1z+tlrc quad0802/alpha1z+tlrc quad1102/alpha1z+tlrc quad2902/alpha1z+tlrc quad3102/alpha1z+tlrc quad3902/alpha1z+tlrc quad4002/alpha1z+tlrc quad4102/alpha1z+tlrc quad4202/alpha1z+tlrc
+!3dttest -prefix alphaz_pre1_D_CQ -set1 quad05/alpha1z+tlrc quad06/alpha1z+tlrc quad07/alpha1z+tlrc quad09/alpha1z+tlrc quad10/alpha1z+tlrc quad14/alpha1z+tlrc quad15/alpha1z+tlrc quad16/alpha1z+tlrc quad18/alpha1z+tlrc quad38/alpha1z+tlrc -set2 quad01/alpha1z+tlrc quad02/alpha1z+tlrc quad03/alpha1z+tlrc quad04/alpha1z+tlrc quad08/alpha1z+tlrc quad11/alpha1z+tlrc quad29/alpha1z+tlrc quad31/alpha1z+tlrc quad39/alpha1z+tlrc quad40/alpha1z+tlrc quad41/alpha1z+tlrc quad42/alpha1z+tlrc
+% copied them to /media/Elements/MEG/talResults/subs42
+cd subs42
+masktlrc('alphaz_pre2_D_CQ+tlrc')
+masktlrc('alphaz_pre1_D_CQ+tlrc')
