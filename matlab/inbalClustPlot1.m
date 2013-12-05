@@ -1,5 +1,7 @@
-function inbalClustPlot1(experiment)
+function [xsvd,nsvd,xcov,ncov,xempty,nempty]=inbalClustPlot1(experiment)
+% [xsvd,nsvd,xcov,ncov,xempty,nempty]=inbalClustPlot1('S')
 for subi=1:5
+    disp(['SUB ',num2str(subi)])
     disp('reading svd data')
     cd /media/YuvalExtDrive/Inbal_Yuval_project
     cd (num2str(subi))
@@ -26,11 +28,18 @@ for subi=1:5
     vempty=vempty(vempty>0);
     [nempty(subi,1:100),xempty(subi,1:100)] = hist(vempty,100);
     clear vempty
+    figure;hold on; 
+    scatter(1:100,nsvd(subi,:),'.b');
+    scatter(1:100,ncov(subi,:),'.r');
+    scatter(1:100,nempty(subi,:),'.g');
+    legend('svd','cov','empty');
+    title(['SUB ',num2str(subi)]);
     
 end
 
-figure;hold on; 
-scatter(xsvd(1,:),nsvd(1,:),'.b');
-scatter(xcov(1,:),ncov(1,:),'.r');
-scatter(xempty(1,:),nempty(1,:),'.g');
-legend('svd','cov','empty');
+% figure;hold on; 
+% scatter(xsvd(1,:),nsvd(1,:),'.b');
+% scatter(xcov(1,:),ncov(1,:),'.r');
+% scatter(xempty(1,:),nempty(1,:),'.g');
+% legend('svd','cov','empty');
+
