@@ -224,3 +224,13 @@ cd /media/Elements/MEG/talResults
 cd subs42
 masktlrc('alphaz_pre2_D_CQ+tlrc')
 masktlrc('alphaz_pre1_D_CQ+tlrc')
+
+
+!3dttest -prefix alphaz_Dpre_2_1 -paired -set1 quad01/alpha1+tlrc quad02/alpha1+tlrc quad03/alpha1+tlrc quad04/alpha1+tlrc quad08/alpha1+tlrc quad11/alpha1+tlrc quad29/alpha1+tlrc quad31/alpha1+tlrc quad39/alpha1+tlrc quad40/alpha1+tlrc quad41/alpha1+tlrc quad42/alpha1+tlrc -set2 quad01b/alpha1+tlrc quad0202/alpha1+tlrc quad0302/alpha1+tlrc quad0402/alpha1+tlrc quad0802/alpha1+tlrc quad1102/alpha1+tlrc quad2902/alpha1+tlrc quad3102/alpha1+tlrc quad3902/alpha1+tlrc quad4002/alpha1+tlrc quad4102/alpha1+tlrc quad4202/alpha1+tlrc
+!3dttest -prefix alphaz_CQpre_2_1 -paired -set1 quad05/alpha1+tlrc quad06/alpha1+tlrc quad07/alpha1+tlrc quad09/alpha1+tlrc quad10/alpha1+tlrc quad14/alpha1+tlrc quad15/alpha1+tlrc quad16/alpha1+tlrc quad18/alpha1+tlrc quad38/alpha1+tlrc -set2 quad0502/alpha1+tlrc quad0602/alpha1+tlrc quad0702/alpha1+tlrc quad0902/alpha1+tlrc quad1002/alpha1+tlrc quad1402/alpha1+tlrc quad1502/alpha1+tlrc quad1602/alpha1+tlrc quad1802/alpha1+tlrc quad3802/alpha1+tlrc
+!mv alphaz*_2_1* subs42/
+cd subs42
+masktlrc('alphaz_Dpre_2_1+tlrc')
+masktlrc('alphaz_CQpre_2_1+tlrc')
+
+%3dttest -prefix alpha_Dpre_2_1 -paired -set1 quad01/alpha1+tlrc quad02/alpha1+tlrc quad03/alpha1+tlrc quad04/alpha1+tlrc quad08/alpha1+tlrc quad11/alpha1+tlrc quad29/alpha1+tlrc quad31/alpha1+tlrc quad39/alpha1+tlrc quad40/alpha1+tlrc quad41/alpha1+tlrc quad42/alpha1+tlrc -set2 quad01b/alpha1+tlrc quad0202/alpha1+tlrc quad0302/alpha1+tlrc quad0402/alpha1+tlrc quad0802/alpha1+tlrc quad1102/alpha1+tlrc quad2902/alpha1+tlrc quad3102/alpha1+tlrc quad3902/alpha1+tlrc quad4002/alpha1+tlrc quad4102/alpha1+tlrc quad4202/alpha1+tlrc\n[yuval@meg2: Tue Jan  1 11:35:22 2013] ===================================\n[yuval@meg2: Tue Jan  1 11:35:22 2013] 3dcalc -a /home/yuval/SAM_BIU/docs/MASK+tlrc -b tempStat+tlrc -expr 'a*b' -prefix masked~

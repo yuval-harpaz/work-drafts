@@ -44,7 +44,30 @@ cfg.xlim=[10 10];
 figure;
 ft_topoplotER(cfg,megFr);
 save megFr megFr
-%% 
+%% Sheraz
+cd /home/yuval/Copy/MEGdata/alpha/sheraz
+
+LS=ls('*.fif');
+LS=LS(1:end-1);
+hdr=ft_read_header(LS);
+trl=[1,hdr.nSamples,0];
+cfg=[];
+cfg.trl=trl;
+cfg.demean='yes';
+cfg.dataset=LS;
+cfg.channel='MEGMAG';
+mag=ft_preprocessing(cfg);
+meanMAG=mean(mag.trial{1,1});
+
+% cfg.channel='MEGGRAD';
+% grd=ft_preprocessing(cfg);
+cfg.channel='MEG';
+meg=ft_preprocessing(cfg);
+
+figOptions.label=meg.label;
+figOptions.layout='neuromag306mag.lay';
+clear mag
+[cleanMEG,tempMEG,periodMEG,mcgMEG,RtopoMEG]=correctHB(meg.trial{1,1},meg.fsample,figOptions,meanMAG);
 
 
 
