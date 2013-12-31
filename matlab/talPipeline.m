@@ -234,3 +234,9 @@ masktlrc('alphaz_Dpre_2_1+tlrc')
 masktlrc('alphaz_CQpre_2_1+tlrc')
 
 %3dttest -prefix alpha_Dpre_2_1 -paired -set1 quad01/alpha1+tlrc quad02/alpha1+tlrc quad03/alpha1+tlrc quad04/alpha1+tlrc quad08/alpha1+tlrc quad11/alpha1+tlrc quad29/alpha1+tlrc quad31/alpha1+tlrc quad39/alpha1+tlrc quad40/alpha1+tlrc quad41/alpha1+tlrc quad42/alpha1+tlrc -set2 quad01b/alpha1+tlrc quad0202/alpha1+tlrc quad0302/alpha1+tlrc quad0402/alpha1+tlrc quad0802/alpha1+tlrc quad1102/alpha1+tlrc quad2902/alpha1+tlrc quad3102/alpha1+tlrc quad3902/alpha1+tlrc quad4002/alpha1+tlrc quad4102/alpha1+tlrc quad4202/alpha1+tlrc\n[yuval@meg2: Tue Jan  1 11:35:22 2013] ===================================\n[yuval@meg2: Tue Jan  1 11:35:22 2013] 3dcalc -a /home/yuval/SAM_BIU/docs/MASK+tlrc -b tempStat+tlrc -expr 'a*b' -prefix masked~
+
+[Dys,Cont]=talDataVox;
+
+[Dys,Cont]=talDataVox([-27 8 57]); %left middle frontal gyrus
+[Dys,Cont]=talDataVox([23 53 17]); %right superior frontal gyrus
+[Dys,Cont]=talDataVox([13 18 42]); %right cigulate gyrus / right SMA
