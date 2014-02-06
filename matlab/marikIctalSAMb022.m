@@ -1,5 +1,75 @@
-cd /home/yuval/Data/epilepsy/b162b/1
-fn='c,rfhp1.0Hz';
+cd /home/yuval/Data/epilepsy/b022
+
+
+fnlong='c,rfhp1.0Hz,ee,ee,n';
+p=pdf4D(fn);
+cleanCoefs = createCleanFile(p, fn,'byLF',0 ,'byFFT',0,'HeartBeat',[]);
+
+fnlong='hb_c,rfhp1.0Hz,ee,ee,n';
+fnshort='c,rfhp1.0Hz,short,n';
+plong=pdf4D(fnlong);
+pshort=pdf4D(fnshort);
+hdr=get(plong,'header')
+nSamp=hdr.epoch_data{1,1}.pts_in_epoch;
+dataLong=read_data_block(plong,[1 nSamp]);
+write_data_block(pshort,dataLong,1);
+
+fn='hb_c,rfhp1.0Hz,short,n';
+
+hdr=ft_read_header(fn);
+% t1=3.5;
+% s1=round(t1*hdr.Fs);s2=s1+999;
+cfg=[];
+cfg.dataset=fn;
+cfg.hpfilter='yes';
+cfg.hpfreq=20;
+cfg.blcwindow=[0 0.4];
+cfg.demean='yes';
+%cfg.trl=[s1,s2,0];
+cfg.channel='MEG';
+raw=ft_preprocessing(cfg);
+
+rewrite_pdf(raw.trial{1,1},raw.label,fn,'hp20');
+
+new_data=DATA_adaptive_pca_denoiser4(raw.trial{1,1},100,500,0.5);
+data=raw.trial{1,1};
+data(:,1:length(new_data))=new_data;
+rewrite_pdf(data,raw.label,'hb_c,rfhp20Hz,short,n','hbdn');
+
+
+%save (['new_data',num2str(cfg.hpfreq),'hp'],'new_data')
+fn='hb_c,rfhp20Hz,short,n';
+
+hdr=ft_read_header(fn);
+ t1=3.5;
+ s1=round(t1*hdr.Fs);s2=s1+999;
+cfg=[];
+cfg.dataset=fn;
+%cfg.hpfilter='yes';
+%cfg.hpfreq=20;
+cfg.blcwindow=[0 0.4];
+cfg.demean='yes';
+cfg.trl=[s1,s2,0];
+cfg.channel='MEG';
+spike=ft_preprocessing(cfg);
+
+% chi=find(ismember(raw.label,'A9'));
+% plot(raw.time{1,1},raw.trial{1,1}(chi,:),'r')
+% hold on
+% plot(raw.time{1,1},new_data(chi,:))
+% dn=raw;
+% dn.trial{1,1}=new_data;
+% dn=correctBL(dn,[0 0.4]);
+spike=correctBL(spike,[0 0.4]);
+cfg=[];
+cfg.xlim=[0.513 0.513];
+cfg.zlim=[-max(max(abs(raw.trial{1,1}))) max(max(abs(raw.trial{1,1})))];
+figure;
+ft_topoplotER(cfg,spike)
+
+
+
+
 
 !SAMcov64 -d lf,hb_c,rfhp1.0Hz -r 1 -m gamma -v
 !SAMwts64 -d lf,hb_c,rfhp1.0Hz -r 1 -m  gamma -c Alla -v

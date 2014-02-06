@@ -1,15 +1,18 @@
-cd /home/yuval/Data/epilepsy/b162b/1
-fn='c,rfhp1.0Hz';
-
-!SAMcov64 -d lf,hb_c,rfhp1.0Hz -r 1 -m gamma -v
-!SAMwts64 -d lf,hb_c,rfhp1.0Hz -r 1 -m  gamma -c Alla -v
+cd /home/yuval/Data/epilepsy/b162b
+%fn='lf,hb_c,rfhp1.0Hz';
+time=40:60;
+cd 1
+Trig2mark('PreIctal',time)
+cd ..
+!SAMcov64 -d lf,hb_c,rfhp1.0Hz -r 1 -m preIctal -v
+!SAMwts64 -d lf,hb_c,rfhp1.0Hz -r 1 -m preIctal -c PreIctala -v
 cd 1/SAM
-[~,~, ActWgts]=readWeights('gamma,40-130Hz,Alla.wts');
+[~,~, ActWgts]=readWeights('preIctal,40-130Hz,PreIctala.wts');
 cd ..
 fn='lf,hb_c,rfhp1.0Hz';
 hdr=ft_read_header(fn);
-s1=round(hdr.Fs*115);
-trl=s1:round(hdr.Fs):s1+19*hdr.Fs;
+s1=round(hdr.Fs*40);
+trl=s1:round(hdr.Fs):s1+20*hdr.Fs;
 trl=trl';
 trl(:,2)=trl+round(hdr.Fs);
 trl(:,3)=0;
@@ -17,8 +20,8 @@ cfg=[];
 cfg.trl=trl;
 cfg.dataset=fn;
 cfg.channel='MEG';
-cfg.hpfilter='yes';
-cfg.hpfreq=40;
+cfg.bpfilter='yes';
+cfg.bpfreq=[40 130];
 raw=ft_preprocessing(cfg);
 ns=mean(abs(ActWgts),2);
 pow=zeros(length(ActWgts),length(trl));
@@ -29,13 +32,161 @@ pow=pow.*(10^13);
 cfg=[];
 cfg.step=5;
 cfg.boxSize=[-120 120 -90 90 -20 150];
-cfg.prefix='gamma';
+cfg.prefix='preIctal40_60';
 cfg.TR =1000;
 cfg.torig = 115*1000;
 VS2Brik(cfg,pow);
-!3dcalc -a maskRS+orig -b gamma+orig -exp 'b*ispositive(a)' -prefix gammaMovie
+!3dcalc -a maskRS+orig -b preIctal40_60+orig -exp 'b*ispositive(a)' -prefix preIctalMovie
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='preIctal40_60';
+VS2Brik(cfg,mean(pow,2));
+!3dcalc -a maskRS+orig -b preIctal40_60+orig -exp 'b*ispositive(a)' -prefix preIctal40_60msk
+
 %% denoised movie
-load hp20_new_data_100_epoch500_r3
+
+
+cfg=[];
+cfg.trl=[trl(1,1),trl(end,2)+round(hdr.Fs),trl(1,1)];
+cfg.dataset=fn;
+cfg.channel='MEG';
+cfg.bpfilter='yes';
+cfg.bpfreq=[40 130];
+rawCont=ft_preprocessing(cfg);
+new_data=DATA_adaptive_pca_denoiser5(rawCont.trial{1,1},100,500,3);
+
+cfg=[];
+cfg.trl=[1,hdr.nSamples,0];
+cfg.dataset=fn;
+cfg.channel='MEG';
+cfg.bpfilter='yes';
+cfg.bpfreq=[40 130];
+rawAll=ft_preprocessing(cfg);
+
+
+rawAll.trial{1,1}(:,trl(1,1):trl(end,2))=new_data(:,1:trl(end,2)-trl(1,1)+1);
+
+rewrite_pdf(rawAll.trial{1,1},rawAll.label,'lf,hb_c,rfhp1.0Hz','dn');
+
+
+!SAMcov64 -d dn_lf,hb_c,rfhp1.0Hz -r 1 -m preIctal -v
+!SAMwts64 -d dn_lf,hb_c,rfhp1.0Hz -r 1 -m  preIctal -c PreIctala -v
+cd 1/SAM
+[~,~, ActWgts]=readWeights('preIctal,40-130Hz,PreIctala.wts');
+ns=mean(abs(ActWgts),2);
+
+samps=trl(:,1)-trl(1,1)+1;
+pow=zeros(length(ActWgts),length(trl));
+for triali=1:length(trl)-1
+    pow(:,triali)=mean(abs(ActWgts*new_data(:,samps(triali):samps(triali)+679)),2)./ns;
+end
+pow=pow.*(10^13);
+cd ..
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='preIctal40_60dn';
+VS2Brik(cfg,mean(pow,2));
+!3dcalc -a maskRS+orig -b preIctal40_60dn+orig -exp 'b*ispositive(a)' -prefix preIctal40_60dnMsk
+%% 102 to 125 sec
+
+
+
+time=105:125;
+
+Trig2mark('PreIctal',time)
+cd ..
+!SAMcov64 -d lf,hb_c,rfhp1.0Hz -r 1 -m preIctal -v
+!SAMwts64 -d lf,hb_c,rfhp1.0Hz -r 1 -m preIctal -c PreIctala -v
+cd 1/SAM
+[~,~, ActWgts]=readWeights('preIctal,40-130Hz,PreIctala.wts');
+cd ..
+fn='lf,hb_c,rfhp1.0Hz';
+hdr=ft_read_header(fn);
+s1=round(hdr.Fs*time(1));
+trl=s1:round(hdr.Fs):s1+20*hdr.Fs;
+trl=trl';
+trl(:,2)=trl+round(hdr.Fs);
+trl(:,3)=0;
+cfg=[];
+cfg.trl=trl;
+cfg.dataset=fn;
+cfg.channel='MEG';
+cfg.bpfilter='yes';
+cfg.bpfreq=[40 130];
+raw=ft_preprocessing(cfg);
+ns=mean(abs(ActWgts),2);
+pow=zeros(length(ActWgts),length(trl));
+for triali=1:length(trl)
+    pow(:,triali)=mean(abs(ActWgts*raw.trial{1,triali}),2)./ns;
+end
+pow=pow.*(10^13);
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='preIctal';
+cfg.TR =1000;
+cfg.torig = 115*1000;
+VS2Brik(cfg,pow);
+!3dcalc -a maskRS+orig -b preIctal+orig -exp 'b*ispositive(a)' -prefix movie105to125
+
+
+%% denoised movie
+
+
+cfg=[];
+cfg.trl=[trl(1,1),trl(end,2)+round(hdr.Fs),trl(1,1)];
+cfg.dataset=fn;
+cfg.channel='MEG';
+cfg.bpfilter='yes';
+cfg.bpfreq=[40 130];
+rawCont=ft_preprocessing(cfg);
+new_data=DATA_adaptive_pca_denoiser5(rawCont.trial{1,1},100,500,3);
+
+cfg=[];
+cfg.trl=[1,hdr.nSamples,0];
+cfg.dataset=fn;
+cfg.channel='MEG';
+cfg.bpfilter='yes';
+cfg.bpfreq=[40 130];
+rawAll=ft_preprocessing(cfg);
+
+
+rawAll.trial{1,1}(:,trl(1,1):trl(end,2))=new_data(:,1:trl(end,2)-trl(1,1)+1);
+
+rewrite_pdf(rawAll.trial{1,1},rawAll.label,'lf,hb_c,rfhp1.0Hz','dn105to125');
+
+
+!SAMcov64 -d dn105to125_lf,hb_c,rfhp1.0Hz -r 1 -m preIctal -v
+!SAMwts64 -d dn105to125_lf,hb_c,rfhp1.0Hz -r 1 -m  preIctal -c PreIctala -v
+cd 1/SAM
+[~,~, ActWgts]=readWeights('preIctal,40-130Hz,PreIctala.wts');
+ns=mean(abs(ActWgts),2);
+
+samps=trl(:,1)-trl(1,1)+1;
+pow=zeros(length(ActWgts),length(trl));
+for triali=1:length(trl)-1
+    pow(:,triali)=mean(abs(ActWgts*new_data(:,samps(triali):samps(triali)+679)),2)./ns;
+end
+pow=pow.*(10^13);
+cd ..
+cfg=[];
+cfg.step=5;
+cfg.boxSize=[-120 120 -90 90 -20 150];
+cfg.prefix='preIctal';
+cfg.TR =1000;
+cfg.torig = 105*1000;
+VS2Brik(cfg,pow);
+!3dcalc -a maskRS+orig -b preIctal+orig -exp 'b*ispositive(a)' -prefix movie105to125dn
+
+
+
+
+
+
+
+
 samps=trl(:,1)-trl(1,1)+1;
 pow=zeros(length(ActWgts),length(trl));
 for triali=1:length(trl)-1
