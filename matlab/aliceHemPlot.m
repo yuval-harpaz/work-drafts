@@ -1,4 +1,4 @@
-function [stat,figure1,R,L]=aliceClustPlot(data1,xlim,zlim,ttype,method);
+function [stat,figure1,R,L]=aliceHemPlot(data1,xlim,zlim,ttype,method);
 % independent sample ttest (two groups)
 %  stat=statPlot('cohLRv1pre_DM','cohLRv1pre_CM',[10 10],[],'ttest2')
 if ~exist('ttype','var')
@@ -77,8 +77,8 @@ antpost=data1.label([Ri,Li]);
 
 cfg.xlim=[xlim xlim];;
 cfg.layout = '4D248.lay';
-cfg.highlight = 'on';
-cfg.highlightchannel = antpost;
+%cfg.highlight = 'on';
+%cfg.highlightchannel = antpost;
 cfg.comment=['p=',num2str(stat.hem.p)];
 figure1=figure;
 ft_topoplotER(cfg,data1)
