@@ -128,3 +128,22 @@ for subi=1:length(subs)
     save (['grad',num2str(subi)],'meg')
     save (['gradFr',num2str(subi)],'megFr')
 end
+
+%% test head position
+cd /home/yuval/Copy/MEGdata/alice
+subs={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
+for subi=1:8
+    cd (subs{subi})
+    load avgLR
+    eval(['grad',num2str(subi),'=avgM10LR.grad;']);
+    clear avg*
+    cd ..
+end
+for subi=1:8
+    eval(['origin(subi,1:3)=fitsphere(grad',num2str(subi),'.chanpos(1:248,:));'])
+end
+LR={'left','right'}
+mo=1000*mean(origin(:,2));
+disp('the )
+
+

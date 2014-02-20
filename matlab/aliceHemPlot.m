@@ -77,8 +77,8 @@ antpost=data1.label([Ri,Li]);
 
 cfg.xlim=[xlim xlim];;
 cfg.layout = '4D248.lay';
-%cfg.highlight = 'on';
-%cfg.highlightchannel = antpost;
+cfg.highlight = 'on';
+cfg.highlightchannel = antpost;
 cfg.comment=['p=',num2str(stat.hem.p)];
 figure1=figure;
 ft_topoplotER(cfg,data1)
