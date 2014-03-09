@@ -659,3 +659,50 @@ sum((R-L)>0)/length(R)
 [results,subjects]=aliceTablesC;
 [results50,subjects50]=aliceTablesC;
 [results,subjects]=aliceTablesCmax;
+%% head position
+open aliceHeadPos
+aliceAlphaGAneg % finds subjects with no more than 1mm right bias
+cd /home/yuval/Copy/MEGdata/alpha
+load leftHeadPosition
+[stat,figure1]=aliceClustPlot(ClosedNeg,10,[0 1e-26],'paired-ttest','max');
+[stat,figure1]=aliceHemPlot(ClosedNeg,10,[0 1e-26],'paired-ttest','mean');
+aliceTtestLR(ClosedNeg,9,0.05);
+for i=1:9
+    cfg=[];
+    cfg.trials=i;
+    cfg.layout='4D248.lay';
+    cfg.xlim=[10 10];
+    figure;
+    ft_topoplotER(cfg,ClosedNeg);
+    title(num2str(i));
+end
+%% realign
+aliceAlphaRealign;
+open aliceHeadPos1;
+cd /home/yuval/Copy/MEGdata/alice/alphaRA
+[stat,figure1,Ra,Rp,La,Lp]=aliceClustPlot('Open',10,[0 1e-26],'paired-ttest','mean');
+[stat,figure1,R,L]=aliceHemPlot('Open',10,[0 1e-26],'paired-ttest','mean');
+aliceTtestLR('Open',9,0.05)
+aliceTtestLR('Open',10,0.05)
+aliceTtestLR('Closed',9,0.05)
+
+%% norm
+load Closed
+ClNorm=Closed;
+for subi=1:size(Closed.powspctrm,1)
+    ClNorm.powspctrm(subi,:,:)=Closed.powspctrm(subi,:,:)./max(max(Closed.powspctrm(subi,:,:)));
+end
+save ClNorm ClNorm
+aliceTtestLR('ClNorm',10,0.001)
+
+load Open
+OpNorm=Open;
+for subi=1:size(Closed.powspctrm,1)
+    OpNorm.powspctrm(subi,:,:)=Open.powspctrm(subi,:,:)./max(max(Open.powspctrm(subi,:,:)));
+end
+save OpNorm OpNorm
+aliceTtestLR('OpNorm',10,0.001);
+
+%% Denis
+Denis2
+o=DenisHS;

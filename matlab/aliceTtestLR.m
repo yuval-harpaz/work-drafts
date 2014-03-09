@@ -23,7 +23,7 @@ if isfield(gaData,'time')
     xSamp=nearest(gaData.time,xlim);
     [~,p] = ttest(dataLR.individual(:,:,xSamp));
 else
-
+    dataLR.powspctrm=zeros(size(dataLR.powspctrm));
     dataLR.powspctrm(:,Li,:)=gaData.powspctrm(:,Li,:)-gaData.powspctrm(:,Ri,:);
     dataLR.powspctrm(:,Ri,:)=gaData.powspctrm(:,Ri,:)-gaData.powspctrm(:,Li,:);
     xSamp=nearest(gaData.freq,xlim);
