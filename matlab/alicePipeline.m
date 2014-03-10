@@ -706,3 +706,24 @@ aliceTtestLR('OpNorm',10,0.001);
 %% Denis
 Denis2
 o=DenisHS;
+DenisHS1; % check A233 - A244 diff
+% Denis A233pli mean  0.9022   -0.5078   -0.0764
+% alice A233pli mean  4.1327    3.3621   -0.7052
+% p - A233 is more posterior than A244, meaning that both turn the head to
+%      the right but in Denis data it is less than a mm
+% l - in Denis data the head is 0.5mm closer to the left side. alice, 3mm
+%      to the right
+DenisAlpha
+cd /home/yuval/Data/Denis/REST
+aliceTtestLR('Rest',10,0.025);
+aliceTtestLR('Rest',9,0.025);
+aliceTtestLR('Rest',11,0.025);
+[stat,figure1]=aliceClustPlot('Rest',10,[0 1e-26],'paired-ttest','max');
+[stat,figure1]=aliceHemPlot('Rest',10,[0 1e-26],'paired-ttest','max');
+
+RestNorm=Rest;
+for subi=1:size(Rest.powspctrm,1)
+    RestNorm.powspctrm(subi,:,:)=Rest.powspctrm(subi,:,:)./max(max(Rest.powspctrm(subi,:,:)));
+end
+aliceTtestLR(RestNorm,10,0.025);
+save RestNorm RestNorm
