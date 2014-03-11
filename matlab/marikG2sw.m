@@ -104,13 +104,17 @@ end
 eval(str);
 %eval(['!3dTcat -prefix adapt5s',fold,' *all+orig.BRIK'])
 eval(['!3drefit -Torg ',num2str(time(1)),' g2sw',fold,'+orig'])
-[V,info]=BrikLoad([num2str(time(1)),'g2sw+orig']);
-g2_=BrikLoad(['g2sw',fold,'+orig']);
-g2_=mean(g2_(:,:,:,31:end),4);
-OptTSOut.Prefix = ['g2sw_',fold,'Avg'];
-OptTSOut.Scale = 1;
-OptTSOut.verbose = 1;
-WriteBrik (g2_, info,OptTSOut);
+%% average
+
+% [V,info]=BrikLoad([num2str(time(1)),'g2sw+orig']);
+% g2_=BrikLoad(['g2sw',fold,'+orig']);
+% g2_=mean(g2_(:,:,:,31:end),4);
+% OptTSOut.Prefix = ['g2sw_',fold,'Avg'];
+% OptTSOut.Scale = 1;
+% OptTSOut.verbose = 1;
+% WriteBrik (g2_, info,OptTSOut);
+
+
 % !3dTcat -prefix adapt5 *s+orig.BRIK
 % !3drefit -Torg 100 adapt5+orig   
 %!rm slide*_*+*        

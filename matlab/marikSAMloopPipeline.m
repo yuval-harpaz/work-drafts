@@ -31,6 +31,10 @@ marikSAMloop2([t-30 t+15],'2','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
 %% g2
 t=63;
 marikG2([t-30 t+15],'ictus','noECG_c,rfhp1.0Hz,ee,ee','/home/yuval/Data/epilepsy/b022');
+marikG2sw([t-30 t+15],'ictus','noECG_c,rfhp1.0Hz,ee,ee','/home/yuval/Data/epilepsy/b022');
+marikG2seg([t-30 t+15],'ictus','noECG_c,rfhp1.0Hz,ee,ee','/home/yuval/Data/epilepsy/b022');
+
+
 t=121;
 marikG2([t-30 t+15],'1','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
 
@@ -49,3 +53,13 @@ t=681;
 marikG2seg([t-30 t+15],'2','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
 t=596;
 marikG2seg([t-30 t+15],'3','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
+
+marikAvgPreIctal
+
+%% overlap
+% see also overlap in marikSAMloopAvg.m
+marikOverlap
+% seg, runs 1-2 4vox, runs 2-3 2vox, runs 1-3 2vox, all runs 2vox
+% sw, runs 1-2 6vox, runs 2-3 6vox, runs 1-3 5vox, all runs 4vox
+% global runs 1-2 2vox, runs 2-3 2vox, runs 1-3 1vox, all runs 1vox
+
