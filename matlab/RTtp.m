@@ -46,7 +46,7 @@ for subi=1:length(subs)
                 RT(trialcount)=RTtr;
                 trialcount=trialcount+1;
                 eval(['!echo  ''',sub,' ',corr,' ',num2str(RTtr),...
-                    ''' >> /home/yuval/Desktop/talResults/RTtp.txt'])
+                    ''' >> /home/yuval/Desktop/RTtp.txt'])
             end
         end
 %            save(['~/Desktop/talResults/s',sub,'_pow',num2str(trval),'_',num2str(1)],'pow');
@@ -55,5 +55,5 @@ for subi=1:length(subs)
         
         %
 end
-cd ('/home/yuval/Desktop/talResults')
+cd ('/home/yuval/Desktop')
 end
