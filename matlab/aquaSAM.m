@@ -1,7 +1,6 @@
-function aquaSAM(PARAM,Active,cond)
+function aquaSAM(PARAM)
 % PARAM='alpha';Active='eyesClosed';
-
-function aquaPower
+Active='eyesClosed';
 cd ('/media/Elements/quadaqua');
 load subs subs
 sess={'a','b'};
@@ -11,38 +10,25 @@ for subi=1:length(subs)
     display(['BEGGINING WITH ',sub]);
     cd (sub)
     for resti=1:2;
-        cd(sess{resti})
-        clnsource=['xc,lf,hb_c,rfhp0.1Hz'];
-        if ~exist([path2file(end),'.rtw'],'file')
-            PWD=pwd;
-            path2RTW=findDiRTW(PWD,'Su');
-            copyfile(path2RTW,['./',path2file(end),'.rtw'])
-        end
-        if exist([cond,'MarkerFile.mrk'],'file')
-            copyfile([cond,'MarkerFile.mrk'],'MarkerFile.mrk');
-        else
-            warning(['no ',cond,'MarkerFile.mrk'])
-        end
-        fileName= conditions{restcell(i)+2};
-        if exist(['xc,hb,lf_',fileName],'file')
-            source=['xc,hb,lf_',fileName];
-        elseif exist(['hb,xc,lf_',fileName],'file')
-            source=['hb,xc,lf_',fileName];
-        elseif exist(['xc,lf_',fileName],'file')
-            source=['xc,lf_',fileName];
-        else
-            warning('did not find clean file')
-        end
+        RUN=sess{resti};
+        cd(RUN)
+        %         if ~exist ('SAM/eyesClosed-NULL,P,Zp.svl','file')
+        source='xc,lf,hb_c,rfhp0.1Hz';
+        PWD=pwd;
+        copyfile('~/SAM_BIU/docs/SuDi0812.rtw',['./',RUN,'.rtw'])
+        copyfile('restMarkerFile.mrk','MarkerFile.mrk');
         cd ..
         if ~exist([PARAM,'.param'],'file')
             copyfile(['/media/Elements/MEG/tal/',PARAM,'.param'],'./')
         end
         if ~exist([RUN,'/SAM/',PARAM,',SAMspm-Segments'],'file');
-            eval(['!SAMcov -r ',RUN,' -d ',source,' -m ',PARAM,' -v']);
-            eval(['!SAMwts -r ',RUN,' -d ',source,' -m ',PARAM,' -c ',Active,'a -v']);
-            eval(['!SAMspm -r ',RUN,' -d ',source,' -m ',PARAM,' -v']);
-            cd([RUN,'/SAM']);system(['cp *',Active,'*.svl ../']);cd ../..
+            eval(['!SAMcov64 -r ',RUN,' -d ',source,' -m ',PARAM,' -v']);
+            eval(['!SAMwts64 -r ',RUN,' -d ',source,' -m ',PARAM,' -c ',Active,'a -v']);
+            eval(['!SAMspm64 -r ',RUN,' -d ',source,' -m ',PARAM,' -v']);
+            cd([RUN,'/SAM']);
+            eval(['!3dcopy alpha,7-13Hz,eyesClosed-NULL,P,Zp.svl ../../../SAM/rest_',RUN,'_',num2str(subi)])
+            cd ../..
         end
+        %         end
     end
-end
 end
