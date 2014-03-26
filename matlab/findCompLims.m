@@ -18,7 +18,8 @@ function [Itroughs,Ipeaks,avgTC,timeCourse]=findCompLims(cfg,varargin)
 % cfg.notBefore limits the first timepoint to look for components;
 % cfg.notAfter limits the last timepoint to look for components;
 % cfg.maxDist is the max time you want from peak to through
-
+% cfg.zThr to play with peak detection threshold (in z scores)
+% cfg.pToP is minimum peak to peak time
 timeCourse=zeros(length(varargin),length(varargin{1,1}.time));
 if ~isfield(cfg,'notBefore')
     cfg.notBefore=0;
@@ -34,6 +35,12 @@ if ~isfield(cfg,'maxDist')
     maxDist=round(0.15*sampRate);
 else
     maxDist=round(cfg.maxDist*sampRate);
+end
+if ~isfield(cfg,'pToP')
+    pToP=50;
+else
+    sRate=1/(varargin{1,1}.time(2)-varargin{1,1}.time(1));
+    pToP=round(cfg.pToP*sRate);
 end
 sampNB=nearest(varargin{1,1}.time,cfg.notBefore);
 sampNA=nearest(varargin{1,1}.time,cfg.notAfter);
@@ -114,7 +121,7 @@ if size(timeCourse,1)>1
 else
     avgTC=timeCourse;
 end
-[peaks, Ipeaks] = findPeaks(avgTC,cfg.zThr, 50, []);
+[peaks, Ipeaks] = findPeaks(avgTC,cfg.zThr, pToP);
 if isempty(peaks)
     error('no peaks! check threshold, check notAfter, do something!')
 end
@@ -152,7 +159,7 @@ for peaki=1:length(peaks);
     end
     % look for peaks in -avgTC (troughs)
     X=-avgTC(startI:endI);
-    [miny, minyI] = findPeaks(X,0, 10, []);
+    [miny, minyI] = findPeaks(X,0, 10);
     minyI=minyI+startI-1;
     nearZero=find(-miny<maxy/20);
     if isempty(nearZero);
