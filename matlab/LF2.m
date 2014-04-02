@@ -1,49 +1,6 @@
-cd /home/yuval/Copy/MEGdata/alice/idan
 
-trig=readTrig_BIU;
-trig=clearTrig(trig);
-restS=find(trig==100,1,'last'); % idan had 100 in the beginning too
-cfg=[];
-cfg.trl=[restS,restS+round(1017.23*120),0];
-cfg.dataset=source;
-cfg.channel='MEG';
-mag=ft_preprocessing(cfg);
-cfg.channel='MCxaA';
-ref=ft_preprocessing(cfg);
-cfg=rmfield(cfg,'trl');
-refAll=ft_preprocessing(cfg);
-% [four,F]=fftBasic(ref.trial{1,1},ref.fsample);
-% [~,refi]=max(abs(four(:,50))./mean(abs(four(:,60:90)),2));
-% ref.label(refi)
-[f100,F100]=fft100(refAll.trial{1,1},ref.fsample);
-
-Hz45i=nearest(F100,45);
-Hz55i=nearest(F100,55);
-[~,maxPow]=max(abs(f100(Hz45i:Hz55i)));
-maxPow=F100(maxPow+Hz45i-1);
-trig=readTrig_BIU;
-trig=trig(restS:restS+round(1017.23*120));
-trig=bitand(uint16(trig),256);
-correctLF(mag.trial{1,1},mag.fsample,'time','adaptive',50,4);
-correctLF(mag.trial{1,1},mag.fsample,'time','adaptive',maxPow,4);
-correctLF(mag.trial{1,1},mag.fsample,ref.trial{1,1},'adaptive',maxPow,4);
-correctLF(mag.trial{1,1},mag.fsample,trig,'adaptive',maxPow,4);
-
-cfg=[];
-cfg.trl=[restS,restS+round(1017.23*120),0];
-cfg.dataset=source;
-cfg.channel='MEG';
-cfg.hpfilter='yes';
-cfg.hpfreq=1;
-cfg.demean='yes';
-magHP=ft_preprocessing(cfg);
-correctLF(magHP.trial{1,1},mag.fsample,'time','adaptive',50,4);
-correctLF(magHP.trial{1,1},mag.fsample,'time',50,50,4);
-% check optimal freq
-% compare trig - constructed - ref
-% constructed: check num cycle effect
 % test epilepsy
-
+%% surface - time frequency A161
 cd /home/yuval/Data/epilepsy/b162b/1
 hdr=ft_read_header(source);
 t=121;
@@ -55,10 +12,7 @@ for trli=2:46
 end
 
 time=-30:15;
-% time0=[-30.5:14.5]'+t;
-% trl=[round(t-30*hdr.Fs),;
-% trl(:,2)=trl+round(hdr.Fs);
-% trl(:,3)=-round(hdr.Fs)/2;
+
 cfg=[];
 cfg.demean='yes';
 cfg.trl=samp;
@@ -78,29 +32,121 @@ cfg.method       = 'mtmfft';
 cfg.taper        = 'hanning';
 cfg.foi          = 1:100;
 cfg.feedback='no';
-cfg.keeptrials='yes';
+%cfg.keeptrials='yes';
 FrAll = ft_freqanalysis(cfg, raw);
 
-% plot results for alpha
+% make cfg for plot
 cfgp = [];
 cfgp.xlim = [50 50];
 cfgp.layout       = '4D248.lay';
 cfgp.interactive='yes';
 cfgp.trials=43;
-figure;ft_topoplotER(cfgp, FrAll);
+%figure;ft_topoplotER(cfgp, FrAll);
 [~,chi]=ismember('A161',raw.label)
-figure;plot(time,FrAll.powspctrm(:,chi,50))
+cfg=[];
+cfg.demean='yes';
+cfg.trl=samp;
+cfg.trl(:,3)=-678/2;
+cfg.dataset=['lf_',source];
+cfg.channel='MEG';
+rawLF=ft_preprocessing(cfg);
+f=[];fcl=[];
+flim=80
+for icti=1:46
+        ff=fftBasic(rawLF.trial{1,icti}(146,:),rawLF.fsample);
+        fcl(icti,1:flim)=abs(ff(1:flim));
+        ff=fftBasic(raw.trial{1,icti}(146,:),raw.fsample);
+        f(icti,1:flim)=abs(ff(1:flim));
+end
 
-%  hb=correctHB(rawCont.trial{1,1},rawCont.fsample);
-%  HB=raw;
-%  for trli=1:46
-%      samples=samp(trli,1):samp(trli,2);
-%      samples=samples-samp(1,1)+1;
-%      HB.trial{1,trli}(:,:)=hb(:,samples);
-%  end
-%  FrHB = ft_freqanalysis(cfg, HB);
-%  figure;ft_topoplotER(cfgp, FrHB);
 
+figure1 = figure('Colormap',...
+    [0 0 0.5625;0 0 1;0 0.5 1;0 1 1;0.125 1 0.875;0.25 1 0.75;0.375 1 0.625;0.5 1 0.5;0.625 1 0.375;0.75 1 0.25;0.875 1 0.125;1 1 0;1 0.9375 0;1 0.875 0;1 0.8125 0;1 0.75 0;1 0.6875 0;1 0.625 0;1 0.5625 0;1 0.5 0;1 0.4375 0;1 0.375 0;1 0.3125 0;1 0.25 0;1 0.1875 0;1 0.125 0;1 0.0625 0;1 0 0;0.998214304447174 0 0;0.996428549289703 0 0;0.994642853736877 0 0;0.992857158184052 0 0;0.991071403026581 0 0;0.989285707473755 0 0;0.987500011920929 0 0;0.985714256763458 0 0;0.983928561210632 0 0;0.982142865657806 0 0;0.98035717010498 0 0;0.97857141494751 0 0;0.976785719394684 0 0;0.975000023841858 0 0;0.973214268684387 0 0;0.971428573131561 0 0;0.969642877578735 0 0;0.967857122421265 0 0;0.966071426868439 0 0;0.964285731315613 0 0;0.962499976158142 0 0;0.960714280605316 0 0;0.95892858505249 0 0;0.95714282989502 0 0;0.955357134342194 0 0;0.953571438789368 0 0;0.951785743236542 0 0;0.949999988079071 0 0;0.948214292526245 0 0;0.946428596973419 0 0;0.944642841815948 0 0;0.942857146263123 0 0;0.941071450710297 0 0;0.939285695552826 0 0;0.9375 0 0;0.5 0 0]);
+axes1 = axes('Parent',figure1,'CLim',[0 3.23970682905768e-10]);
+box(axes1,'on');
+hold(axes1,'all');
+xlim(axes1,[-30 15]);
+ylim(axes1,[1 80]);
+surface('Parent',axes1,'ZData',f','YData',1:80,'XData',time,'CData',f');
+% surface('ZData',f','YData',1:80,'XData',time,'CData',f');
+figure2 = figure('Colormap',...
+    [0 0 0.5625;0 0 1;0 0.5 1;0 1 1;0.125 1 0.875;0.25 1 0.75;0.375 1 0.625;0.5 1 0.5;0.625 1 0.375;0.75 1 0.25;0.875 1 0.125;1 1 0;1 0.9375 0;1 0.875 0;1 0.8125 0;1 0.75 0;1 0.6875 0;1 0.625 0;1 0.5625 0;1 0.5 0;1 0.4375 0;1 0.375 0;1 0.3125 0;1 0.25 0;1 0.1875 0;1 0.125 0;1 0.0625 0;1 0 0;0.998214304447174 0 0;0.996428549289703 0 0;0.994642853736877 0 0;0.992857158184052 0 0;0.991071403026581 0 0;0.989285707473755 0 0;0.987500011920929 0 0;0.985714256763458 0 0;0.983928561210632 0 0;0.982142865657806 0 0;0.98035717010498 0 0;0.97857141494751 0 0;0.976785719394684 0 0;0.975000023841858 0 0;0.973214268684387 0 0;0.971428573131561 0 0;0.969642877578735 0 0;0.967857122421265 0 0;0.966071426868439 0 0;0.964285731315613 0 0;0.962499976158142 0 0;0.960714280605316 0 0;0.95892858505249 0 0;0.95714282989502 0 0;0.955357134342194 0 0;0.953571438789368 0 0;0.951785743236542 0 0;0.949999988079071 0 0;0.948214292526245 0 0;0.946428596973419 0 0;0.944642841815948 0 0;0.942857146263123 0 0;0.941071450710297 0 0;0.939285695552826 0 0;0.9375 0 0;0.5 0 0]);
+axes2 = axes('Parent',figure2,'CLim',[0 3.23970682905768e-10]);
+box(axes2,'on');
+hold(axes2,'all');
+xlim(axes2,[-30 15]);
+ylim(axes2,[1 80]);
+surface('Parent',axes2,'ZData',f','YData',1:80,'XData',time,'CData',fcl');
+
+
+%% compare methods
+% fcl is for trig 
+% fcl 50 is adaptive with 50 cycles
+lf=correctLF(rawCont.trial{1,1},rawCont.fsample,'time',50,50,4);
+LF=raw;
+for trli=1:46
+    samples=samp(trli,1):samp(trli,2);
+    samples=samples-samp(1,1)+1;
+    LF.trial{1,trli}(:,:)=lf(:,samples);
+end
+fcl50=[];
+flim=80;
+for icti=1:46
+        ff=fftBasic(LF.trial{1,icti}(146,:),rawLF.fsample);
+        fcl50(icti,1:flim)=abs(ff(1:flim));
+end
+% adaptive 256
+lf=correctLF(rawCont.trial{1,1},rawCont.fsample,'time','ADAPTIVE',50,4);
+LF=raw;
+for trli=1:46
+    samples=samp(trli,1):samp(trli,2);
+    samples=samples-samp(1,1)+1;
+    LF.trial{1,trli}(:,:)=lf(:,samples);
+end
+fcl256=[];
+
+for icti=1:46
+        ff=fftBasic(LF.trial{1,icti}(146,:),rawLF.fsample);
+        fcl256(icti,1:flim)=abs(ff(1:flim));
+end
+% find 0-crossing
+lf=correctLF(source,[],[],'ADAPTIVE',50,4);
+lf=lf(:,samp(1,1):samp(end,2));
+LF=raw;
+for trli=1:46
+    samples=samp(trli,1):samp(trli,2);
+    samples=samples-samp(1,1)+1;
+    LF.trial{1,trli}(:,:)=lf(:,samples);
+end
+fclRef=[];
+
+for icti=1:46
+        ff=fftBasic(LF.trial{1,icti}(161,:),rawLF.fsample);
+        fclRef(icti,1:flim)=abs(ff(1:flim));
+end
+
+f_ictal=[];
+
+
+
+figure;
+plot(mean(f(31:45,:),1),'r')
+hold on;
+plot(mean(fcl(31:45,:),1),'b')
+plot(mean(f(1:30,:),1),'k')
+plot(mean(fcl(1:30,:),1),'c')
+legend('ictal raw','ictal clean','preictal raw','preictal clean')
+
+
+figure;
+plot(mean(f(31:46,:),1),'r')
+hold on;
+plot(mean(fcl(31:46,:),1),'b')
+plot(mean(fcl50(31:46,:),1),'c')
+plot(mean(fcl256(31:46,:),1),'g')
+%plot(mean(fclRef(31:46,:),1),'y')
+legend('raw','trig','50 cycles','256 cycles')
+%% old
 lf=correctLF(rawCont.trial{1,1},rawCont.fsample,'time',50,50,4);
 LF=raw;
 for trli=1:46
@@ -307,17 +353,6 @@ end
 figure;plot(time,fcl)
 hold on
 plot(time,f,'r')
-f=[];fcl=[];
-for icti=1:46
-        ff=fftBasic(rawLF.trial{1,icti}(146,:),rawLF.fsample);
-        fcl(icti,1:100)=abs(ff(1:100)).^2;
-        ff=fftBasic(raw.trial{1,icti}(146,:),raw.fsample);
-        f(icti,1:100)=abs(ff(1:100)).^2;
-end
-figure;
-%imagesc(f')
-pcolor(sqrt(f)')
-figure;
-pcolor(sqrt(fcl)')
+
 
 % check again with adaptive, time etc
