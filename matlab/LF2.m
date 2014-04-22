@@ -146,6 +146,250 @@ plot(mean(fcl50(31:46,:),1),'c')
 plot(mean(fcl256(31:46,:),1),'g')
 %plot(mean(fclRef(31:46,:),1),'y')
 legend('raw','trig','50 cycles','256 cycles')
+
+%% check cycles - drift effect
+N=[64 128 215];
+t=sparse([]);
+p=t;
+pH=p;
+tH=t;
+for subi=1:8
+    for Ni=N
+        [p(Ni,subi),t(Ni,subi),pH(Ni,subi),tH(Ni,subi)]=LFtestCycN(subi,Ni);
+    end
+end
+figure;
+plot(tH(tH(:,1)~=0,:)','o')
+legend(num2str(find(t(:,1))))
+figure;
+plot(t(t(:,1)~=0,:)','o')
+%% random numbers
+ToDo:
+1. check BL problem in the beginning
+2. Test that length of data doesn't matter
+3. test sRate effect
+
+
+%BL issue
+data=rand(100,100000);
+data=data-0.5;
+lin=-0.5:0.00001:(0.5-0.00001);
+data=data+repmat(lin,100,1);
+lf=correctLF(data,1017.23,'time',512,50,4,0.1);
+figure;
+plot(mean(lf))
+
+% 1017 sRate
+N=[512,1024,2048,4096];
+
+nPerm=100;
+LF=[];
+for perm=1:nPerm
+    
+    for i=1:4
+        lf=correctLF(rand(100,100000),1017.23,'time',N(i),50,4,0.1);
+        close;
+        fcl=mean(abs(fftBasic(lf(:,50000:end),1017.23)),1);
+        LF(i,perm)=fcl(50);
+    end
+    lf=correctLF(rand(100,100000),1017.23,'time','GLOBAL',50,4,0.1);
+    close;
+    fcl=abs(fftBasic(lf(:,50000:end),1017.23));
+    LF(5,perm)=fcl(50);
+end
+ttest2(LF(3,:),LF(4,:))
+figure;
+plot(LF')
+saveas(1,'100perm1017.png')
+
+
+
+N=[512,1024,2048,4096];
+nPerm=10;
+LF=[];
+sRate=500;
+for perm=1:nPerm
+    
+    for i=1:4
+        lf=correctLF(rand(100,150000),sRate,'time',N(i),50,4,0.1);
+        close;
+        fcl=mean(abs(fftBasic(lf(:,50000:end),sRate)),1);
+        LF(i,perm)=fcl(50);
+    end
+%     lf=correctLF(rand(100,100000),sRate,'time','GLOBAL',50,4,0.1);
+%     close;
+%     fcl=abs(fftBasic(lf(:,50000:end),sRate));
+%     LF(5,perm)=fcl(50);
+end
+%ttest2(LF(3,:),LF(4,:))
+figure;
+plot(LF')
+legend(num2str(N'))
+%saveas(1,'100perm1017.png')
+
+% legend(num2str(N(1)),num2str(N(2)),num2str(N(3)),num2str(N(4)),'GLOBAL')
+% baselineFreq=[1:49,51:100];
+% p=[];
+% t=[];
+% for i=1:5
+%     [~,p(i),~,stat]=ttest(LF(i,baselineFreq)',LF(i,50));
+%     t(i)=stat.tstat;
+% end
+
+FIXME % there is a problem in the beginning of the curve
+close;
+[fcl,F]=fftBasic(lf,1017.23);
+[a,b,c,d]=LFtestCycN(subi,Ni);
+
+subs={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
+lineSamp=[40:49 51:60];
+%cycT=100:100:1000;%20:20:200;
+cycT=(2*ones(1,8)).^[6:6+8-1];
+ %n=length(cycT);
+for subi=1:8
+    sub=subs{subi};
+    cd /home/yuval/Copy/MEGdata/alice
+    cd (sub)
+    
+%     A245=readChan(source,'A245');
+    trig=bitand(uint16(readTrig_BIU(source)),256);
+%     samp=1:1017:length(trig);
+%     samp=samp';
+%     samp(:,2)=samp+1016;
+%     samp=samp(1:end-1,:);
+    
+    
+    %fclT=zeros(n,248,80);
+    
+   cfg=[];
+    cfg.dataset=source;
+    cfg.channel='MEG';
+    cfg.demean='yes';
+    raw=ft_preprocessing(cfg);
+    
+    for cyci=1:length(cycT)
+        cycNum=cycT(cyci);
+        %[fclT(cyci),~,fclT(cyci,:),f]=LFtestNcyc(A245,1:119,trig,cycNum,samp,1017.23,0.1);
+        lf=correctLF(raw.trial{1,1},1017.23,trig,cycNum,50,4,0.1);
+        [fcl,F]=fftBasic(lf,1017.23);
+        %fcl=abs(fcl);
+        fclT(cyci,:,1:80)=fcl(:,1:80);
+        clear lf
+    end
+     fclT=abs(fclT);
+    % [~,~,fclG]=LFtestNcyc(A245,1:119,trig,'GLOBAL',samp,1017.23);
+    % [~,~,fclG1]=LFtestNcyc(A245,1:119,trig,'GLOBAL',samp,1017.23,1);
+    for cyci=1:length(cycT)
+        for chani=1:248
+            a=polyfit(lineSamp',squeeze(abs(fclT(cyci,chani,lineSamp))),1);
+            %y=[40:60]*a(1)+a(2);
+            
+            A(cyci,chani)=50*a(1)+a(2);
+            D(cyci,chani)=fclT(cyci,chani,50)-A(cyci,chani);
+        end 
+    end
+    zero=sum(D<0);
+    zero(zero==0)=1;
+    
+%     p=pdf4D(source);
+%     chi=channel_index(p,'MEG');
+%     raw=read_data_block(p,[1,length(trig)],chi);
+    f=fftBasic(raw.trial{1,1},1017.23);
+    f=abs(f(:,1:80));
+    figure;scatter(f(:,50),zero)
+%     figure;plot(f)
+%     hold on
+%     plot([40:60],y,'r')
+%     estimate=y(11);
+    
+    topoplot248(zero)
+    topoplot248(f(:,50))
+    bestClean(subi)=cycT(nearest(sum(D'),0));
+    [~,maxCh]=max(f(:,50));
+    [~,minCh]=min(f(:,50));
+    bestMax(subi)=cycT(nearest(D(:,maxCh),0));
+    bestMin(subi)=cycT(nearest(D(:,minCh),0));
+    cd ../
+end
+save best bestMax bestMin bestClean
+bestClean
+% 
+% plot(fclT(1,:),'g')
+% plot(fclT(2,:),'k')
+% 
+% plot(f)
+% hold on
+% plot(fclT(1,:),'g')
+% plot(fclT(end,:),'r')
+% plot(fclT(9,:),'r')
+% plot(fclT(8,:),'r')
+% plot(fclT(7,:),'c')
+% plot(fclT(6,:),'m')
+% plot(fclT(5,:),'k')
+% plot(fclT(4,:),'c')
+%% check cycles number effect
+ref=readChan(source,'MCxaA');
+ref=ref(samp(1,1):samp(end,2));
+trig=bitand(uint16(readTrig_BIU(source)),256);
+%trig=trig(samp(1,1):samp(end,2));
+A161=readChan(source,'A161');
+
+n=8;
+fclT=zeros(n,80);
+cycT=(2*ones(1,n)).^[6:6+n-1];
+sampPre=1:678:81036;
+sampPre=sampPre';
+sampPre(:,2)=sampPre+677;
+
+for cyci=1:n
+    cycNum=cycT(cyci);
+    [fcl50(cyci),~,fclT(cyci,:)]=LFtestNcyc(A161,1:119,trig,cycNum,sampPre);
+    %dif50(cyci)=fcl(cyci,50)-fclG(1,50);
+end
+plot(f)    
+hold on
+plot(50,fcl50)
+plot(50,fcl50(end),'r.')
+
+cyc=(2*ones(1,12)).^[0:11];
+fcl=zeros(12,80);
+
+err=zeros(12,1);
+[~,~,fclG,f]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,trig,'GLOBAL',samp);
+dif50=zeros(12,1);
+for cyci=1:12
+    cycNum=cyc(cyci);
+    [~,~,fcl(cyci,:)]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',cycNum,samp);
+    dif50(cyci)=fcl(cyci,50)-fclG(1,50);
+    err(cyci)=mean(abs(fcl(cyci,setdiff(1:80,50))-f(1,setdiff(1:80,50))));
+end
+figure;
+plot(f,'r');
+hold on
+plot(fcl,'g');
+figure;plot(err,'k');hold on;plot(dif50,'b');legend('ERROR','clean-Global at 50Hz')
+
+
+
+
+% [f50_1024]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',1024,samp);
+% [f50_512]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',512,samp);
+% [f50_256,~,fcl,f]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',256,samp);
+% [f50_128]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',128,samp);
+% [f50_64,~,fcl64]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',64,samp);
+% [f50_32]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',32,samp);
+% [f50_16]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',16,samp);
+% [f50_8,~,fcl8]=LFtestNcyc(rawCont.trial{1,1}(146,:),31:46,'time',8,samp);
+% 
+% figure;plot(f,'r')
+% hold on;plot(fcl,'g')
+% plot(50,f50_1024,'.k')
+% plot(50,f50_512,'.b')
+% plot(50,f50_128,'.y')
+% plot(50,f50_64,'.m')
+% plot(50,f50_32,'.c')
+% plot(fclG,'k')
+
 %% old
 lf=correctLF(rawCont.trial{1,1},rawCont.fsample,'time',50,50,4);
 LF=raw;

@@ -55,7 +55,7 @@ t=596;
 marikG2seg([t-30 t+15],'3','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
 
 marikAvgPreIctal
-
+marikAvg2
 %% overlap
 % see also overlap in marikSAMloopAvg.m
 marikOverlap
