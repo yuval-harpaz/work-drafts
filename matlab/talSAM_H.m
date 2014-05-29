@@ -15,7 +15,7 @@ for subi=1:length(subs)
         path2file=conditions{restcell(i)+1};
         RUN=conditions{restcell(i)+1}(end);
         %fileName=['xc,lf_',fileName];
-        cd(path2file)
+        cd(path2file(end-16:end))
         if ~exist([path2file(end),'.rtw'],'file')
             PWD=pwd;
             path2RTW=findDiRTW(PWD,'Su');

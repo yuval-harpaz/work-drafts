@@ -9,7 +9,7 @@ figure3=kurFigMagSeiz;
 % status
 figure4=kurFigStatus
 % real data metric + window length effect
-[figure5top,figure5bottom]=kurFigWindows1
+figure5=kurFigWindows3
 
 figure6=kurFigSimRate
 

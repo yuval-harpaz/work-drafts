@@ -37,7 +37,7 @@ clear V
 cond={'seg','sw','_'};
 for foldi=1
     fold=num2str(foldi);
-    for condi=1:3
+    for condi=1:length(cond)
         g2_=BrikLoad(['/home/yuval/Data/epilepsy/g2/movies/b022_g2',cond{condi},fold,'+orig']);
         g2_p=mean(g2_(:,:,:,1:30),4);
         OptTSOut.Prefix = ['b022_g2',cond{condi},fold,'AvgPI'];

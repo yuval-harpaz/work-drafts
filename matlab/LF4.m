@@ -1,4 +1,108 @@
 %% random numbers
+% Fig. 1
+cd /home/yuval/Dropbox/LF
+sRate=2034.5;
+%data=rand(100,round(100*sRate))-0.5;
+load data/rand2034
+lf=correctLF(data,sRate,'time',1000,50);
+close;
+[f,F]=fftBasic(data,sRate);
+f=abs(f);
+fcl=abs(fftBasic(lf,sRate));
+figure;
+%figure('Color',[0.8 0.8 0.8]);
+%set(gca,'Color',[0.8 0.8 0.8]);
+plot(F,mean(f),'k','linewidth',4)
+hold on
+plot(F,mean(fcl),'color',[0.8 0.8 0.8],'linewidth',2)
+ylim([0.5 1.4])
+xlim([20 80])
+legend('original','cleaned')
+
+%Fig. 2
+cd /home/yuval/Dropbox/LF
+load data/ratio
+rat=squeeze(mean(ratio(2:4,:,:),3));
+C=[];
+sRate=1017.23;
+sRates=[sRate*2/3 sRate sRate*2];
+for sRatei=1:length(sRates)
+    for repi=1:length(reps)
+        [~,p,c]=ttest(squeeze(ratio(sRatei,repi,:)),[],[],'left');
+        C(sRatei,repi)=c(2);
+    end
+end
+x=[reps(1:9),fliplr(reps(1:9))];
+Cnn=-100*ones(size(C));
+Cnn(rat<0)=C(rat<0);
+maxC=max(Cnn);
+y=[max(rat(:,1:9)),fliplr(maxC(1:9))];
+y(8)=rat(2,8);
+figure;
+plot(reps,rat(1,:),'k','linewidth',2)
+set(gca,'FontSize',16,'FontName','Times')
+ticks=reps(1:2:end)
+set(gca,'XTick',ticks);
+set(gca,'YTick',-0.6:0.2:0);
+hold on
+plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
+plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
+fill(x,y,[.9 .9 .9],'linestyle','none')
+plot(reps,rat(1,:),'k','linewidth',2)
+plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
+plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
+%plot(100:4500,0,'b')
+ylim([-0.7 0.1])
+legend1=legend ('678Hz','1017Hz','2035Hz','Conf Int')
+hy=ylabel('Ratio of Change in PSD')
+hx=xlabel('N cycles')
+set(legend1,'Position',[0.6 0.25 0.2 0.2],'box','off');
+box off
+
+%% empty room
+cd /home/yuval/Data/emptyRoom2
+load ratio35seg
+rat=squeeze(mean(ratio,3));
+Cpos=[];
+Cneg=[];
+% for chani=1:248
+%     for repi=1:length(reps)
+%         [~,p,c]=ttest(squeeze(ratio(chani,repi,:)));
+%         Cneg(chani,repi)=c(1);
+%         Cpos(chani,repi)=c(2);
+%     end
+% end
+for chani=1:248
+    for repi=1:length(reps)
+        Cm(chani,repi)=mean(squeeze(ratio(chani,repi,:)));
+    end
+end
+x=[reps,fliplr(reps)];
+y=[min(Cm),fliplr(max(Cm))];
+ticks=reps(1:2:end)
+figure;
+plot(reps,mean(rat),'k','linewidth',2)
+set(gca,'FontSize',16,'FontName','Times')
+set(gca,'XTick',ticks);
+set(gca,'YTick',-1:2);
+hold on
+fill(x,y,[.9 .9 .9],'linestyle','none')
+plot(reps,mean(rat),'k','linewidth',2)
+load /home/yuval/Data/emptyRoom2/f.mat
+mean(mean(f50./fBL,2))
+max(mean(f50./fBL,2))
+
+
+
+plot(reps,rat(1,:),'k','linewidth',2)
+plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
+plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
+plot(100:4500,0,'b')
+ylim([-1 0.2])
+legend ('678Hz','1017Hz','2035Hz','Conf Int')
+ylabel('PSD ratio: (Clean-Original)/Clean')
+xlabel('N cycles')
+%% old
 sRate=1017.23;
 sRates=[sRate/2 sRate*2/3 sRate sRate*2];
 reps=[100 500 1000 1500 2000 2500 3000 3500 4000 4500];
@@ -195,38 +299,7 @@ sd=std(rat,[],2);
 figure;plot(reps,ra)
 hold on;plot(reps,ra+sd/sqrt(35),'k.')
 
-cd /home/yuval/Data/emptyRoom2
-Trig=readTrig_BIU;
-reps=[100 500 1000 1500 2000 2500 3000 3500 4000 4500];
-try
-    matlabpool
-end
-samp100s=round(1.017249990200457e+03*100);
-startSamp=1;
-ratio=[];
-for segi=1:35
-    cfg=[];
-    cfg.channel='MEG';
-    cfg.dataset=source;
-    cfg.trl=[startSamp samp100s*segi 0];
-    data=ft_preprocessing(cfg);
-    f=abs(fftBasic(data.trial{1,1},data.fsample));
-    f50(1:248,segi)=f(:,50);
-    fBL(1:248,segi)=mean(f(:,[25:49 51:99 101:125]),2);
-    trig=Trig(cfg.trl(1):cfg.trl(2));
-%     for repi=1:length(reps)
-%         rateCount=0;
-%         lf=correctLF(data.trial{1,1},data.fsample,trig,reps(repi),50,4);
-%         close;
-%         fcl=abs(fftBasic(lf,data.fsample));
-%         fcl50=fcl(:,50);
-%         ratio(1:248,repi,segi)=(fcl50-fBL)./fBL;
-%         disp(num2str(repi))
-%     end
-    startSamp=startSamp+samp100s;
-    disp([' SEG SEG SEG ',num2str(segi)])
-end
-save f f f50 fBL
+
 %% consistency
 cd /home/yuval/Data/emptyRoom2
 Trig=readTrig_BIU;

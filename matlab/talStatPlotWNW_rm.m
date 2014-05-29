@@ -1,4 +1,4 @@
-function [P,figure1]=talStatPlot_rm(data1,data2,data3,data4,xlim,zlim,chans,midline,pthr); %#ok<INUSD>
+function [P,figure1]=talStatPlotWNW_rm(data1,data2,data3,data4,data5,data6,data7,data8,xlim,zlim,chans,midline,pthr); %#ok<INUSD>
 % independent sample ttest (two groups)
 %  stat=statPlot('cohLRv1pre_DM','cohLRv1pre_CM',[10 10],[],'ttest2')
 
@@ -13,7 +13,7 @@ end
 if isempty(cfg.zlim)
     cfg.zlim='maxmin';
 end
-for datai=1:4
+for datai=1:8
     istr=num2str(datai);
     eval(['[title',istr,',data',istr,']=getparts(data',istr,');'])
 end
@@ -31,7 +31,7 @@ if length(data1.label)<35
     cfg.layout = 'WG32.lay'
 end
 % deleting pairs of bad chans
-for datai=1:4
+for datai=1:8
     istr=num2str(datai);
     eval(['data',istr,'=badchanss(data',istr,',dataMat);'])
     if exist('midline','var')
@@ -41,17 +41,23 @@ for datai=1:4
 end
 
 
-%% repeated measure anova (2x2)
+%% repeated measure anova (2x2x2)
 P=ones(length(data1.label),3);
 geiger=1;
 for chani=1:length(chans)
     [~,chi]=ismember(chans{chani,1},data1.label);
-    dyslexia=[data1.powspctrm(:,chi,xlim(1)),data3.powspctrm(:,chi,xlim(1))];
-    control=[data2.powspctrm(:,chi,xlim(1)),data4.powspctrm(:,chi,xlim(1))];
+    x1=[data1.powspctrm(:,chi,xlim(1));data2.powspctrm(:,chi,xlim(1));data3.powspctrm(:,chi,xlim(1));data4.powspctrm(:,chi,xlim(1));data5.powspctrm(:,chi,xlim(1));data6.powspctrm(:,chi,xlim(1));data7.powspctrm(:,chi,xlim(1));data8.powspctrm(:,chi,xlim(1))];
+    x2=[ones(12,1);2*ones(11,1)];x2=[x2;x2;x2;x2];
+    x3=[ones(46,1);2*ones(46,1)];
+    x4=[ones(23,1);2*ones(23,1);ones(23,1);2*ones(23,1)];
+    x5=[1:12,1:11]';x5=[x5;x5;x5;x5];
+    x=[x1,x2,x3,x4,x5];
     
-    %[p, table] = anova_rm(dyslexia)
-    %[p, table] = anova_rm(control)
+    anovan(y, [x1 x5], 'random', 4,...
+        'nested', [0 0 0 0; 0 0 0 0; 0 0 0 0; 1 0 0 0],...
+        'varnames', {'Condition', 'A', 'B', 'Subject'}, 'model' ,'full')
     %[p, table] = anova_rm({dyslexia control});
+    %[op] = RMAOV32(x,0.05);
     p = anova_rm({dyslexia control},'off');
     P(chi,:)=p([1 2 4]);
     if p(2)<pthr %|| strcmp(data1.label{chi},'A210')
@@ -96,7 +102,7 @@ if isempty(findstr('/',data))
 else
     [path1, data] = fileparts(data);
 end
-title=[path1(end-7:end),'/',data];
+title=[path1,'/',data];
 eval(['data=',data])
 
 function data=badchanss(data,dataMat)

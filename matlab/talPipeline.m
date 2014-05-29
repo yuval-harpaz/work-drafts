@@ -204,7 +204,7 @@ talStatPlot('cohLRv1pre_D','cohLRv1pre_CQ',[freq freq],[0 1],'ttest2',chans',1);
 talStatPlot('cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],'ttest2',chans',1);
 talStatPlot('cohLRv2pre_D','cohLRv2post_D',[freq freq],[0 1],'paired-ttest',chans',1);
 talStatPlot('cohLRv2pre_D','cohLRv1pre_CQ',[freq freq],[0 1],'ttest2',chans',1);
-
+% repeated measures ANOVA
 talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.05);
 talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.01);
 talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.005);
@@ -240,3 +240,57 @@ masktlrc('alphaz_CQpre_2_1+tlrc')
 [Dys,Cont]=talDataVox([-27 8 57]); %left middle frontal gyrus
 [Dys,Cont]=talDataVox([23 53 17]); %right superior frontal gyrus
 [Dys,Cont]=talDataVox([13 18 42]); %right cigulate gyrus / right SMA
+
+%% 25.05.14
+cd /media/Elements/MEG/talResults/Coh
+load LRchans
+%load LRpairs
+chans=Lchannel;
+chans(60:118)=Rchannel;
+freq=10;
+cd /media/Elements/MEG/talResults/timeProdCoh
+talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.05);
+cd /media/Elements/MEG/talResults/oneBackCoh/NW
+talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.05);
+cd /media/Elements/MEG/talResults/oneBackCoh/W
+talStatPlot_rm('cohLRv1pre_D','cohLRv1pre_CQ','cohLRv2pre_D','cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.05);
+
+% cd /media/Elements/MEG/talResults/oneBackCoh/
+% [P,figure1]=talStatPlotWNW_rm('W/cohLRv1pre_D','W/cohLRv1pre_CQ','W/cohLRv2pre_D','W/cohLRv2pre_CQ','NW/cohLRv1pre_D','NW/cohLRv1pre_CQ','NW/cohLRv2pre_D','NW/cohLRv2pre_CQ',[freq freq],[0 1],chans',1,0.05);
+
+talCohList2(Lchannel,Rchannel,10);
+talCohList1(Lchannel,10);
+talCohListMax(Lchannel,10);
+load('/media/Elements/MEG/tal/subs46')
+talSAM_TP(subsV1,'alpha')
+chans5={'A234','A215','A233','A231','A230'};
+talCohList1(chans5,10);
+
+%%
+
+subsV1={'quad01';'quad02';'quad03';'quad04';'quad08';'quad11';'quad29';'quad31';'quad39';'quad40';'quad41';'quad42';'quad05';'quad06';'quad07';'quad09';'quad10';'quad14';'quad15';'quad16';'quad18';'quad37';'quad38';'quad12';'quad20';'quad24';'quad25';'quad26';'quad27';'quad30';'quad32';'quad33';'quad34';'quad35';'quad36';};
+subsV2={'quad01b';'quad0202';'quad0302';'quad0402';'quad0802';'quad1102';'quad2902';'quad3102';'quad3902';'quad4002';'quad4102';'quad4202';'quad0502';'quad0602';'quad0702';'quad0902';'quad1002';'quad1402';'quad1502';'quad1602';'quad1802';'quad3702';'quad3802';'quad1202';'quad2002';'quad2402';'quad2502';'quad2602';'quad2702';'quad3002';'quad3202';'quad3302';'quad3402';'quad3502';'quad3602';};
+talSAM_TP(subsV1,'alpha')
+talSAM_TP(subsV2,'alpha')
+
+
+
+
+% %pat='/media/My Passport/MEG/tal';
+% pat='/media/Elements/MEG/tal';
+% % talMove2tlrcH(subs,cond,pat)
+% %SVL='alpha,7-13Hz,eyesClosed-NULL,P,Zp.svl';
+% 
+% SVL='gamma,25-45Hz,eyesClosed-NULL,P,Zp.svl';
+% talFunc2tlrcH(subs,cond,SVL,pref)
+% talMvResultsH(subs,cond,pref)
+% talGstats42('gamma');
+% 
+% pref='theta';
+% subs={'quad38','quad39','quad40','quad41','quad42','quad3802','quad3902','quad4002','quad4102','quad4202'};
+% talSAM_H(subs,pref,'eyesClosed',cond)
+% SVL='theta,3-7Hz,eyesClosed-NULL,P,Zp.svl';
+% talFunc2tlrcH(subs,cond,SVL,pref)
+% display('run ~/func2tlrc.txt')
+% talMvResultsH(subs,cond,pref)
+% talGstats42('theta');

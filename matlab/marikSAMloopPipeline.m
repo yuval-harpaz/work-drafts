@@ -26,6 +26,7 @@ cd /home/yuval/Data/epilepsy/p006/1
 open scrap
 marikPlotTrace;
 
+
 t=681;
 marikSAMloop2([t-30 t+15],'2','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
 %% g2
@@ -63,3 +64,9 @@ marikOverlap
 % sw, runs 1-2 6vox, runs 2-3 6vox, runs 1-3 5vox, all runs 4vox
 % global runs 1-2 2vox, runs 2-3 2vox, runs 1-3 1vox, all runs 1vox
 
+%% traces
+%b162b voxel index [17 24 17]
+marikTraces
+marikTracesb022;
+%% permutation test
+marikPerm

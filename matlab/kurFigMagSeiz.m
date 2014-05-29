@@ -11,7 +11,7 @@ axes1 = axes('Parent',figure1,'FontSize',20,'FontName','Times',...
 box(axes1,'on');
 hold(axes1,'all');
 plot(timeline,vsFro/1e-9,'k','LineWidth',2)
-ylabel('Source moment (nA/m^2)','FontSize',20,'FontName','Times');
+ylabel('Source moment (nA*m)','FontSize',20,'FontName','Times');
 title('Baseline effect on g2 for a continuous event','FontSize',20,'FontName','Times')
 hold on
 line([10 20],[120 120],'LineWidth',2,'color','k')
@@ -35,5 +35,7 @@ annotation(figure1,'textbox',...
     'FontName','Times',...
     'FitBoxToText','off',...
     'LineStyle','none');
+xlabel('Time (s)')
 box off
+
 end

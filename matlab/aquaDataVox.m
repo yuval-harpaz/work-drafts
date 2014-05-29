@@ -46,10 +46,11 @@ for voxi=1:size(vox,1)
     aqua(:,2)=list(41:end);
     bars=[mean(aqua) mean(TalQuad) mean(TalVerb)];
     err=[std(aqua)./sqrt(size(aqua,1)) std(TalQuad)./sqrt(size(TalQuad,1)) std(TalVerb)./sqrt(size(TalVerb,1))];
-    bar(bars,'k')
-    hold on
-    errorbar(bars,err,'k.')
-    title ('aqua 1    aqua 2    TalQuad 1  TalQuad 2 TalVerb 1 TalVerb 2')
+%     figure;
+%     bar(bars,'k')
+%     hold on
+%     errorbar(bars,err,'k.')
+%     title ('aqua 1    aqua 2    TalQuad 1  TalQuad 2 TalVerb 1 TalVerb 2')
     table={'subject';'quad06';'quad11';'quad14';'quad15';'quad16';'quad18';'quad37';'quad42';'quad24';'quad25';'quad26';'quad27';'quad30';'quad32';'quad35';'quad36';'Nissim003';'Nissim004';'Nissim005';'Nissim006';'Nissim008';'Nissim009';'Nissim011';'Nissim012';};
     table{1,2}='visit 1';
     table{1,3}='visit 2';

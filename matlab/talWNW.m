@@ -38,7 +38,7 @@ for subi=1:length(subs)
         cfg1.feedback='no';
         data=ft_preprocessing(cfg1);
         
-        wtsNoSuf='SAM/theta,3-7Hz,eyesCloseda';
+        wtsNoSuf='SAM/alpha,7-13Hz,eyesCloseda';
         if exist ([wtsNoSuf,'.mat'],'file')
             load ([wtsNoSuf,'.mat'])
         else

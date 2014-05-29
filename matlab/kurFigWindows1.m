@@ -39,7 +39,7 @@ set(semilogx1(2),'MarkerFaceColor',[0 0 0],'MarkerSize',10,'Marker','^',...
     'DisplayName','Frequent Spike');
 
 % Create xlabel
-xlabel('Time Window (Seconds)','FontSize',20,'FontName','Times');
+xlabel('Time Window (s)','FontSize',20,'FontName','Times');
 
 % Create ylabel
 ylabel('Summary g2','FontSize',20,'FontName','Times');
@@ -72,7 +72,7 @@ semilogx2 = semilogx(X,YMatrix2,'Parent',axes2,'LineWidth',2,...
 set(semilogx2(1),'MarkerSize',30,'Marker','.','DisplayName','Rare Spike');
 set(semilogx2(2),'MarkerFaceColor',[0 0 0],'MarkerSize',10,'Marker','^',...
     'DisplayName','Frequent Spike');
-xlabel(' ','FontSize',20,'FontName','Times');
+xlabel('Time Window (s)','FontSize',20,'FontName','Times');
 
 % Create ylabel
 ylabel('Maximum g2','FontSize',20,'FontName','Times');

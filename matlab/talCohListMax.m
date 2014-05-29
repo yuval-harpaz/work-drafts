@@ -1,4 +1,4 @@
-function table=talCohList1(chan,freq)
+function table=talCohListMax(chan,freq)
 
 cd /media/Elements/MEG/
 load('talResults/Coh/cohLRv1post_D')
@@ -78,7 +78,7 @@ for i=1:35
         Table{i+1,k+1}=num2str(table(i,k));
     end
 end
-xlwrite('cohMean59.xls',Table);
+xlwrite('cohMax59.xls',Table);
 
 
 function [D,CQ,CV]=getData(conds,group,chi,freq)
@@ -87,7 +87,7 @@ for gri=1:3
         load([conds{condi},group{gri}])
         eval(['grSize=size(',conds{condi},group{gri},'.powspctrm,1);']);
         grSize=num2str(grSize);
-        eval([group{gri},'(1:',grSize,',',num2str(condi),')=mean(',conds{condi},group{gri},'.powspctrm(:,[',num2str(chi),'],',num2str(freq),'),2);']);
+        eval([group{gri},'(1:',grSize,',',num2str(condi),')=max(',conds{condi},group{gri},'.powspctrm(:,[',num2str(chi),'],',num2str(freq),')''',');']);
     end
 end
 

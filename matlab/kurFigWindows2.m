@@ -91,5 +91,6 @@ ylabel('Maximum g2','FontSize',20,'FontName','Times');
 % set(legend2,...
 %     'Position',[0.5 0.6 0.3 0.15],...
 %     'LineWidth',2);
+legend('Rare Spike','Frequent Spike')
 xlim([0.1 35])
 title ({'Window length effect on g2 for','sources with different frequencies'})

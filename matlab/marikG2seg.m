@@ -61,17 +61,18 @@ for segi=1:length(t)
 %     cd segments/SAM
     [~,~, ActWgts]=readWeights('seg1,40-130Hz,sega.wts');
     cd ..
-    ns=mean(abs(ActWgts),2);
+%     ns=mean(abs(ActWgts),2);
     if exist('seg1+orig.BRIK')
         !rm seg1+*
     end
-    pow=mean(abs(ActWgts*raw.trial{1,segi}),2)./ns;
-    pow=pow.*(10^13);
+%     pow=mean(abs(ActWgts*raw.trial{1,segi}),2)./ns;
+%     pow=pow.*(10^13);
+    g2seg=G2(ActWgts*raw.trial{1,segi});
     cfg=[];
     cfg.step=5;
     cfg.boxSize=[-120 120 -90 90 -20 150];
     cfg.prefix='seg1';
-    VS2Brik(cfg,pow);
+    VS2Brik(cfg,g2seg);
     eval(['!3dcalc -a ../maskRS+orig -b seg1+orig -exp ''','b*ispositive(a)''',' -prefix ',num2str(tt(segi)),'g2seg']);
     !rm seg1+*
     
