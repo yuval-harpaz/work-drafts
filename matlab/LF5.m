@@ -105,35 +105,28 @@ xlabel('N cycles')
 
 %% Empty Room Global
 % global
+
+
 cd /home/yuval/Data/emptyRoom2
-Trig=readTrig_BIU;
-trig=Trig(1:3560375);
-ratio=[];
-cfg=[];
-cfg.channel='MEG';
-cfg.dataset=source;
-cfg.trl=[1 1 0];
-dummy=ft_preprocessing(cfg);
-for chani=36:248
-    cfg.channel=dummy.label{chani,1};
-    cfg.trl=[1 3560375 0];
-    data=ft_preprocessing(cfg);
-    f(chani,1:508)=abs(fftBasic(data.trial{1,1},data.fsample));
-    f50(chani)=f(chani,50);
-    fBL(chani)=mean(f(chani,[25:49 51:99 101:125]),2);
-    lf=correctLF(data.trial{1,1},data.fsample,trig,'GLOBAL',50);
-    close;
-    fcl(chani,1:508)=abs(fftBasic(lf,data.fsample));
-    fcl50(chani)=fcl(chani,50);
-    ratio(chani)=(fcl50(chani)-fBL(chani))./fBL(chani);
-    disp([' CHANNEL ',num2str(chani)])
-end
-save ratioG ratio fcl f fBL f50
+% LFEmptGlob
+%save ratioGsize ratio fcl f fBL f50
+load fG
+f50=squeeze(f(:,50,:));
+fcl50=squeeze(fcl(:,50,:));
+fBL=squeeze(mean(f(:,[25:49 51:99 101:125],:),2));
+ratio=(fcl50-fBL)./fBL;
 rat=squeeze(mean(ratio));
-ra=mean(rat,2);
-sd=std(rat,[],2);
-figure;plot(reps,ra)
-hold on;plot(reps,ra+sd/sqrt(35),'k.')
+plot(rat(4),'or')
+hold on
+col={'ob','ok','og'}
+for leni=1:3
+    load(['ff',num2str(leni)])
+    fcl50=squeeze(ffcl(:,50,:));
+    fBL=squeeze(mean(ff(:,[25:49 51:99 101:125],:),2));
+    plot(squeeze(mean((fcl50-fBL)./fBL)),col{leni});
+end
+    
+    
 
 
 %% consistency

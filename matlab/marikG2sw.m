@@ -53,13 +53,14 @@ for slidei=1:length(t)
     cd(pat)
     cd (fold)
     Trig2mark('slide',t(slidei));
-    cd ..
+    cd(pat)
     eval(['!SAMcov64 -d ',fn,' -r ',fold,' -m adapt6 -v'])
     eval(['!SAMwts64 -d ',fn,' -r ',fold,' -m adapt6 -c slidea -v'])
     cd (fold)
     cd SAM
     [~,~, ActWgts]=readWeights('adapt6,40-130Hz,slidea.wts');
-    cd ..
+    cd (pat)
+    cd (fold)
 	%ns=mean(abs(ActWgts),2);
     for segi=segments
 %         if counters(segi)==5

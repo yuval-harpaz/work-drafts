@@ -70,3 +70,28 @@ marikTraces
 marikTracesb022;
 %% permutation test
 marikPerm
+
+%% Subject 3 (b023)
+t=[2123.82,169.46,127.5]; 
+marikSAMloop([t(1)-30 t(1)+10],'2','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b023');
+marikSAMloop([t(2)-30 t(2)+23],'3','c,rfDC','/home/yuval/Data/epilepsy/b023');
+marikSAMloop([t(3)-30 t(3)+15],'4','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b023');
+
+marikG2sw([t(3)-30 t(3)+15],'4','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b023');
+marikG2sw([t(1)-30 t(1)+10],'2','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b023');
+marikG2sw([t(2)-30 t(2)+23],'3','c,rfDC','/home/yuval/Data/epilepsy/b023');
+
+marikAvgSub3
+marikTracesSub3
+% marikSAMg2
+% runi=1;
+% time=[t(runi)-30 t(runi)+15];
+% % b022
+% t=63;
+% marikSAMloop2([t-30 t+15],'ictus','noECG_c,rfhp1.0Hz,ee,ee','/home/yuval/Data/epilepsy/b022');
+% marikSAMloop([t-30 t+15],'ictus','noECG_c,rfhp1.0Hz,ee,ee','/home/yuval/Data/epilepsy/b022');
+% marikSAMloop1([t-30 t+15],'ictus','noECG_c,rfhp1.0Hz,ee,ee','/home/yuval/Data/epilepsy/b022');
+% t=121;
+% marikSAMloop1([t-30 t+15],'1','c,rfhp1.0Hz','/home/yuval/Data/epilepsy/b162b');
+
+

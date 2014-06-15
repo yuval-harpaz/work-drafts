@@ -53,13 +53,14 @@ for slidei=1:length(t)
     cd(pat)
     cd (fold)
     Trig2mark('slide',t(slidei));
-    cd ..
+    cd (pat)
     eval(['!SAMcov64 -d ',fn,' -r ',fold,' -m adapt6 -v'])
     eval(['!SAMwts64 -d ',fn,' -r ',fold,' -m adapt6 -c slidea -v'])
     cd (fold)
     cd SAM
     [~,~, ActWgts]=readWeights('adapt6,40-130Hz,slidea.wts');
-    cd ..
+    cd (pat)
+    cd (fold)
 	ns=mean(abs(ActWgts),2);
     for segi=segments
 %         if counters(segi)==5
@@ -85,10 +86,10 @@ for triali=1:ntrl
     % here I only average repetitions 1 to 5, the 6th is always corrupt,
     % might be something to do with left edge of filtered data in SAMcov
     TI=num2str(triali);
-    eval(['!3dcalc -a slide',TI,'_1+orig -b slide',TI,'_2+orig -c slide',TI,'_3+orig -d slide',TI,'_4+orig -e slide',TI,'_5+orig -exp ''','(a+b+c+d+e)/5''',' -prefix ',num2str(time(1)+triali-1),'s']);
+    eval(['!3dcalc -a slide',TI,'_1+orig -b slide',TI,'_2+orig -c slide',TI,'_3+orig -d slide',TI,'_4+orig -e slide',TI,'_5+orig -exp ''','(a+b+c+d+e)/5''',' -prefix ',num2str(round(time(1))+triali-1),'s']);
 end
 str=['!3dTcat -prefix adapt',fold,' '];
-for triali=time(1):time(2)
+for triali=round(time(1)):round(time(2))
     str=[str,num2str(triali),'s+orig '];
 end
 eval(str);

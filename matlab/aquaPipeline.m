@@ -23,3 +23,14 @@ load /media/Elements/quadaqua/Coh/GA
 stat=statPlot(cohLRv2_aqua,cohLRv2_quad,[10 10],[0 1],'ttest2')
 stat=statPlot(cohLRv2_aqua,cohLRv2_verb,[10 10],[0 1],'ttest2')
 
+cd /media/Elements/MEG/talResults/Coh
+load LRchans
+cd /media/Elements/quadaqua/Coh
+load GA
+%load LRpairs
+chans=Lchannel;
+chans(60:118)=Rchannel;
+freq=10;
+stat=statPlot(cohLRv2_aqua,cohLRv2_verb,[10 10],[0 1],'ttest2')
+titles={'cohLRv1 aqua','cohLRv1 quad','cohLRv1 verb','cohLRv2 aqua','cohLRv2 quad','cohLRv2 verb'}
+aquaStatPlot_rm(cohLRv1_aqua,cohLRv1_quad,cohLRv1_verb,cohLRv2_aqua,cohLRv2_quad,cohLRv2_verb,titles,[freq freq],[0 1],chans',1,0.05);
