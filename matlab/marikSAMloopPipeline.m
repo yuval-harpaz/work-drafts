@@ -83,6 +83,11 @@ marikG2sw([t(2)-30 t(2)+23],'3','c,rfDC','/home/yuval/Data/epilepsy/b023');
 
 marikAvgSub3
 marikTracesSub3
+marikTracesSub2
+marikTracesSub1
+
+marikPlotTraceSub3;
+
 % marikSAMg2
 % runi=1;
 % time=[t(runi)-30 t(runi)+15];

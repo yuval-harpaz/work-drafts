@@ -20,12 +20,22 @@ for ii=10:16
 end
 
 time=1/sRate:1/sRate:(length(CRAW)/sRate);
-[CRAW_LF,~,~,Artifact]=correctLF(double(CRAW(15,:)),sRate,[],'FITSIZE',50,1,[],'samp',[],true);
-
-figure;plot(CRAW(15,:),'r');
+[CRAW_LF,~,~,Artifact]=correctLF(double(CRAW(15,:)),sRate,[],'FITSIZE',50,1,[],'samp',[]);
+save chan15 CRAW_LF Artifact
+figure;
+h=plot(CRAW(15,1:44000),'r');
 hold on
-plot(CRAW_LF,'g')
-plot(Artifact,'k')
+plot(CRAW_LF(1:44000),'g')
+plot(Artifact(1:44000),'k')
+saveas(h,'ch15.fig')
+[CRAW_LF,~,~,Artifact]=correctLF(double(CRAW(16,:)),sRate,[],'FITSIZE',50,1,[],'samp',[]);
+save chan16 CRAW_LF Artifact
+figure;
+h=plot(CRAW(16,1:44000),'r');
+hold on
+plot(CRAW_LF(1:44000),'g')
+plot(Artifact(1:44000),'k')
+saveas(h,'ch16.fig')
 % %[CRAW_LF,~,~,Artifact]=correctLF(double(CRAW),sRate,[],'GLOBAL',50,1,[],[],true);
 % figure('units','normalized','outerposition',[0 0 1 1])
 % for chani=1:16
@@ -38,3 +48,14 @@ plot(Artifact,'k')
 % set(gca,'ytick',[0 1000]);
 % ylabel('Time (s)')
 % save ([fileName,'-LF.mat'],'CRAW_LF')
+data=CRAW(16,:);
+clear CRAW*
+fObj=fdesign.notch('N,F0,Q,Ap',6,50,10,1,sRate);%
+    Filt=design(fObj ,'iir');
+    dataNotch = myFilt(data,Filt);
+[f,F]=fftBasic(double(data),44000);
+f=abs(f);
+fNotch=abs(fftBasic(double(dataNotch),44000));
+plot(F,f,'r')
+hold on
+plot(F,fNotch)

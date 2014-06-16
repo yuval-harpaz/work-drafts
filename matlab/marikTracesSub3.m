@@ -6,14 +6,14 @@ vox=[22 10 22];
 cond={'sw'};
 for runi=2:4
     run=num2str(runi);
-    V=BrikLoad(['g2',cond{condi},run,'+orig']);
-    eval([cond{condi},run,'g2=squeeze(V(vox(1)+1,vox(2)+1,vox(3)+1,:));'])
+    V=BrikLoad(['g2sw',run,'+orig']);
+    eval(['sw',run,'g2=squeeze(V(vox(1)+1,vox(2)+1,vox(3)+1,:));'])
 end
 
 for runi=2:4
     run=num2str(runi);
-    V=BrikLoad([cond{condi},run,'+orig']);
-    eval([cond{condi},run,'=squeeze(V(vox(1)+1,vox(2)+1,vox(3)+1,:));'])
+    V=BrikLoad(['sw',run,'+orig']);
+    eval(['sw',run,'=squeeze(V(vox(1)+1,vox(2)+1,vox(3)+1,:));'])
     
 end
 % figure;
