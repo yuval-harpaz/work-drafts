@@ -1,6 +1,6 @@
 %% random numbers
 sRate=1017.23;
-sRates=[sRate/2 sRate*2/3 sRate sRate*2];
+sRates=[sRate*2/3 sRate sRate*2];
 reps=[100 500 1000 1500 2000 2500 3000 3500 4000 4500];
 neg=[];
 ratio=[];
@@ -16,10 +16,14 @@ ratio=[];
 %     end
 repCount=0;
 permN=500;
+progress=0;
 for repi=1:length(reps)
     rateCount=0;
     repCount=repCount+1;
+    
     for ratei=1:length(sRates)
+    progress=progress+1;
+    disp([num2str(progress),' of 30'])
         rateCount=rateCount+1;
         data=rand(permN,round(100*sRates(ratei)));
         data=data-0.5;
@@ -45,7 +49,7 @@ for repi=1:length(reps)
         
     end
 end
-
+clear data
 C=[];
 for sRatei=1:length(sRates)
     for repi=1:length(reps)

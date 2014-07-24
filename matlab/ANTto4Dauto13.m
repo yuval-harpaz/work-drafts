@@ -171,7 +171,6 @@ scFac=round(log10(median(scale)));
 rsEEGsc=rsEEG*10^scFac;
 % scale according to range of data (quartiles) to fit short format
 qrtl=quantile(rsEEG',[0.25 0.75]);
-qrtl=qrtl(:,qrtl(1,:)~=0);
 qrScale=10*mean(abs(median(qrtl')));
 fac=(2^15-1)./qrScale;
 facP=floor(log10(fac));

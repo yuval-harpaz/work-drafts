@@ -4,7 +4,7 @@ cd /home/yuval/Dropbox/LF
 sRate=2034.5;
 %data=rand(100,round(100*sRate))-0.5;
 load data/rand2034
-lf=correctLF(data,sRate,'time',1000,50);
+lf=correctLF(data,sRate,'time','ADAPTIVE1',50);
 close;
 [f,F]=fftBasic(data,sRate);
 f=abs(f);
@@ -15,11 +15,11 @@ figure;
 plot(F,mean(f),'k','linewidth',4)
 hold on
 plot(F,mean(fcl),'color',[0.8 0.8 0.8],'linewidth',2)
-ylim([0.5 1.4])
+ylim([0.3 0.8])
 xlim([20 80])
 legend('original','cleaned')
 
-%Fig. 2
+%% Fig. 2 and 3 
 cd /home/yuval/Dropbox/LF
 load data/ratio
 rat=squeeze(mean(ratio(2:4,:,:),3));
@@ -40,8 +40,8 @@ y=[max(rat(:,1:9)),fliplr(maxC(1:9))];
 y(8)=rat(2,8);
 figure;
 plot(reps,rat(1,:),'k','linewidth',2)
-set(gca,'FontSize',16,'FontName','Times')
-ticks=reps(1:2:end)
+set(gca,'FontSize',16,'FontName','Times');
+ticks=reps(1:2:end);
 set(gca,'XTick',ticks);
 set(gca,'YTick',-0.6:0.2:0);
 hold on
@@ -53,10 +53,48 @@ plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
 plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
 %plot(100:4500,0,'b')
 ylim([-0.7 0.1])
-legend1=legend ('678Hz','1017Hz','2035Hz','Conf Int')
-hy=ylabel('Ratio of Change in PSD')
-hx=xlabel('N cycles')
+legend1=legend ('678Hz','1017Hz','2035Hz','Conf Int');
+hy=ylabel('Ratio of Change in PSD');
+hx=xlabel('N cycles');
 set(legend1,'Position',[0.6 0.25 0.2 0.2],'box','off');
+box off
+
+load data/ratioYH
+rat=squeeze(mean(ratio,3));
+C=[];
+sRate=1017.23;
+sRates=[sRate*2/3 sRate sRate*2];
+reps=[100 500 1000 1500 2000 2500 3000 3500 4000 4500];
+x=[reps,fliplr(reps)];
+for sRatei=1:length(sRates)
+    for repi=1:length(reps)
+        [~,p,c]=ttest(squeeze(ratio(sRatei,repi,:)));
+        Cneg(sRatei,repi)=c(2);
+        Cpos(sRatei,repi)=c(1);
+    end
+end
+maxC=max([Cpos;Cneg]);
+minC=min([Cpos;Cneg]);
+y=[minC,fliplr(maxC)];
+figure;
+plot(reps,rat(1,:),'k','linewidth',2)
+set(gca,'FontSize',16,'FontName','Times')
+ticks=reps(1:2:end)
+set(gca,'XTick',ticks);
+set(gca,'YTick',-0.6:0.2:1);
+hold on
+plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
+plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
+fill(x,y,[.9 .9 .9],'linestyle','none')
+plot(reps,rat(1,:),'k','linewidth',2)
+plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
+plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
+%plot(100:4500,0,'b')
+ylim([-0.8 1.2])
+legend1=legend ('678Hz','1017Hz','2035Hz','Conf Int');
+hy=ylabel('Ratio of Change in PSD');
+hx=xlabel('N cycles');
+set(legend1,'Position',[0.6 0.6 0.2 0.2],'box','off');
 box off
 
 %% empty room

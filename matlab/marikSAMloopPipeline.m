@@ -87,7 +87,28 @@ marikTracesSub2
 marikTracesSub1
 
 marikPlotTraceSub3;
+marikPlotTraceSub3B; % for all 3 subjects
 
+% for dipole fit, extracted 290-490s from analog data 11:33 run 2
+t=42; % 332s in the original file
+marikSAMloop([t(1)-30 t(1)+10],'5','c,rfhp1.0Hz,ee','/home/yuval/Data/epilepsy/b023');
+marikG2sw([t(1)-30 t(1)+10],'5','c,rfhp1.0Hz,ee','/home/yuval/Data/epilepsy/b023');
+
+%% 5 more datasets b023
+% seiz 2 | 11:33 run2 2123.82  onst  end  
+% seiz 3 | 12:45 run1 169.46
+% seiz 4 | 12:54 run1 127.5
+% seiz 5 | 11:33 run2 330
+% seiz 6 | 11:33 run2 3188      40   53
+% seiz 7 | 11:33 run2 2460      40   65
+% seiz 8 | 11:33 run2 147       40   60
+% seiz 9 | 12:45 run1 1         2.5  13
+% seiz 10| 12:54 run1 1179      40   48
+
+marikSAMloopB023last5
+
+
+%%
 % marikSAMg2
 % runi=1;
 % time=[t(runi)-30 t(runi)+15];

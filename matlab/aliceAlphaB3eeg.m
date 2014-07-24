@@ -29,11 +29,11 @@ for sfi=1:8
     Fr = ft_freqanalysis(cfg, eeg);
     maxfri=1;
     [~,maxch]=max(mean(Fr.powspctrm(:,:,maxfri),1));
-    maxfr=Fr.freq(maxfri);
+    %maxfr=Fr.freq(maxfri);
     cfg=[];
     cfg.layout='WG32.lay';
     cfg.highlight='labels';
-    cfg.xlim=[maxfr maxfr];
+    cfg.xlim=[freq freq];
     cfg.highlightchannel=Fr.label(maxch);
     figure;
     ft_topoplotER(cfg,Fr);

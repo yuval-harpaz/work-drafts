@@ -24,7 +24,14 @@ if exist(['MEG/',run,'/c,rfhp0.1Hz'],'file')
 elseif exist([run,'/c,rfhp1.0Hz'],'file')
     megFN='c,rfhp1.0Hz';
 else
-    error('default filename not found, please use ANTto4D')
+    try
+        cd MEG
+        cd(run)
+        megFN=source;
+        cd ../..
+    catch
+        error('default filename not found, please use ANTto4D')
+    end
 end
 cd EEG
 LS=ls;
@@ -202,7 +209,7 @@ lat=[1 length(trig)];
 clear eeg mMat rsEEG trig
 cd ../MEG
 cd(run)
-p=pdf4D('c,rfhp0.1Hz');
+p=pdf4D(megFN);
 chi=channel_index(p,'MEG');
 data=read_data_block(p,lat,chi);
 %time=meg.time{1,1};
