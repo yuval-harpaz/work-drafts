@@ -35,7 +35,7 @@ xlabel('Time (s)')
 ylabel('Residual Artifact')
 title('Simulated Filter Distortion')
 box off
-saveas(fig1,'~/Desktop/poster/fig1.tif')
+% saveas(fig1,'~/Desktop/poster/fig1.tif')
 %% Fig 2
 cd /home/yuval/Data/emptyRoom2
 trl=1:1017:1017*100;
@@ -86,9 +86,11 @@ ylabel('PSD')
 l2=legend('Raw','Notch 48-52','DFT (1s)');
 set(l2,'location','NorthWest','box','off')
 box off
-saveas(fig2,'~/Desktop/poster/fig2.tif')
-
+%saveas(fig2,'~/Desktop/poster/fig2.tif')
+cd ~/Dropbox/poster
+% exportfig(fig2,'figNotch.png','Format','png','Color','rgb','Resolution',300)
 %% Fig 3, ref channel
+cd /home/yuval/Data/emptyRoom2
 cfg=[];
 cfg.trl=[1,101725,0];
 cfg.channel='MCxaA';%'A149';
@@ -111,7 +113,7 @@ time=time(1:200);
 chLF=chanLF(1:200);
 clnRef=cleanRef(1:200);
 avg=[2.89119737381359e-13,7.79861182648340e-13,1.07857073207176e-12,8.64481527901416e-13,9.18944765707920e-13,1.04312821954690e-12,1.02630245229774e-12,1.31582818958519e-12,1.22139113018672e-12,4.21806970346207e-13,-2.10098555011177e-13,-7.49795644003205e-13,-1.17914559436105e-12,-1.04310532734657e-12,-1.03721395225933e-12,-1.15760672704210e-12,-9.74597051332109e-13,-1.12901840861876e-12,-1.11480504540830e-12,-3.64048602290936e-13,1.73204407664864e-13,5.88017810807483e-13;];
-figure;
+fig3=figure;
 plot(time,chLF,'r','linewidth',2)
 set(gca,'fontname','times','fontsize',15)
 hold on
@@ -121,7 +123,23 @@ for WUi=1:10
     line(time([WU(WUi),WU(WUi)]),[min(chLF),max(chLF)],'color','k','linewidth',2,'linestyle','--')
 end
 legend('noisy channel','average 50Hz wave','cleaned channel','zero crossing');
-title('zero crossing markers for averaging the noise waveform')
+title('zero crossing markers')
 xlabel('Time (s)')
 ylabel('MEG amplitude (T)')
 cd /home/yuval/Desktop/poster
+exportfig(fig3,'figZx.png','Format','png','Color','rgb','Resolution',300)
+
+%% Fig 4
+figure4=LFfigRandC;
+cd /home/yuval/Desktop/poster
+exportfig(figure4,'figRand.png','Format','png','Color','rgb','Resolution',300)
+%% Fig 5
+fig5=LFfigEmpty2;
+cd /home/yuval/Desktop/poster
+exportfig(fig5,'figEmpt.png','Format','png','Resolution',300)
+
+%% LFepi
+LFepi3
+
+cd /home/yuval/Data/epilepsy/b162b/1
+correctHB('c,rfhp1.0Hz');

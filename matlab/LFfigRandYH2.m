@@ -1,4 +1,4 @@
-function figure1=LFfigRand2
+function figure1=LFfigRandYH2
 
 cd /home/yuval/Dropbox/LF
 load data/ratio
@@ -25,7 +25,7 @@ set(gca,'FontSize',16,'FontName','Times');
 ticks=reps(1:2:end);
 set(gca,'XTick',ticks);
 %set(gca,'YTick',-0.6:0.2:0);
-set(gca,'YTick',-0.6:0.3:1);
+set(gca,'YTick',-0.75:0.25:0.25);
 hold on
 plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
 plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
@@ -34,14 +34,14 @@ plot(reps,rat(1,:),'k','linewidth',2)
 plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
 plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
 %plot(100:4500,0,'b')
-ylim([-0.7 1.2])
+ylim([-1 0.5])
 legend1=legend ('678Hz','1017Hz','2035Hz','Conf Int');
 hy=ylabel('Ratio of Change in PSD');
 hx=xlabel('N cycles');
 set(legend1,'box','off');
 box off
 
-load data/ratioYH
+load data/ratioYH2
 rat=squeeze(mean(ratio,3));
 C=[];
 sRate=1017.23;
@@ -64,7 +64,7 @@ plot(reps,rat(1,:),'k','linewidth',2)
 set(gca,'FontSize',16,'FontName','Times')
 ticks=reps(1:2:end);
 set(gca,'XTick',ticks);
-set(gca,'YTick',-0.6:0.3:1);
+set(gca,'YTick',-0.75:0.25:0.25);
 hold on
 plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
 plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
@@ -73,7 +73,7 @@ plot(reps,rat(1,:),'k','linewidth',2)
 plot(reps,rat(2,:),'color',[0.3 0.3 0.3],'linewidth',2)
 plot(reps,rat(3,:),'color',[0.6 0.6 0.6],'linewidth',2)
 %plot(100:4500,0,'b')
-ylim([-0.8 1.2])
+ylim([-1 0.5])
 % legend1=legend ('678Hz','1017Hz','2035Hz','Conf Int');
 hy=ylabel('Ratio of Change in PSD');
 hx=xlabel('N cycles');
