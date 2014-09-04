@@ -1,18 +1,19 @@
 
-LFfigNotch;
-LFfigRand2
-LFfigRandYH2
-LFfigEmpty
-LFfigEmptyYH
-LFfigEmptyYH2
-LFfigSim
 
+
+LFfigEmpty
+LFfigSim
+LFepi4
 %% new adaptive
 LF7 %empty room
 LF3_b %rand
-LFsim
+LFsim2
 %% rejected
-
+LFfigNotch;
+LFfigRand2
+LFfigRandYH2
+LFfigEmptyYH
+LFfigEmptyYH2
 % looked for 50Hz artifact in EEG, non was found
 [rest1,rest2]=LFeegAlice('idan');
 % bad EEG epilepsy data

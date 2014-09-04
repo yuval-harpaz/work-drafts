@@ -1,4 +1,4 @@
-function ANTto4D_ECG(eegFN,run,megFN,method,segBegSamp)
+function ANTto4D_EOGbi(eegFN,run,megFN,method,segBegSamp)
 % mergeEegMeg
 % cd to where the eeg data is. there should be run folders with meg: 1,2...
 

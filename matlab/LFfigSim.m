@@ -2,10 +2,11 @@ function LFfigSim
 
 
 %% empty room
-cd /home/yuval/Dropbox/LF/data
-load ratioSim
-plot(reps,mean(ratio,3)')
-legend(ratioDim1)
+cd /home/yuval/Dropbox/MEG/LF/data
+load ratioSim2
+plot(reps,squeeze(ratio(2,:,:)),'lineWidth',2)
+legend(snr)
+title('31Hz ratio by SNR')
 
 
 

@@ -2,7 +2,7 @@ function LFfigNotch
 
 %% random numbers, Tal and Abeles method
 % Fig. 1
-cd /home/yuval/Dropbox/LF
+cd /home/yuval/Dropbox/MEG/LF
 sRate=2034.5;
 %data=rand(100,round(100*sRate))-0.5;
 load data/rand2034
