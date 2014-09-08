@@ -2,12 +2,15 @@
 
 
 LFfigEmpty
+LFfig1000
 LFfigSim
-LFepi4
+
 %% new adaptive
 LF7 %empty room
 LF3_b %rand
 LFsim2
+LFepi4
+LF7_b
 %% rejected
 LFfigNotch;
 LFfigRand2
