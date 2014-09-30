@@ -16,12 +16,12 @@ for segi=1:35
     cfg.dataset=source;
     cfg.trl=[startSamp samp100s*segi 0];
     data=ft_preprocessing(cfg);
-    s0=1;
+%     s0=1;
     s1=round(1000*1017/50);
-    s2=round(2*1000*1017/50);
-    s3=round(3*1000*1017/50);
-    s10=length(data.time{1,1});
-    s9=s10-s1;
+%     s2=round(2*1000*1017/50);
+%     s3=round(3*1000*1017/50);
+%     s10=length(data.time{1,1});
+%     s9=s10-s1;
     %f1=abs(fftBasic(data.trial{1,1}(:,s0:s1),data.fsample));
     %f2=abs(fftBasic(data.trial{1,1}(:,s1+1:s2),data.fsample));
     %f3=abs(fftBasic(data.trial{1,1}(:,s2+1:s3),data.fsample));
@@ -59,4 +59,4 @@ for segi=1:35
     end
     startSamp=startSamp+samp100s;
 end
-save ratio1000all ratio*
+%save ratio1000all ratio*

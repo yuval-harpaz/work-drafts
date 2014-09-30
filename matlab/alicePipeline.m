@@ -1,5 +1,10 @@
 
+%% Sep 2014
 
+ aliceAlphaTime(1,'v1'); %(subFold)
+ 
+ 
+ 
 %% exploring results
 % evoked response
 

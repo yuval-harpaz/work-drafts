@@ -60,10 +60,4 @@ set(gca,'Fontsize',20,'FontName','times')
 set(gcf,'color','w')
 title('50Hz, N = 400')
 colorbar
-% figure;
-% topoplot248(10^11*f500A1(:,50),cfg);
-% set(gca,'Fontsize',20,'FontName','times')
-% set(gcf,'color','w')
-% colorbar
-% title('COPY COLORBAR ONLY')
 
