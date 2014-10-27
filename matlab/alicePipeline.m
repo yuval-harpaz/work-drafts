@@ -2,7 +2,8 @@
 %% Sep 2014
 
  aliceAlphaTime(1,'v1'); %(subFold)
- 
+ aliceAlphaTimePlanar(1,'v0.1');
+ aliceAlphaTimeAvg;
  
  
 %% exploring results

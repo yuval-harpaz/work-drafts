@@ -1,6 +1,6 @@
-function aliceAlphaTime(thrSig,thrSNR) %(subFold)
-%sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
-sf={'mark'};
+function aliceAlphaTimeConds(thrSig,thrSNR) %(subFold)
+sf={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
+%sf={'mark'};
 for sfi=1:length(sf)
     subFold=sf{sfi};
     % checks peak to peak alpha as percent of time
@@ -9,10 +9,10 @@ for sfi=1:length(sf)
     %thr='%75';
     %thr='v0.55';
     if ~exist('thrSig','var')
-        thrSig=0;
+        thrSig=1;
     end
     if ~exist('thrSNR','var')
-        thrSNR=0;
+        thrSNR=1;
     end
     cd /home/yuval/Data/alice
     cd(subFold)
@@ -24,21 +24,50 @@ for sfi=1:length(sf)
     load LRpairs
     load files/triggers
     load files/evt
-    for resti=100;%[100,102];
+    load files/indEOG.mat
+    load files/topoEOG
+    topoHeeg=topoH;
+    topoVeeg=topoV;
+    load files/topoMOG
+    load files/eog
+    topoHmeg=topoH;
+    topoVmeg=topoV;
+    clear topoH topoV
+    for condi=[8 10 12 20 100 102];%;
         % EEG
-        sampBeg=round(evt(find(evt(:,3)==resti),1)*1024);
+        sampBeg=round(evt(find(evt(:,3)==condi),1)*1024);
         sampEnd=sampBeg+60*1024;
         %samps1s=sampBeg:1024:sampEnd-1;
         %trl=[samps1s',samps1s'+1024,zeros(size(samps1s'))];
         
         cfg=[];
         cfg.trl=[sampBeg,sampEnd,0];
-        cfg.channel={'EEG','-M1','-M2'};
+        %cfg.channel='EEG';% {'EEG','-M1','-M2'};
+        cfg.channel={'EEG',eog.label{indH}};
         cfg.demean='yes';
         cfg.feedback='no';
         cfg.hpfilter='yes';
         cfg.hpfreq=6;
         eeg=readCNT(cfg);
+        chans=[1:12,14:18,20:32];
+        cfg = [];
+        cfg.topo      = topoHeeg;%(1:32,1);
+        cfg.topolabel = eeg.label;%(1:32);
+        compH     = ft_componentanalysis(cfg, eeg);
+        cfg = [];
+        cfg.component = 1;
+        eegpca = ft_rejectcomponent(cfg, compH,eeg);
+        cfg = [];
+        cfg.topo      = topoVeeg;%(1:32,1);
+        cfg.topolabel = eeg.label;%(1:32);
+        compV     = ft_componentanalysis(cfg, eegpca);
+        cfg = [];
+        cfg.component = 1;
+        eegpca = ft_rejectcomponent(cfg, compV,eegpca);
+        
+        eegpca.label=eegpca.label(chans);
+        eegpca.trial{1,1}(chans,:);
+        FIXME take last 30sec + first 30sec reading , fix also MEG
         %     f=abs(fftBasic(eeg.trial{1,1},eeg.fsample));
         %     i9=find(f(:,9)>1.5*median(f(:,9)))
         %     i10=find(f(:,10)>1.5*median(f(:,10)))
@@ -56,8 +85,7 @@ for sfi=1:length(sf)
             disp([blank,str]);
             blank=repmat(sprintf('\b'), 1, length(str)+1);
         end
-        disp('done EEG')
-        restS=find(trigV==resti);
+        restS=find(trigV==condi);
         restS=restS(end);
         startSmeg=trigS(restS);
         endSmeg=round(startSmeg+60*1017.23);
@@ -71,6 +99,7 @@ for sfi=1:length(sf)
         cfg.dataset=ls('*lf*');
         cfg.dataset=cfg.dataset(1:end-1);
         meg=ft_preprocessing(cfg);
+        
         % 119 - 88 window size
         blank=[];
         for chi=1:248
