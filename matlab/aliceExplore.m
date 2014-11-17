@@ -43,7 +43,7 @@ L=e.rmsL;
 [~,p,~,stats]=ttest(L,R)
 
 % M170 (0.1790)
-xlim=times(2);
+xlim=times.peakM(2);
 extrema=aliceCompByMaxCh(file,xlim,'L',chans);
 R=-extrema.minR;
 L=extrema.maxL;

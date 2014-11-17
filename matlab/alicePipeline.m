@@ -4,14 +4,19 @@
  aliceAlphaTime(1,'v1'); %(subFold)
  aliceAlphaTimePlanar(1,'v0.1');
  aliceAlphaTimeAvg;
+ aliceAlphaTimeConds(1,'v1'); %(subFold)
+ aliceAlphaTimeCond20(1,'v1');
+ aliceWbW2;
+ open aliceAlphaTimeCond1% to explore
  
- 
+ aliceAlphaTimeCond20tf % fft for BL and trial, creates alphaTrial.mat
+ aliceAlphaTimeCond20tf1
 %% exploring results
 % evoked response
 
 open aliceExplore
 open aliceExplore20
-
+open aliceExplore20_1
 open aliceStatExplore1
 
 

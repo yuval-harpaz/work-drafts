@@ -1,3 +1,9 @@
+%% Nov 2014
+freq=10;
+stat=statPlotCoh('/media/yuval/Elements/MEG/talResults/Coh/cohLRv1pre_C','/media/yuval/Elements/MEG/talResults/timeProdCoh/cohLRv1pre_C',[freq freq],[0 1],'paired-ttest')
+
+
+%% older
 freq=10;
 % sig results
 stat=statPlot('cohLRv1pre_D','cohLRv1pre_C',[freq freq],[0 1],'ttest2')
