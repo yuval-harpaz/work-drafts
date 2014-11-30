@@ -56,6 +56,7 @@ if ~exist('eeg.mat','file')
     cfg.demean='yes';
     cfg.bpfilter='yes';
     cfg.bpfreq=[1 400];
+    cfg.channel={'Fp1';'Fpz';'Fp2';'F7';'F3';'Fz';'F4';'F8';'FC5';'FC1';'FC2';'FC6';'M1';'T7';'C3';'Cz';'C4';'T8';'M2';'CP5';'CP1';'CP2';'CP6';'P7';'P3';'Pz';'P4';'P8';'POz';'O1';'Oz';'O2';};
     eeg=readCNT(cfg);
     display('saving eeg ft structure')
     save eeg eeg -v7.3
