@@ -12,6 +12,7 @@ if isempty(LS);
     fileName='';
 elseif length(LS)>1
     warning('more than one c,* files present, took the first one')
+    fileName=LS{1,1};
 else
     fileName=LS{1,1};
 end
