@@ -1,4 +1,4 @@
-function SchizPhase(foi)
+function SchizPSD
 bands=[1 4;5 8;9 12;13 19;20 25;26 70;13 25];
 cd /media/yuval/Elements/SchizoRestMaor
 load Subs
@@ -16,63 +16,36 @@ for subi=1:length(Subs)
         sub=Subs{subi,1};
         cd(sub)
         clear cond*
-        %try
-        load freq
-        load coh
-        load cohLR
-        for i=1:248
-            for j=1:248
-                if i==j
-                    %phaseDif(i,j,1:length(foi))=0;
-                    PLI(i,j,1:length(foi))=0;
-                    PC(i,j,1:length(foi))=0;
-                else
-                    [~,I]=ismember(['A',num2str(i)],freq.label);
-                    [~,J]=ismember(['A',num2str(j)],freq.label);
-                    for foii=1:length(foi)
-                        phI=mod(phase(freq.fourierspctrm(:,I,foi(foii))),2*pi);
-                        phJ=mod(phase(freq.fourierspctrm(:,J,foi(foii))),2*pi);
-                        PLI(i,j,foii) = abs(mean(sign(sin(phI-phJ))));
-                        PC(i,j,foii) = abs(mean(exp(1i*(phI-phJ))));
-                        %phaseDif(i,j,foii)=mean(phI-phJ);
-                    end
-                end
+        try
+            load freq
+            Freq=squeeze(mean(mean(abs(freq.fourierspctrm)),2));
+            if strcmp(Subs{subi,2}(1),'S')
+                scCount=scCount+1;
+                scLabel{scCount}=sub;
+                PSDsc(scCount,1:70)=Freq;
+            else
+
+                coCount=coCount+1;
+                coLabel{coCount}=sub;
+                PSDco(coCount,1:70)=Freq;
             end
-            %disp(num2str(i));
-            prog(i);
+            disp(['done ',sub]);
+        catch
+            disp([sub,' had no split cond'])
         end
-        %PLI = abs(mean(sign(sin(phaseDif))));
-        %PC = abs(mean(exp(1i*(phaseDif))));
-        if strcmp(Subs{subi,2}(1),'S')
-            sc=true;
-            scCount=scCount+1;
-            scLabel{scCount}=sub;
-            pliSc(scCount,1:248,1:length(foi))=max(PLI);
-            pc(scCount,1:248,1:length(foi))=max(PC);
-        else
-            sc=false;
-            coCount=coCount+1;
-            coLabel{coCount}=sub;
-            pliCo(coCount,1:248,1:length(foi))=max(PLI);
-            pcCo(coCount,1:248,1:length(foi))=max(PC);
-        end
-        
-%         pli(subi,1:248,1:length(foi))=max(PLI);
-%         pc(subi,1:248,1:length(foi))=max(PC);
         cd ../
-        disp([' done ',num2str(subi),' of ',num2str(length(Subs))]);
     end
 end
 cd /media/yuval/Elements/SchizoRestMaor
-save PLI pli*
-save PC pc*
+save PSD PSD* *Label
 disp('finish');
+
 % function cohFreq=cohBand(cohLR,Li,Ri)
 % %coh=mean(cohLR.cohspctrm(:,9:12),2);
 % cohFreq=ones(248,70);
 % cohFreq(Ri,:)=cohLR.cohspctrm;
 % cohFreq(Li,:)=cohLR.cohspctrm;
-%
+% 
 %
 % [~,chani]=ismember('A158',cond204.label);
 % [~,p]=ttest2(fSc(chani,:),fCo(chani,:))
