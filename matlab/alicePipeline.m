@@ -1,3 +1,13 @@
+%% Jan 2015
+open aliceExplore2015
+open aliceExploreGavg
+open aliceExploreGavgLR
+aliceAvgSubs;
+aliceGAnotReduced('alice')
+aliceZeroSacSpike;
+aliceGAwbw2;
+aliceCompSacSpike;
+aliceCompOnAvg;
 
 %% Sep 2014
 

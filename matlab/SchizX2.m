@@ -24,6 +24,7 @@ for subi=1:length(xSubs)
         
         % run ica (it takes a long time have a break)
         cfg            = [];
+        %cfg.method='pca';
         cfg.channel    = 'MEG'; %cfg.channel = {'MEG','-A74'};
         comp_dummy     = ft_componentanalysis(cfg, dummy);
         
