@@ -1,6 +1,5 @@
-function aliceSpike
-% Here I try to keep the M/P100 while rejecting the spike. I had trouble
-% here because spike topography of block 1 was not similar to Gavg
+function aliceSpike1
+% Here I try to run ICA and check which components represent the spike.
 cd /home/yuval/Data/alice
 load ga/GavgMalice
 load ga/GavgEalice
@@ -236,7 +235,7 @@ for subi=1:8
         cfg.demean='yes';
         cfg.baselinewindow=[-bl,-bl+0.2];
         cfg.bpfilter='yes';
-        cfg.bpfreq=[1 40];
+        cfg.bpfreq=[13 90];
         cfg.padding=2;
         cfg.trl=trlMEG;
         cfg.dataset=megFNc;
@@ -256,11 +255,11 @@ for subi=1:8
         topoM100=topoM100(:,1);
         % correct H and V and spike components, leave P100 in
         cfg = [];
-        cfg.topo      = [topoHmeg(1:248,1),topoVmeg(1:248,1),spikeTopo8(subi,:)',topoM100./max(abs(spikeTopo8(subi,:)))];
+        cfg.topo      = [topoHmeg(1:248,1),topoVmeg(1:248,1),spikeTopo8(subi,:)',topoM100];
         cfg.topolabel = meg.label(1:248);
         comp     = ft_componentanalysis(cfg, meg);
         cfg = [];
-        cfg.component = [1,2,3];
+        cfg.component = [1,2];
         megpca = ft_rejectcomponent(cfg, comp,meg);
         
         
