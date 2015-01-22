@@ -7,8 +7,10 @@ freq=[1 100]; %[0.101 100];
 bl=0.6;
 blE=round(bl*1024);blM=round(bl*1017.23);
 str='';
+strc='';
 stro='';
 strE='';
+strEc='';
 strEo='';
 for subi=1:8
     %if ~exist(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',num2str(subi),'.mat'],'file')
@@ -220,38 +222,18 @@ for subi=1:8
     %     cfg.interactive='yes';
     %     cfg.xlim=[0.094 0.094];
     %     ft_topoplotER(cfg,avgMEGc,avgMEGo);
-    eval(['Mc',num2str(subi),'=avgMEGc;']);
-    eval(['Mo',num2str(subi),'=avgMEGo;']);
-    eval(['Ec',num2str(subi),'=avgEEGc;']);
-    eval(['Eo',num2str(subi),'=avgEEGo;']);
-%     ns=num2str(subi);
-%     save(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',ns],['Mo',ns],['M',ns],['Eo',ns],['E',ns]);
+    
     %cd ../
     %     else
     %         load(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',num2str(subi)]);
     %     end
-    str=[strc,',M',num2str(subi)];
+    str=[str,',Mr',num2str(subi)];
     strc=[strc,',Mc',num2str(subi)];
     stro=[stro,',Mo',num2str(subi)];
-    strE=[strEc,',E',num2str(subi)];
+    strE=[strE,',Er',num2str(subi)];
     strEc=[strEc,',Ec',num2str(subi)];
     strEo=[strEo,',Eo',num2str(subi)];
-    % end
-    % cfg=[];
-    % cfg.channel=1:248;
-    % cfg.keepindividual='yes';
-    % eval(['avgM=ft_timelockgrandaverage(cfg',str,');'])
-    % eval(['avgMorig=ft_timelockgrandaverage(cfg',stro,');'])
-    % cfg.channel=[1:12,14:18,20:32];
-    % eval(['avgE=ft_timelockgrandaverage(cfg',strE,');'])
-    % eval(['avgEorig=ft_timelockgrandaverage(cfg',strEo,');'])
-    % save /home/yuval/Copy/MEGdata/alice/ga2015/ga avgE avgM avgEorig avgMorig
-    % figure;
-    % cfg=[];
-    % cfg.layout='WG32.lay';
-    % cfg.interactive='yes';
-    % cfg.xlim=[0.094 0.094];
-    % ft_topoplotER(cfg,avgE,avgEorig);
+    
     % figure;
     % cfg=[];
     % cfg.layout='4D248.lay';
@@ -261,170 +243,128 @@ for subi=1:8
     
     
     %% reduce avg from trials
-    tempStart=0.05;
-    tempEnd=0.24;
-    supress=0.1;
+    EEGr=EEGpca;
+    MEGr=MEGpca;
+    tempStart=0.025;
+    tempEnd=0.25;
+    supress=0.05;
     supressE=round(supress*1024);
     supressM=round(supress*1017.23);
-    sampE=nearest(avgEEG.time,tempStart);
-    
-    for chani=1:32
-        chan=avgEEG.avg(chani,:);
-        spikeLine=chan(spikeStart):(chan(spikeEnd)-chan(spikeStart))/length(spikeStart:spikeEnd-1):chan(spikeEnd);
-        chan(spikeStart:spikeEnd)=spikeLine;
-        avgEEG.avg(chani,:)=chan;
-    end
-    avg=zeros(size(avgEEGc.avg));
-    begSamp=nearest(avgEEGc.time,-0.1);
-    endSamp=nearest(avgEEGc.time,0.5);
-    %    avgN=50;
-    %     if length(trlInd)<50
-    %         warning('less than 50 trials')
-    %         avgN=length(trlInd);
-    %         eval(['!echo "segment ',num2str(trigValues(piskai)),' had ',num2str(avgN),'trials" >>errors.txt'])
-    %         trials=1:avgN;
-    %     else % take as little muscle artifact as possible
-    %     cfg=[];
-    %     cfg.demean='yes';
-    %     %        cfg.baselinewindow=[-bl,-bl+0.2];
-    %     cfg.bpfilter='yes';
-    %     cfg.bpfreq=[110 140];
-    %     cfg.padding=2;
-    %     cfg.trl=[samps(:,1)-blE,samps(:,1)+blE,-blE*ones(length(samps),1)];
-    %     eegHF=readCNT(cfg);
-    %     sdE=zeros(1,length(trlInd));
-    %     for triali=1:length(trlInd)
-    %         sdE(triali)=mean(std(eeg.trial{1,trlInd(triali)}(1:32,:)'));
-    %     end
-    %     [~,msci]=sort(sdE);
-    %     trials=msci(1:50);
-    %    end
+    sampEstart=nearest(avgEEGc.time,tempStart);
+    sampMstart=nearest(avgMEGc.time,tempStart);
+    sampEend=nearest(avgEEGc.time,tempEnd);
+    sampMend=nearest(avgMEGc.time,tempEnd);
+    % make template, zero beginning and end of avg
+    temp=zeros(size(avgEEGc.avg));
+    supressor=(0-1/supressE):1/supressE:(1-1/supressE);
+    LS=length(supressor);
+    temp(:,sampEstart:sampEend)=avgEEGc.avg(:,(sampEstart:sampEend));
+    temp(:,sampEstart:sampEstart+LS-1)=repmat(supressor,34,1).*avgEEGc.avg(:,sampEstart:sampEstart+LS-1);
+    temp(:,sampEend-LS+1:sampEend)=fliplr(repmat(supressor,34,1)).*avgEEGc.avg(:,sampEend-LS+1:sampEend);
+    %     begSamp=nearest(avgEEGc.time,-0.1);
+    %     endSamp=nearest(avgEEGc.time,0.5);
     samp0=nearest(avgEEGc.time,0);
     for triali=1:length(trlInd);
-        trial=EEGpca.trial{1,trlInd(triali)}(1:32,:);
-        if trlPrev(triali)>0 && trlPrev(triali)<0.7
+        clear T*
+        if trlPrev(triali)>0 && trlPrev(triali)<(0.2+tempEnd) % to leave 0.2s clean baseline window
             prevS0=samp0-trlPrev(triali)*1024;
-            trial(:,1:prevS0+1024*0.5)=trial(:,1:prevS0+1024*0.5)-avgEEG.avg(:,endSamp-prevS0-1024*0.5+1:endSamp);
+            T3=length(avgEEGc.time);
+            T2=T3-samp0+prevS0;
+            T1=T3-T2;
+            EEGr.trial{triali}(:,1:T2)=EEGpca.trial{triali}(:,1:T2)-temp(:,T1:end-1);
         end
-        if trlNext(triali)>0 && trlNext(triali)<0.6
+        if trlNext(triali)>0 && trlNext(triali)<(0.5-tempStart) % to have 0.5 quiet ERP
             nextS0=samp0+trlNext(triali)*1024;
-            trial(:,nextS0-round(1024*0.1):end)=trial(:,nextS0-round(1024*0.1):end)-avgEEG.avg(:,begSamp:begSamp+size(trial(:,nextS0-round(1024*0.1):end),2)-1);
+            T3=length(avgEEGc.time);
+            T5=T3-nextS0+samp0;
+            T4=T3-T5;
+            EEGr.trial{triali}(:,T4+1:end)=EEGpca.trial{triali}(:,T4+1:end)-temp(:,1:T5);
         end
-        avg=avg+trial;
     end
-    avg=avg./avgN;
-    avgEEG1=avgEEGorig;
-    avgEEG1.avg=avg;
-    avgEEG1=correctBL(avgEEG1,[-0.4 -0.2]);
-    avgEEG1.cfg.trials=trlInd(1:avgN);
-    avgEEG1.cfg.sampleinfo=eegpca.sampleinfo(trlInd(1:avgN),:);
-    
-    %         cfg=[];
-    %         cfg.channel='EEG';
-    %         cfg.trials=trlInd(1:avgN);
-    %         avgEEG0=ft_timelockanalysis(cfg,eegpca);
-    %         avgEEG0.time=avgEEG0.time-endSaccS/1024;
-    %         avgEEG0=correctBL(avgEEG0,[-bl,-bl+0.2]);
-    %         figure;
-    %         cfg=[];
-    %         cfg.layout='WG32.lay';
-    %         cfg.interactive='yes';
-    %         ft_multiplotER(cfg,avgEEG1,avgEEG0);
-    %         pause
-    %         close all
-    eval(['avgE',num2str(trigValues(piskai)),'=avgEEG1']);
-    
-    
-    %% MEG
-    
-    %         startSeeg=round(evt(find(evt(:,3)==trigValues(piskai)),1)*1024);
-    %         endSeeg=round(evt(find(evt(:,3)==trigValues(piskai))+1,1)*1024);
-    %         startSmeg=trigS(find(trigV==trigValues(piskai)));
-    %         endSmeg=trigS(find(trigV==trigValues(piskai))+1);
-    %         megSR=(endSmeg-startSmeg)/((endSeeg-startSeeg)/1024);
-    %         if round(megSR)~=1017
-    %             error('problem detecting MEG sampling rate')
-    %         end
-    %         trl=samps(:,1)-blE;
-    %         %trl=[avgEEG1.cfg.sampleinfo,-blE*ones(length(avgEEG1.cfg.sampleinfo),1)];
-    %         %[eegpca.sampleinfo(trlInd(1:avgN),:),-blE*ones(length(avgEEG1.cfg.sampleinfo),1)];
-    %         %trl=[samps(:,1)-blE,samps(:,1)+blE,-blE*ones(length(samps),1)];
-    %         trlMEG=round((trl-startSeeg)/1024*megSR)+startSmeg;
-    %         trlMEG(:,2)=trlMEG+round(megSR*1.2);
-    %         trlMEG(:,3)=-blM*ones(length(trl),1);
-    %
-    %         cfg=[];
-    %         cfg.demean='yes';
-    %         cfg.baselinewindow=[-bl,-bl+0.2];
-    %         cfg.bpfilter='yes';
-    %         cfg.bpfreq=freq;
-    %         cfg.padding=2;
-    %         cfg.trl=trlMEG;
-    %         cfg.dataset=megFNc;
-    %         cfg.channel='MEG';
-    %         meg=ft_preprocessing(cfg);
-    %         % correct H and V components
-    %         cfg = [];
-    %         cfg.topo      = [topoHmeg(1:248,1),topoVmeg(1:248,1)];
-    %         cfg.topolabel = meg.label(1:248);
-    %         comp     = ft_componentanalysis(cfg, meg);
-    %         cfg = [];
-    %         cfg.component = [1,2];
-    %         megpca = ft_rejectcomponent(cfg, comp,meg);
-    %
-    
-    
     cfg=[];
-    cfg.channel='MEG';
-    cfg.trials=find(samps(:,2)==1);
-    avgMEG=ft_timelockanalysis(cfg,megpca);
-    avgMEG.time=avgMEG.time-endSaccS/1024;
-    avgMEG=correctBL(avgMEG,[-bl,-bl+0.2]);
-    %for triali=1:avgN
-    samp0=nearest(avgMEG.time,0);
+    cfg.trials=trlInd;
+    avgEEGr=ft_timelockanalysis(cfg,EEGr);
+    avgEEGr=correctBL(avgEEGr,[-0.6 -0.05]);
+    %             figure;
+    %             cfg=[];
+    %             cfg.layout='WG32.lay';
+    %             cfg.interactive='yes';
+    %             cfg.xlim=[0.1 0.1];
+    %             cfg.zlim=[-2 2];
+    %             ft_topoplotER(cfg,avgEEGr,avgEEGc);
+    eval(['E',num2str(subi),'r=avgEEGr']);
     
-    spikeStart=nearest(avgMEG.time,-0.05);
-    spikeEnd=nearest(avgMEG.time,0.03);
-    for chani=1:248
-        chan=avgMEG.avg(chani,:);
-        spikeLine=chan(spikeStart):(chan(spikeEnd)-chan(spikeStart))/(spikeEnd-spikeStart):chan(spikeEnd);
-        if length(spikeLine)<(spikeEnd-spikeStart+1)
-            if ((spikeEnd-spikeStart+1)-length(spikeLine))>1
-                error('wrong spike length');
-            else
-                spikeLine(end+1)=chan(spikeEnd);
-            end
+    
+    % MEG
+    
+    
+    
+    % make template, zero beginning and end of avg
+    temp=zeros(size(avgMEGc.avg));
+    supressor=(0-1/supressM):1/supressM:(1-1/supressM);
+    LS=length(supressor);
+    temp(:,sampMstart:sampMend)=avgMEGc.avg(:,(sampMstart:sampMend));
+    temp(:,sampMstart:sampMstart+LS-1)=repmat(supressor,250,1).*avgMEGc.avg(:,sampMstart:sampMstart+LS-1);
+    temp(:,sampMend-LS+1:sampMend)=fliplr(repmat(supressor,250,1)).*avgMEGc.avg(:,sampMend-LS+1:sampMend);
+    %     begSamp=nearest(avgEEGc.time,-0.1);
+    %     endSamp=nearest(avgEEGc.time,0.5);
+    samp0=nearest(avgMEGc.time,0);
+    for triali=1:length(trlInd);
+        clear T*
+        if trlPrev(triali)>0 && trlPrev(triali)<(0.2+tempEnd) % to leave 0.2s clean baseline window
+            prevS0=round(samp0-trlPrev(triali)*1017.23);
+            T3=length(avgMEGc.time);
+            T2=T3-samp0+prevS0;
+            T1=T3-T2;
+            MEGr.trial{triali}(:,1:T2)=MEGpca.trial{triali}(:,1:T2)-temp(:,T1:end-1);
         end
-        chan(spikeStart:spikeEnd)=spikeLine;
-        avgMEG.avg(chani,:)=chan;
+        if trlNext(triali)>0 && trlNext(triali)<(0.5-tempStart) % to have 0.5 quiet ERP
+            nextS0=round(samp0+trlNext(triali)*1017.23);
+            T3=length(avgMEGc.time);
+            T5=T3-nextS0+samp0;
+            T4=T3-T5;
+            MEGr.trial{triali}(:,T4+1:end)=MEGpca.trial{triali}(:,T4+1:end)-temp(:,1:T5);
+        end
     end
-    
-    
-    avg=zeros(size(avgMEG.avg));
-    begSamp=nearest(avgMEG.time,-0.1);
-    endSamp=nearest(avgMEG.time,0.5);
-    
-    for triali=trials
-        trial=megpca.trial{1,trlInd(triali)};
-        if trlPrev(triali)>0 && trlPrev(triali)<0.7
-            prevS0=round(samp0-trlPrev(triali)*megSR);
-            trial(:,1:prevS0+round(megSR*0.5))=trial(:,1:prevS0+round(megSR*0.5))-avgMEG.avg(:,endSamp-prevS0-round(megSR*0.5)+1:endSamp);
-        end
-        if trlNext(triali)>0 && trlNext(triali)<0.6
-            nextS0=samp0+round(trlNext(triali)*megSR);
-            trial(:,nextS0-round(megSR*0.1):end)=trial(:,nextS0-round(megSR*0.1):end)-avgMEG.avg(:,begSamp:begSamp+size(trial(:,nextS0-round(megSR*0.1):end),2)-1);
-        end
-        avg=avg+trial;
-    end
-    avg=avg./avgN;
-    avgMEG1=avgMEG;
-    avgMEG1.avg=avg;
-    avgMEG1=correctBL(avgMEG1,[-0.4 -0.2]);
-    avgMEG1.cfg.trials=trlInd(1:avgN);
-    avgMEG1.cfg.sampleinfo=megpca.sampleinfo(trlInd(1:avgN),:);
-    eval(['avgM',num2str(trigValues(piskai)),'=avgMEG1']);
-    
-    clear avg*EG*
-    save avgReducedEog avgM* avgE*
+    cfg=[];
+    cfg.trials=trlInd;
+    avgMEGr=ft_timelockanalysis(cfg,MEGr);
+    avgMEGr=correctBL(avgMEGr,[-0.6 -0.05]);
+%     figure;
+%     cfg=[];
+%     cfg.layout='4D248.lay';
+%     cfg.interactive='yes';
+%     cfg.xlim=[0.1 0.1];
+%     cfg.zlim=[-2e-13 2e-13];
+%     ft_topoplotER(cfg,avgMEGr,avgMEGc);
+    eval(['Mr',num2str(subi),'=avgMEGr;']);
+    eval(['Mc',num2str(subi),'=avgMEGc;']);
+    eval(['Mo',num2str(subi),'=avgMEGo;']);
+    eval(['Er',num2str(subi),'=avgEEGr;']);
+    eval(['Ec',num2str(subi),'=avgEEGc;']);
+    eval(['Eo',num2str(subi),'=avgEEGo;']);
+    ns=num2str(subi);
+    save(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',ns],['Mo',ns],['Mc',ns],['Eo',ns],['Ec',ns],['Mr',ns],['Er',ns]);
     cd ../
 end
+
+cfg=[];
+cfg.channel=1:248;
+cfg.keepindividual='yes';
+eval(['avgMpca=ft_timelockgrandaverage(cfg',strc,');'])
+eval(['avgMorig=ft_timelockgrandaverage(cfg',stro,');'])
+eval(['avgMreduced=ft_timelockgrandaverage(cfg',str,');'])
+
+cfg.channel=[1:12,14:18,20:32];
+eval(['avgEpca=ft_timelockgrandaverage(cfg',strEc,');'])
+eval(['avgEorig=ft_timelockgrandaverage(cfg',strEo,');'])
+eval(['avgEreduced=ft_timelockgrandaverage(cfg',strE,');'])
+save /home/yuval/Copy/MEGdata/alice/ga2015/ga avgEpca avgMpca avgEorig avgMorig avgEreduced avgMreduced
+figure;
+cfg=[];
+cfg.layout='WG32.lay';
+cfg.interactive='yes';
+cfg.xlim=[0.094 0.094];
+ft_topoplotER(cfg,avgEreduced,avgEpca,avgEorig);
+cfg.layout='4D248.lay';
+ft_topoplotER(cfg,avgMreduced,avgMpca,avgMorig);

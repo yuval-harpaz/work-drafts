@@ -9,6 +9,8 @@ aliceGAwbw2;
 aliceCompSacSpike;
 aliceCompOnAvg;
 
+alicePCA;
+aliceReduce;
 %% Sep 2014
 
  aliceAlphaTime(1,'v1'); %(subFold)
