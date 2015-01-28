@@ -10,7 +10,14 @@ aliceCompSacSpike;
 aliceCompOnAvg;
 
 alicePCA;
-aliceReduce;
+aliceReduce(-0.4,0.4,0.1);
+aliceReduceDist;
+
+open aliceExplore2015a
+aliceRMSclusters
+statPlotLR(MaRMS,0.3,1,'maxabs');
+statPlotLR(avgMr,0.3,0,'maxabs');
+
 %% Sep 2014
 
  aliceAlphaTime(1,'v1'); %(subFold)

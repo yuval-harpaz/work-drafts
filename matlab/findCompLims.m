@@ -20,6 +20,9 @@ function [Itroughs,Ipeaks,avgTC,timeCourse]=findCompLims(cfg,varargin)
 % cfg.maxDist is the max time you want from peak to through
 % cfg.zThr to play with peak detection threshold (in z scores)
 % cfg.pToP is minimum peak to peak time
+% you can insert any data now as long as it has data.avg and data.time. if
+% this is the case (no data.label) you can specify channels by their index
+% numbers.
 timeCourse=zeros(length(varargin),length(varargin{1,1}.time));
 if ~isfield(cfg,'notBefore')
     cfg.notBefore=0;
@@ -42,6 +45,12 @@ else
     sRate=1/(varargin{1,1}.time(2)-varargin{1,1}.time(1));
     pToP=round(cfg.pToP*sRate);
 end
+if isfield(cfg,'smooth')
+    smt=cfg.smooth;
+else
+    smt=[];
+end
+isEEG=false;isMEG=false;
 sampNB=nearest(varargin{1,1}.time,cfg.notBefore);
 sampNA=nearest(varargin{1,1}.time,cfg.notAfter);
 for avgi=1:length(varargin)
@@ -51,6 +60,9 @@ for avgi=1:length(varargin)
     if avgi==1
         if ~isfield(cfg,'channel')
             cfg.channel=[];
+        end
+        if ~isfield(avgData,'label')
+            avgData.label='';
         end
         if isfield(avgData,'grad') || ~isempty(find(ismember(avgData.label,'A1'), 1))
             isMEG=true;
@@ -67,12 +79,18 @@ for avgi=1:length(varargin)
                 cfg.channel={ 'Fp1' 'Fpz' 'Fp2' 'F7' 'F3' 'Fz' 'F4' 'F8' 'FC5' 'FC1' 'FC2' 'FC6' 'T7' 'C3' 'Cz' 'C4' 'T8' 'CP5' 'CP1' 'CP2' 'CP6' 'P7' 'P3' 'Pz' 'P4' 'P8' 'POz' 'O1' 'Oz' 'O2'};
             end
         else
-            error('what is this data, EEG or MEG?')
+            
+            if ~isempty(cfg.channel)
+                chansi=cfg.channel;
+            else
+                chansi=1:size(avgData.avg,1);
+            end
         end
-        
-        for chi=1:length(cfg.channel)
-            [~,ind]=ismember(cfg.channel{chi},avgData.label);
-            chansi(chi)=ind;
+        if isEEG || isMEG
+            for chi=1:length(cfg.channel)
+                [~,ind]=ismember(cfg.channel{chi},avgData.label);
+                chansi(chi)=ind;
+            end
         end
     end
     if isfield(avgData,'individual')
@@ -120,6 +138,9 @@ if size(timeCourse,1)>1
     avgTC=mean(timeCourse);
 else
     avgTC=timeCourse;
+end
+if ~isempty(smt)
+    avgTC=smooth(avgTC,smt);
 end
 [peaks, Ipeaks] = findPeaks(avgTC,cfg.zThr, pToP);
 if isempty(peaks)

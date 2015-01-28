@@ -1,8 +1,16 @@
-function aliceReduce
+function aliceReduce(tempStart,tempEnd,supress)
 cd /home/yuval/Data/alice
-tempStart=0.055;
-tempEnd=0.35;
-supress=0.05;
+if ~existAndFull('tempStart')
+    tempStart=0.055;
+end
+if ~existAndFull('tempEnd')
+    tempEnd=0.35;
+end
+if ~existAndFull('supress')
+    supress=0.05;
+end
+
+
 tic
 [avgMr,avgEr]=doReduce(tempStart,tempEnd,supress);
 toc
@@ -10,22 +18,25 @@ load /home/yuval/Copy/MEGdata/alice/ga2015/ga
 figure;
 cfg=[];
 cfg.interactive='yes';
-cfg.xlim=[0.094 0.094];
+%cfg.xlim=[0.3 0.3];
+cfg.zlim=[-3e-14 3e-14];
 cfg.layout='4D248.lay';
-ft_topoplotER(cfg,avgMr,avgMpca);
-cfg.layout='WG32.lay';
-ft_topoplotER(cfg,avgEr,avgEpca);
+% ft_topoplotER(cfg,avgMr,avgMpca);
+% cfg.layout='WG32.lay';
+% ft_topoplotER(cfg,avgEr,avgEpca);
 dif=avgMr;
 dif.individual=avgMpca.individual-avgMr.individual;
-ft_topoplotER(cfg,avgMr,avgMpca,dif)
-%save /home/yuval/Copy/MEGdata/alice/ga2015/gaR avgEreduced avgMreduced
-function [avgMreduced,avgEreduced]=doReduce(tempStart,tempEnd,supress)
+% ft_topoplotER(cfg,avgMr,avgMpca,dif)
+cfg.channel= {'A99', 'A100', 'A131', 'A132', 'A133', 'A134', 'A135', 'A159', 'A160', 'A161', 'A162', 'A181', 'A182', 'A183', 'A184', 'A199', 'A200', 'A201', 'A216'};
+ft_singleplotER(cfg,avgMr,avgMpca,dif)
+save /home/yuval/Copy/MEGdata/alice/ga2015/gaR avgEr avgMr tempStart tempEnd supress
+function [avgMreduced,avgEreduced]=doReduce(tempStart,tempEnd,supress) %#ok<STOUT>
 sf=[];
 load comps
 clear comps;
-freq=[1 100]; %[0.101 100];
-bl=0.6;
-blE=round(bl*1024);blM=round(bl*1017.23);
+% freq=[1 100]; %[0.101 100];
+% bl=0.6;
+% blE=round(bl*1024);blM=round(bl*1017.23);
 str='';
 strE='';
 for subi=1:8
@@ -140,13 +151,13 @@ for subi=1:8
             T3=length(avgEEGc.time);
             T5=T3-nextS0+samp0;
             T4=T3-T5;
-            EEGr.trial{triali}(:,T4+1:end)=EEGpca.trial{triali}(:,T4+1:end)-temp(:,1:T5);
+            EEGr.trial{triali}(:,T4+1:end)=EEGr.trial{triali}(:,T4+1:end)-temp(:,1:T5);
         end
     end
     cfg=[];
     cfg.trials=trlInd;
     avgEEGr=ft_timelockanalysis(cfg,EEGr);
-    avgEEGr=correctBL(avgEEGr,[-0.6 -0.05]);
+    avgEEGr=correctBL(avgEEGr,[-0.6 -0.05]); %#ok<NASGU>
     %             figure;
     %             cfg=[];
     %             cfg.layout='WG32.lay';
@@ -185,13 +196,13 @@ for subi=1:8
             T3=length(avgMEGc.time);
             T5=T3-nextS0+samp0;
             T4=T3-T5;
-            MEGr.trial{triali}(:,T4+1:end)=MEGpca.trial{triali}(:,T4+1:end)-temp(:,1:T5);
+            MEGr.trial{triali}(:,T4+1:end)=MEGr.trial{triali}(:,T4+1:end)-temp(:,1:T5);
         end
     end
     cfg=[];
     cfg.trials=trlInd;
     avgMEGr=ft_timelockanalysis(cfg,MEGr);
-    avgMEGr=correctBL(avgMEGr,[-0.6 -0.05]);
+    avgMEGr=correctBL(avgMEGr,[-0.6 -0.05]); %#ok<NASGU>
     %     figure;
     %     cfg=[];
     %     cfg.layout='4D248.lay';
