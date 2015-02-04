@@ -10,13 +10,17 @@ aliceCompSacSpike;
 aliceCompOnAvg;
 
 alicePCA;
-aliceReduce(-0.4,0.4,0.1);
-aliceReduceDist;
+aliceReduce(-0.4,0.4,0.1); % this is what I used eventually to reduce prev and next ERP
+aliceReduceDist; % distribution of n-1 and n+1 saccade
 
 open aliceExplore2015a
 aliceRMSclusters
 statPlotLR(MaRMS,0.3,1,'maxabs');
 statPlotLR(avgMr,0.3,0,'maxabs');
+open aliceExplore2015b
+
+aliceGAaliceNtrials;
+
 
 %% Sep 2014
 

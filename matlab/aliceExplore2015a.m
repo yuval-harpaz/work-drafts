@@ -4,7 +4,7 @@ load gaR
 load ../ga/GavgE20
 load ../ga/GavgM20
 
-%% Gavg all alice paragraphs
+% Gavg all alice paragraphs
 t0=-0.2;t1=0.55;
 s0=nearest(avgMr.time,t0);
 s1=nearest(avgMr.time,t1);
@@ -16,7 +16,7 @@ for subi=1:8
     data=squeeze(avgMr.individual(subi,:,samples));
     mult=wts'*data;
     tc=mult(logical(eye(763)));
-    tc=tc/mean(tc(1:s3));
+    tc=tc-mean(tc(1:s3));
     TCalice(subi,1:763)=tc;
 end
 figure;plot(time,TCalice)
@@ -34,7 +34,7 @@ for subi=1:8
     data=squeeze(avgEr.individual(subi,:,samples));
     mult=wts'*data;
     tc=mult(logical(eye(769)));
-    tc=tc/mean(tc(1:s3e));
+    tc=tc-mean(tc(1:s3e));
     TCeAlice(subi,1:769)=tc;
 end
 figure;plot(timeE,TCeAlice)
