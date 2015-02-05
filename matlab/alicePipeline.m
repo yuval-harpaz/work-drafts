@@ -22,7 +22,11 @@ open aliceExplore2015b
 aliceGAaliceNtrials;
 open aliceExplore2015c % mmeting with avi, aliceResults1.docx
 
-
+% source level
+cd /home/yuval/Copy/MEGdata/alice/ga2015/func
+permuteBriks('Ma_','Mw_',[],[],147); % 194ms
+permuteBriks('Ma_','Mw_',[],[],83); % 130ms
+permuteBriks('Ma_','Mw_',[],[],53); % 194ms
 %% Sep 2014
 
  aliceAlphaTime(1,'v1'); %(subFold)
