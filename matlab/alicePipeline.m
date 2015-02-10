@@ -28,10 +28,12 @@ cd /home/yuval/Copy/MEGdata/alice/ga2015/func
 permuteBriks('Ma_','Mw_',[],[],147); % 194ms
 permuteBriks('Ma_','Mw_',[],[],83); % 130ms
 permuteBriks('Ma_','Mw_',[],[],53); % 194ms
-permuteMovie('Ma_','Mw_',[],[],0:203,0.01,'both');
+permuteMovie('Ma_','Mw_',[],[],[],0.01,'both');
 aliceWindows
+permuteMovie('MaSW_','MwSW_',[],[],[],0.01,'both');
 permuteBriks('MaSW_','MwSW_',[],[],1); % 194ms
 permuteBriks('MaSW_','MwSW_',[],[],2);
+
 %% Sep 2014
 
  aliceAlphaTime(1,'v1'); %(subFold)
