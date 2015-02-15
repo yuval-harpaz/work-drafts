@@ -22,18 +22,32 @@ open aliceExplore2015b
 aliceGAaliceNtrials;
 open aliceExplore2015c % mmeting with avi, aliceResults1.docx
 
-% source level
+%% source level
 aliceMovies
 cd /home/yuval/Copy/MEGdata/alice/ga2015/func
 permuteBriks('Ma_','Mw_',[],[],147); % 194ms
 permuteBriks('Ma_','Mw_',[],[],83); % 130ms
 permuteBriks('Ma_','Mw_',[],[],53); % 194ms
 permuteMovie('Ma_','Mw_',[],[],[],0.01,'both');
-aliceWindows
+aliceWindows; % 0.075:0.025:0.225
 permuteMovie('MaSW_','MwSW_',[],[],[],0.01,'both');
 permuteBriks('MaSW_','MwSW_',[],[],1); % 194ms
 permuteBriks('MaSW_','MwSW_',[],[],2);
 
+permuteBriks('Ma_',1,[],[],147); % 194ms
+
+permuteMovie('MaSW_',1,[],[],[],[],'both');
+permuteMovie('MwSW_',1,[],[],[],[],'both');
+permuteMovie('MaSW_','MwSW_',[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','AW');
+
+permuteMovie('Ma_',1,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','A');
+permuteMovie('Mw_',1,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','W');
+permuteMovie('Ma_','Mw_',[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','AW');
+aliceWindows(0.025,'/home/yuval/Copy/MEGdata/alice/ga2015/func1');
+cd /home/yuval/Copy/MEGdata/alice/ga2015/func1
+permuteMovie('MaSW_',1,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','Asw');
+permuteMovie('MwSW_',1,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','Wsw');
+permuteMovie('MaSW_','MwSW_',[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','AWsw');
 %% Sep 2014
 
  aliceAlphaTime(1,'v1'); %(subFold)
