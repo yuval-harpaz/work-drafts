@@ -156,83 +156,15 @@ figure;
 ft_plot_mesh(bnd, 'vertexcolor', src);
 
 
-%% one by one
-load averages
-load 1/headmodel;
-load ctx
-ctx=[lh;rh];
-cfg = [];
-%cfg.grad = ft_convert_units(stdAvg.grad,'mm');
-cfg.channel ='MEG';
-cfg.grid.pos = ctx;
-cfg.grid.inside = [1:size(ctx,1)]';
-cfg.vol = vol;
-cfg.grad=ft_convert_units(iAvg.grad,'mm');
-leadfield = ft_prepare_leadfield(cfg);
-
-cfg                  = [];
-cfg.covariance       = 'yes';
-cfg.removemean       = 'no';
-cfg.covariancewindow = [-0.1 0];
-cfg.channel='MEG';
-cov=ft_timelockanalysis(cfg, iAvg);
-
-cfg=[];
-cfg.method = 'mne';
-cfg.grid = leadfield;
-cfg.vol = vol;
-cfg.mne.lambda = 1e9;
-cov.grad=ft_convert_units(iAvg.grad,'mm');
-source = ft_sourceanalysis(cfg,cov);
-figure;
-scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,source.avg.pow(:,155),'fill')
-axis tight
-view(200, 30)
-
-load 2/headmodel;
-cfg = [];
-%cfg.grad = ft_convert_units(stdAvg.grad,'mm');
-cfg.channel ='MEG';
-cfg.grid.pos = ctx;
-cfg.grid.inside = [1:size(ctx,1)]';
-cfg.vol = vol;
-cfg.grad=ft_convert_units(i2Avg.grad,'mm');
-leadfield = ft_prepare_leadfield(cfg);
-cfg                  = [];
-cfg.covariance       = 'yes';
-cfg.removemean       = 'no';
-cfg.covariancewindow = [-0.1 0];
-cfg.channel='MEG';
-cov=ft_timelockanalysis(cfg, i2Avg);
-
-
-cfg=[];
-cfg.method = 'mne';
-cfg.grid = leadfield;
-cfg.vol = vol;
-cfg.mne.lambda = 1e9;
-cov.grad=ft_convert_units(i2Avg.grad,'mm');
-source = ft_sourceanalysis(cfg,cov);
-figure;
-scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,source.avg.pow(:,155),'fill')
-axis tight
-view(200, 30)
 
 %% beamforming 
-cd /home/yuval/Data/marik/mark
-load ctx
-load leadfield.mat
-load vol
-load grad496
-load avgBoth
-ctx=[lh;rh];
+
 
 cfg                  = [];
 cfg.covariance       = 'yes';
 cfg.removemean       = 'no';
 cfg.covariancewindow = [-0.1 0.3];
-cfg.channel='MEG';
-cov=ft_timelockanalysis(cfg, avgBoth);
+cov=ft_timelockanalysis(cfg, avg_hand2);
 
 cfg=[];
 cfg.method = 'sam';
@@ -240,24 +172,26 @@ cfg.grid = leadfield;
 cfg.vol = vol;
 cfg.sam.lambda = 0.05;
 cfg.fixedori='gareth';
-cov.grad=grad;
+cov.grad = ft_convert_units(grad,'mm');
 s = ft_sourceanalysis(cfg, cov);
 sN=length(s.avg.mom);
 s.avg.pow=zeros(1,sN);
 s.avg.norm=zeros(1,sN);
 for si=1:sN
     if ~isempty(s.avg.mom{1,si})
-        s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
+        s.avg.pow(1,si)=mean(abs(s.avg.mom{1,si}(1,s1:s2)));
         %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
     end
 end
 
+% figure;
+% noori=s.avg.pow./s.avg.noise;
+% scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,noori,'fill')
+% axis tight
+% view(200, 30)
 figure;
-noori=s.avg.pow./s.avg.noise;
-scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,noori,'fill')
-axis tight
-view(200, 30)
-
+pow=s.avg.pow;
+ft_plot_mesh(bnd, 'vertexcolor', pow');
 %% fixed ori
 load ctxdip
 clear grid
