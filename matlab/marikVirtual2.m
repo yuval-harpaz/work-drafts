@@ -31,157 +31,130 @@ save headmodel vol grid M1
 !rm modte*
 cd ..
 %% unify headmodels
+
+
+cd /home/yuval/Data/marik/som1/1
+[~,~,mesh,~,volSph]=headmodel_BIU([],[],5,[],'localspheres');
+[~,~,mesh]=headmodel_BIU([],[],5,[],'localspheres');
+cd ../
+load avg
+%grad=rmfield(avg1.cfg.grad,'balance');
+grad=avg1_hand2.grad;
+grad.label=avg1_hand2.label;
+grad.chanori=grad.chanori(1:248,:);
+grad.chanpos=grad.chanpos(1:248,:);
+grad.chantype=grad.chantype(1:248,:);
+grad.chanunit=grad.chanunit(1:248,:);
+grad.coilori=grad.coilori(1:248,:);
+grad.coilpos=grad.coilpos(1:248,:);
+grad.tra=grad.tra(1:248,1:248);
+
+chanN=248;
+grad.chanori(chanN+1:2*chanN,:)=avg2_hand2.grad.chanori(1:248,:);
+grad.chanpos(chanN+1:2*chanN,:)=avg2_hand2.grad.chanpos(1:248,:);
+grad.chantype(chanN+1:2*chanN,:)=avg2_hand2.grad.chantype(1:248,:);
+grad.chanunit(chanN+1:2*chanN,:)=avg2_hand2.grad.chanunit(1:248,:);
+grad.coilori(chanN+1:2*chanN,:)=avg2_hand2.grad.coilori(1:248,:);
+grad.coilpos(chanN+1:2*chanN,:)=avg2_hand2.grad.coilpos(1:248,:);
+
+grad.chanori(2*chanN+1:3*chanN,:)=avg3_hand2.grad.chanori(1:248,:);
+grad.chanpos(2*chanN+1:3*chanN,:)=avg3_hand2.grad.chanpos(1:248,:);
+grad.chantype(2*chanN+1:3*chanN,:)=avg3_hand2.grad.chantype(1:248,:);
+grad.chanunit(2*chanN+1:3*chanN,:)=avg3_hand2.grad.chanunit(1:248,:);
+grad.coilori(2*chanN+1:3*chanN,:)=avg3_hand2.grad.coilori(1:248,:);
+grad.coilpos(2*chanN+1:3*chanN,:)=avg3_hand2.grad.coilpos(1:248,:);
+grad.tra=eye(chanN*3);
+for chi=1:248
+    label{chi,1}=[avg1_hand2.label{chi,1},'A'];
+    label{248+chi,1}=[avg1_hand2.label{chi,1},'B'];
+    label{2*248+chi,1}=[avg1_hand2.label{chi,1},'C'];
+end
+grad.label=label;
+loc={'_foot1','_foot2','_hand2'};
+for loci=1:3
+    avg=rmfield(eval(['avg1',loc{loci}]),'dof');
+    avg=rmfield(avg,'cfg');
+    eval(['avg.avg=[avg1',loc{loci},'.avg;avg2',loc{loci},'.avg;avg3',loc{loci},'.avg];'])
+    eval(['avg.var=[avg1',loc{loci},'.var;avg2',loc{loci},'.var;avg3',loc{loci},'.var];'])
+    avg.grad=ft_convert_units(grad,'mm');
+    avg.label=label;
+    eval(['avg',loc{loci},'=avg;']);
+end
 load 1/headmodel
 vol1=vol;
 load 2/headmodel
 vol2=vol;
 load 3/headmodel
 vol3=vol;
-
-chanN=length(vol1.label);
 vol=rmfield(vol1,'cfg');
-vol.r=[vol1.r;vol2.r;vol3.r];
-vol.o=[vol1.o;vol2.o;vol3.o];
-grad=rmfield(vol1.cfg.grad,'balance');
-grad.label=vol.label;
-grad.chanori(chanN+1:2*chanN,:)=vol2.cfg.grad.chanori;
-grad.chanpos(chanN+1:2*chanN,:)=vol2.cfg.grad.chanpos;
-grad.chantype(chanN+1:2*chanN,:)=vol2.cfg.grad.chantype;
-grad.chanunit(chanN+1:2*chanN,:)=vol2.cfg.grad.chanunit;
-grad.coilori(chanN+1:2*chanN,:)=vol2.cfg.grad.coilori;
-grad.coilpos(chanN+1:2*chanN,:)=vol2.cfg.grad.coilpos;
+vol.r=[vol1.r(1:248,:);vol2.r(1:248,:);vol3.r(1:248,:)];
+vol.o=[vol1.o(1:248,:);vol2.o(1:248,:);vol3.o(1:248,:)];
+vol.label=label;
+% dipole fit
 
-grad.chanori(2*chanN+1:3*chanN,:)=vol3.cfg.grad.chanori;
-grad.chanpos(2*chanN+1:3*chanN,:)=vol3.cfg.grad.chanpos;
-grad.chantype(2*chanN+1:3*chanN,:)=vol3.cfg.grad.chantype;
-grad.chanunit(2*chanN+1:3*chanN,:)=vol3.cfg.grad.chanunit;
-grad.coilori(2*chanN+1:3*chanN,:)=vol3.cfg.grad.coilori;
-grad.coilpos(2*chanN+1:3*chanN,:)=vol3.cfg.grad.coilpos;
-for chi=1:chanN
-    vol.label{chi,1}=[vol1.label{chi,1},'A'];
-    vol.label{chanN+chi,1}=[vol1.label{chi,1},'B'];
-    vol.label{2*chanN+chi,1}=[vol1.label{chi,1},'C'];
-end
-
-FIXME
-
-load averages
-avgBoth=rmfield(iAvg,'dof');
-avgBoth=rmfield(avgBoth,'cfg');
-avgBoth.avg=[iAvg.avg;i2Avg.avg];
-avgBoth.var=[iAvg.var;i2Avg.var];
-avgBoth.grad=ft_convert_units(grad,'mm');
-for chi=1:248
-    avgBoth.label{248+chi,1}=[iAvg.label{chi,1},'B'];
-end
-avgBoth.grad.tra=iAvg.grad.tra;
-avgBoth.grad.tra(271+1:271*2,276+1:276*2)=iAvg.grad.tra;
-save avgBoth avgBoth
-save vol vol
-%% dipole fit
-
-cd 1;
-load headmodel
-load ../averages
-liAvg.grad=ft_convert_units(liAvg.grad,'mm');
+t=[0.027 0.037];
+%liAvg.grad=ft_convert_units(liAvg.grad,'mm');
 cfg = [];
-cfg.latency = [t t];  % specify latency window around M50 peak
+cfg.latency = t; 
 cfg.numdipoles = 1;
-cfg.vol=vol;
+cfg.vol=volSph;
 cfg.feedback = 'textbar';
 cfg.gridsearch='yes';
-dip = ft_dipolefitting(cfg, liAvg);
-
-hs=ft_read_headshape('hs_file');
+cfg.channel='MEG';
+dip = ft_dipolefitting(cfg, avg_hand2);
+hs=ft_read_headshape('1/hs_file');
 figure;plot3pnt(hs.pnt,'ro');
 hold on;
 ft_plot_dipole(dip.dip.pos/1000,dip.dip.mom/1000,'units','m')
 
-cd /home/yuval/Data/camera/2;
-load headmodel
-li2Avg.grad=ft_convert_units(li2Avg.grad,'mm');
-cfg = [];
-cfg.latency = [t t];  % specify latency window around M50 peak
-cfg.numdipoles = 1;
-cfg.vol=vol;
-cfg.feedback = 'textbar';
-cfg.gridsearch='yes';
-dip = ft_dipolefitting(cfg, li2Avg);
 
-ft_plot_dipole(dip.dip.pos/1000,dip.dip.mom/1000,'units','m','color','green');
 
-%% remove refs from grad
-grad=iAvg.grad;
-megi=ismember(grad.chantype,'meg');
-
-grad.chanori=[grad.chanori(megi,:);grad.chanori(megi,:)];
-grad.chanpos=[grad.chanpos(megi,:);grad.chanpos(megi,:)];
-grad.chantype=grad.chantype(megi,:);
-grad.chantype(249:496)=grad.chantype;
-grad.chanunit=grad.chanunit(megi,:);
-grad.chanunit(249:496)=grad.chanunit;
-grad.coilori=[grad.coilori(megi,:);grad.coilori(megi,:)];
-grad.coilpos=[grad.coilpos(megi,:);grad.coilpos(megi,:)];
-
-grad.label=avgBoth.label;
-grad.tra=eye(248*2);
-grad=ft_convert_units(grad,'mm')
-save grad496 grad
-%% hybrid model dipole fit
-cd /home/yuval/Data/camera
-load vol
-load avgBoth
-load grad496
-t=0.252;
-avgBoth.grad=grad;
-cfg = [];
-cfg.latency = [t t];  % specify latency window around M50 peak
-cfg.numdipoles = 1;
-cfg.vol=vol;
-cfg.feedback = 'textbar';
-cfg.gridsearch='yes';
-cfg.channel     = avgBoth.label;
-dip = ft_dipolefitting(cfg, avgBoth);
-ft_plot_dipole(dip.dip.pos/1000,dip.dip.mom/1000,'units','m','color','blue');
 %% mne
-load ctx
-ctx=[lh;rh];
+
 cfg = [];
-%cfg.grad = ft_convert_units(stdAvg.grad,'mm');
+cfg.grad = ft_convert_units(grad,'mm');
 cfg.channel ='MEG';
-cfg.grid.pos = ctx;
-cfg.grid.inside = [1:size(ctx,1)]';
+cfg.grid.pos=mesh.tess_ctx.vert;
+cfg.grid.inside=1:length(cfg.grid.pos);
 cfg.vol = vol;
-cfg.grad=grad;
 leadfield = ft_prepare_leadfield(cfg);
 
 cfg                  = [];
 cfg.covariance       = 'yes';
 cfg.removemean       = 'no';
 cfg.covariancewindow = [-0.1 0];
-cfg.channel='MEG';
-cov=ft_timelockanalysis(cfg, avgBoth);
+cov=ft_timelockanalysis(cfg, avg_hand2);
+
+% cfg        = [];
+% cfg.method = 'mne';
+% cfg.grid   = leadfield;
+% cfg.vol    = vol;
+% cfg.mne.prewhiten = 'yes';
+% cfg.mne.lambda    = 3;
+% cfg.mne.scalesourcecov = 'yes';
+% sourceFC  = ft_sourceanalysis(cfg,tlckFC);
 
 cfg=[];
 cfg.method = 'mne';
 cfg.grid = leadfield;
 cfg.vol = vol;
 cfg.mne.lambda = 1e9;
-cov.grad=grad;
+cov.grad=ft_convert_units(grad,'mm');
 source = ft_sourceanalysis(cfg,cov);
-figure;
-scatter3(ctx(:,1),ctx(:,2),ctx(:,3),20,source.avg.pow(:,155),'fill')
-axis tight
-view(200, 30)
-%view(3)
-% lh only
-% scatter3(ctx(1:6237,1),ctx(1:6237,2),ctx(1:6237,3),30,source.avg.pow(1:6237,155),'fill')
+s1=nearest(cov.time,t(1));
+s2=nearest(cov.time,t(2));
+src=mean(source.avg.pow(:,s1:s2),2);
+% figure;
+% scatter3(cfg.grid.pos(:,1),cfg.grid.pos(:,2),cfg.grid.pos(:,3),20,src,'fill')
 % axis tight
 % view(200, 30)
-% 
-% scatter3(ctx(6238:end,1),ctx(6238:end,2),ctx(6238:end,3),30,source.avg.pow(6238:end,155),'fill')
-% axis tight
-% view(180, 30)
+
+
+bnd.pnt=mesh.tess_ctx.vert;
+bnd.tri=mesh.tess_ctx.face;
+figure;
+ft_plot_mesh(bnd, 'vertexcolor', src);
+
 
 %% one by one
 load averages
