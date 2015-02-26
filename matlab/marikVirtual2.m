@@ -155,6 +155,8 @@ bnd.tri=mesh.tess_ctx.face;
 figure;
 ft_plot_mesh(bnd, 'vertexcolor', src);
 
+source.tri=bnd.tri;
+ft_sourcemovie([],source);
 
 
 %% beamforming 
@@ -192,61 +194,61 @@ end
 figure;
 pow=s.avg.pow;
 ft_plot_mesh(bnd, 'vertexcolor', pow');
-%% fixed ori
-load ctxdip
-clear grid
-grid.pos=[lhpnt;rhpnt];
-grid.mom=[lhori;rhori];
-grid.inside=1:length(grid.mom);
-cfg=[];
-cfg.method = 'sam';
-cfg.grid = grid;
-cfg.vol = vol;
-cfg.sam.lambda = 0.05;
-cfg.fixedori='set';
-s = ft_sourceanalysis(cfg, cov);
-sN=length(s.avg.mom);
-s.avg.pow=zeros(1,sN);
-s.avg.norm=zeros(1,sN);
-for si=1:sN
-    if ~isempty(s.avg.mom{1,si})
-        s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
-        %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
-    end
-end
-fixedori=s.avg.pow./s.avg.noise;
-figure;
-scatter3(grid.pos(:,1),grid.pos(:,2),grid.pos(:,3),20,fixedori,'fill')
-axis tight
-view(200, 30)
-
-
-
-clear grid
-grid.pos=[lhpnt;rhpnt];
-%grid.mom=[lhori;rhori];
-grid.inside=1:length(grid.pos);
-cfg=[];
-cfg.method = 'sam';
-cfg.grid = grid;
-cfg.vol = vol;
-cfg.sam.lambda = 0.05;
-cfg.fixedori='gareth';
-s = ft_sourceanalysis(cfg, cov);
-sN=length(s.avg.mom);
-s.avg.pow=zeros(1,sN);
-s.avg.norm=zeros(1,sN);
-for si=1:sN
-    if ~isempty(s.avg.mom{1,si})
-        s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
-        %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
-    end
-end
-fixedori=s.avg.pow./s.avg.noise;
-figure;
-scatter3(grid.pos(:,1),grid.pos(:,2),grid.pos(:,3),20,fixedori,'fill')
-axis tight
-view(200, 30)
-
-
-
+% %% fixed ori
+% load ctxdip
+% clear grid
+% grid.pos=[lhpnt;rhpnt];
+% grid.mom=[lhori;rhori];
+% grid.inside=1:length(grid.mom);
+% cfg=[];
+% cfg.method = 'sam';
+% cfg.grid = grid;
+% cfg.vol = vol;
+% cfg.sam.lambda = 0.05;
+% cfg.fixedori='set';
+% s = ft_sourceanalysis(cfg, cov);
+% sN=length(s.avg.mom);
+% s.avg.pow=zeros(1,sN);
+% s.avg.norm=zeros(1,sN);
+% for si=1:sN
+%     if ~isempty(s.avg.mom{1,si})
+%         s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
+%         %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
+%     end
+% end
+% fixedori=s.avg.pow./s.avg.noise;
+% figure;
+% scatter3(grid.pos(:,1),grid.pos(:,2),grid.pos(:,3),20,fixedori,'fill')
+% axis tight
+% view(200, 30)
+% 
+% 
+% 
+% clear grid
+% grid.pos=[lhpnt;rhpnt];
+% %grid.mom=[lhori;rhori];
+% grid.inside=1:length(grid.pos);
+% cfg=[];
+% cfg.method = 'sam';
+% cfg.grid = grid;
+% cfg.vol = vol;
+% cfg.sam.lambda = 0.05;
+% cfg.fixedori='gareth';
+% s = ft_sourceanalysis(cfg, cov);
+% sN=length(s.avg.mom);
+% s.avg.pow=zeros(1,sN);
+% s.avg.norm=zeros(1,sN);
+% for si=1:sN
+%     if ~isempty(s.avg.mom{1,si})
+%         s.avg.pow(1,si)=abs(s.avg.mom{1,si}(1,155));
+%         %s.avg.norm(1,si)=s.avg.pow(1,si)./mean(abs(s.avg.filter{1,si}));
+%     end
+% end
+% fixedori=s.avg.pow./s.avg.noise;
+% figure;
+% scatter3(grid.pos(:,1),grid.pos(:,2),grid.pos(:,3),20,fixedori,'fill')
+% axis tight
+% view(200, 30)
+% 
+% 
+% 
