@@ -24,6 +24,11 @@ open aliceExplore2015c % mmeting with avi, aliceResults1.docx
 
 aliceSuma;
 alicePoster
+
+alicePCA10; % Thamil
+aliceReduce10;
+open aliceExplore2015t
+
 %% source level
 aliceMovies
 cd /home/yuval/Copy/MEGdata/alice/ga2015/func

@@ -1,4 +1,4 @@
-function [avgMr,avgEr]=aliceChooseNtrials(N,~,sampM);
+function [avgMr,avgEr]=aliceChooseNtrials10(N,~,sampM);
 % N is how many trials were used for the WbW for each subject
 cd /home/yuval/Data/alice
 tempStart=-0.4;
@@ -12,7 +12,7 @@ clear comps;
 % blE=round(bl*1024);blM=round(bl*1017.23);
 str='';
 strE='';
-for subi=1:8
+for subi=1:7
     %if ~exist(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',num2str(subi),'.mat'],'file')
     subFold=sf{subi};
     cd(subFold)

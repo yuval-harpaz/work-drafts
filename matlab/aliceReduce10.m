@@ -1,9 +1,37 @@
-function [avgMr,avgEr]=aliceChooseNtrials(N,~,sampM);
-% N is how many trials were used for the WbW for each subject
+function aliceReduce10(tempStart,tempEnd,supress)
 cd /home/yuval/Data/alice
-tempStart=-0.4;
-tempEnd=0.4;
-supress=0.1;
+if ~existAndFull('tempStart')
+    tempStart=0.055;
+end
+if ~existAndFull('tempEnd')
+    tempEnd=0.35;
+end
+if ~existAndFull('supress')
+    supress=0.05;
+end
+
+
+tic
+[avgMr10,avgEr10,N,sampM]=doReduce(tempStart,tempEnd,supress);
+toc
+%load /home/yuval/Copy/MEGdata/alice/ga2015/ga
+% figure;
+% cfg=[];
+% cfg.interactive='yes';
+% %cfg.xlim=[0.3 0.3];
+% cfg.zlim=[-3e-14 3e-14];
+% cfg.layout='4D248.lay';
+% % ft_topoplotER(cfg,avgMr,avgMpca);
+% % cfg.layout='WG32.lay';
+% % ft_topoplotER(cfg,avgEr,avgEpca);
+% dif=avgMr;
+% dif.individual=avgMpca.individual-avgMr.individual;
+% % ft_topoplotER(cfg,avgMr,avgMpca,dif)
+% cfg.channel= {'A99', 'A100', 'A131', 'A132', 'A133', 'A134', 'A135', 'A159', 'A160', 'A161', 'A162', 'A181', 'A182', 'A183', 'A184', 'A199', 'A200', 'A201', 'A216'};
+% ft_singleplotER(cfg,avgMr,avgMpca,dif)
+[avgMr,avgEr]=aliceChooseNtrials10(N,[],sampM);
+save /home/yuval/Copy/MEGdata/alice/ga2015/gaR10 avgEr avgMr avgEr10 avgMr10 tempStart tempEnd supress N
+function [avgMreduced,avgEreduced, N,sampM]=doReduce(tempStart,tempEnd,supress) %#ok<STOUT>
 sf=[];
 load comps
 clear comps;
@@ -12,18 +40,14 @@ clear comps;
 % blE=round(bl*1024);blM=round(bl*1017.23);
 str='';
 strE='';
-for subi=1:8
+for subi=1:7
     %if ~exist(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',num2str(subi),'.mat'],'file')
     subFold=sf{subi};
     cd(subFold)
     
-    load MEGpca
-    load EEGpca
-    cfg=[];
-    cfg.bpfilter='yes';
-    cfg.bpfreq=[1 40];
-    MEGpca=ft_preprocessing(cfg,MEGpca);
-    EEGpca=ft_preprocessing(cfg,EEGpca);
+    load MEGpca10
+    load EEGpca10
+    
     %% find preceding and following trials
     [~,badE]=badTrials([],EEGpca,0);
     [~,badM]=badTrials([],MEGpca,0);
@@ -131,9 +155,10 @@ for subi=1:8
             EEGr.trial{triali}(:,T4+1:end)=EEGr.trial{triali}(:,T4+1:end)-temp(:,1:T5);
         end
     end
-    %cfg=[];
-    %cfg.trials=trlInd;
-    
+    cfg=[];
+    cfg.trials=trlInd;
+    avgEEGr=ft_timelockanalysis(cfg,EEGr);
+    avgEEGr=correctBL(avgEEGr,[-0.6 -0.05]); %#ok<NASGU>
     %             figure;
     %             cfg=[];
     %             cfg.layout='WG32.lay';
@@ -141,7 +166,7 @@ for subi=1:8
     %             cfg.xlim=[0.1 0.1];
     %             cfg.zlim=[-2 2];
     %             ft_topoplotER(cfg,avgEEGr,avgEEGc);
-    % eval(['E',num2str(subi),'r=avgEEGr']);
+    eval(['E',num2str(subi),'r=avgEEGr']);
     
     
     % MEG
@@ -175,27 +200,10 @@ for subi=1:8
             MEGr.trial{triali}(:,T4+1:end)=MEGr.trial{triali}(:,T4+1:end)-temp(:,1:T5);
         end
     end
-    
-    
-    n=2*round(N(subi)/2);
-    sampBefore=find(MEGr.sampleinfo(trlInd,2)<sampM(subi,1));
-    if n/2>length(sampBefore)
-        trlBef=trlInd(sampBefore);
-        warning(['sub ',num2str(subi),' ',num2str(length(trlBef)),' of ',num2str(n/2)])
-    else
-        trlBef=trlInd(sampBefore(end-n/2+1:sampBefore(end)));
-    end
-    sampAfter=find(MEGr.sampleinfo(trlInd,1)>sampM(subi,2));
-    trlAft=trlInd(sampAfter(1:(n-length(trlBef))));
     cfg=[];
-    cfg.trials=[trlBef,trlAft];%trlInd;
-    if length(cfg.trials)~=n
-        error('bad N')
-    end
+    cfg.trials=trlInd;
     avgMEGr=ft_timelockanalysis(cfg,MEGr);
     avgMEGr=correctBL(avgMEGr,[-0.6 -0.05]); %#ok<NASGU>
-    avgEEGr=ft_timelockanalysis(cfg,EEGr);
-    avgEEGr=correctBL(avgEEGr,[-0.6 -0.05]); %#ok<NASGU>
     %     figure;
     %     cfg=[];
     %     cfg.layout='4D248.lay';
@@ -208,6 +216,9 @@ for subi=1:8
     % ns=num2str(subi);
     %save(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',ns],['Mo',ns],['Mc',ns],['Eo',ns],['Ec',ns],['Mr',ns],['Er',ns]);
     cd ../
+    N(subi)=length(trlInd);
+    sampM(subi,1)=MEGpca.sampleinfo(1);
+    sampM(subi,2)=MEGpca.sampleinfo(end);
 end
 
 cfg=[];
@@ -215,10 +226,10 @@ cfg.channel=1:248;
 cfg.keepindividual='yes';
 % eval(['avgMpca=ft_timelockgrandaverage(cfg',strc,');'])
 % eval(['avgMorig=ft_timelockgrandaverage(cfg',stro,');'])
-eval(['avgMr=ft_timelockgrandaverage(cfg',str,');'])
+eval(['avgMreduced=ft_timelockgrandaverage(cfg',str,');'])
 %
 cfg.channel=[1:12,14:18,20:32];
 % eval(['avgEpca=ft_timelockgrandaverage(cfg',strEc,');'])
 % eval(['avgEorig=ft_timelockgrandaverage(cfg',strEo,');'])
-eval(['avgEr=ft_timelockgrandaverage(cfg',strE,');'])
+eval(['avgEreduced=ft_timelockgrandaverage(cfg',strE,');'])
 
