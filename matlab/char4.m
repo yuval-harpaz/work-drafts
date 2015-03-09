@@ -27,7 +27,7 @@ for subi=1:length(Sub)
         !rm xc,lf_c,rfhp0.1Hz
         !rm lf_c,rfhp0.1Hz
     end
-    %if ~exist('data.mat','file')
+    if ~exist('data.mat','file')
         disp(['read trig for ',Sub{subi}])
         trig=readTrig_BIU(source);
         trig=bitset(uint16(trig),12,0);
@@ -79,7 +79,7 @@ for subi=1:length(Sub)
         %     clear Fr
         save data data good TRL -v7.3
         clear data good TRL
-    %end
+    end
     cd ../
 end
 
