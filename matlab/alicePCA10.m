@@ -10,7 +10,7 @@ for subi=1:7
     %if ~exist(['/home/yuval/Copy/MEGdata/alice/ga2015/alice',num2str(subi),'.mat'],'file')
     subFold=sf{subi};
     cd(subFold)
-    if ~exist('EEGpca10.mat','file')
+    %if ~exist('EEGpca10.mat','file')
         megFNc=ls('*lf*');
         megFNc=megFNc(1:end-1);
         load files/evt
@@ -96,8 +96,6 @@ for subi=1:7
             MEG.sampleinfo(end+1:end+length(meg.trial),:)=meg.sampleinfo;
             MEG.trialinfo(end+1:end+length(meg.trial),:)=eeg.trialinfo;
         end
-        
-        
         MEG.label(249:250)=EEG.label(33:34);
         % correct H and V components
         cfg = [];
@@ -128,6 +126,6 @@ for subi=1:7
         disp(['saving ',subFold]);
         save MEGpca10 MEGpca
         save EEGpca10 EEGpca
-    end
+%    end
     cd ../
 end

@@ -23,15 +23,51 @@ E10=mean(avgEr10.individual(:,:,s1:s2),3);
 Er=mean(avgEr.individual(:,:,s1:s2),3);
 
 
-
+[~,p]=ttest(mean(E10(:,28:30),2),mean(Er(:,28:30),2))
 
 [~,~,sigT]=permuteMat(Mr,M10); % empty, no difference
 
 figure;topoplot248(mean(Mr))
-
+caxis(1.0e-12 *[ -0.10    0.1]);
 figure;topoplot248(mean(M10))
+caxis(1.0e-12 *[ -0.10    0.1]);
 
 figure;
 plot(avgMr.time,squeeze(mean(mean(abs(avgMr.individual),2),1)),'k')
 hold on
-plot(avgMr.time,squeeze(mean(mean(abs(avgMr10.individual),2),1)),'r') % FIX FILTER!!!
+plot(avgMr.time,squeeze(mean(mean(abs(avgMr10.individual),2),1)),'r')
+
+
+[~,~,sigT]=permuteMat(Er,E10); % empty, no difference
+
+figure;topoplot30(mean(Er))
+caxis([-4 4]);
+figure;topoplot30(mean(E10))
+caxis([-4 4]);
+
+figure;
+plot(avgEr.time,squeeze(mean(mean(abs(avgEr.individual),2),1)),'k')
+hold on
+plot(avgEr.time,squeeze(mean(mean(abs(avgEr10.individual),2),1)),'r')
+
+
+
+t=[0.16 0.18];
+s1=nearest(avgEr.time,t(1));
+s2=nearest(avgEr.time,t(2));
+E10=mean(avgEr10.individual(:,:,s1:s2),3);
+Er=mean(avgEr.individual(:,:,s1:s2),3);
+s1=nearest(avgEr.time,t(1));
+s2=nearest(avgEr.time,t(2));
+E10=mean(avgEr10.individual(:,:,s1:s2),3);
+Er=mean(avgEr.individual(:,:,s1:s2),3);
+[~,~,sigT]=permuteMat(Er,E10); % empty, no difference
+
+figure;topoplot30(mean(Er))
+caxis([-4 4]);
+figure;topoplot30(mean(E10))
+caxis([-4 4]);
+
+[~,p]=ttest(mean(E10(:,28:30),2),mean(Er(:,28:30),2))
+
+
