@@ -176,7 +176,7 @@ for subi=1:12;
     load avgAll
     data.trial=data.trial(good);
     data.time=data.time(good);
-    data.sampleinfo=data.sampleinfo(good);
+    data.sampleinfo=data.sampleinfo(good,:);
     %close all
     cfg=[];
     cfg.badChan={'A204','A74'};
@@ -188,7 +188,7 @@ for subi=1:12;
     title(num2str(subi));
     cfg=[];
     cfg.trials=good;
-    sampleinfo=data.sampleinfo(good);
+    sampleinfo=data.sampleinfo(good,:);
     avg=ft_timelockanalysis(cfg,data);
     save avgAll1 avg sampleinfo
 end
