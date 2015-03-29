@@ -115,3 +115,16 @@ circ_plot(CorrPh(13,:)','pretty','bo',true,'linewidth',2,'color','r'),
 
 subplot(2,2,4)
 circ_plot(CorrPh(13,:)','hist',[],20,true,true,'linewidth',2,'color','r')
+
+
+for chani=1:248
+    p(chani) = circ_cmtest(CorrPh(chani,:),MissPh(chani,:));
+end
+cfg.highlightchannel=find(p<0.05);
+cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
+figure;topoplot248(mean(MissPSD,2),cfg)
+title('Miss');
+figure;topoplot248(mean(CorrPSD,2),cfg)
+title('Correct');
+
+
