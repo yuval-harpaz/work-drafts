@@ -1,4 +1,18 @@
-function vsWindows(Subs,GA,wts,width,t,prefix)
+function vsWindows(Subs,GA,wts,width,t,prefix,method)
+% takes fieldtrip grandaverage data (GA) with individual subjects and
+% creates movies of source activity by multilying SAM weights by them. if
+% you have more than one '.wts' file you should specify which one you want.
+% Subs is a cell erray with folders for subject names.
+% width is how wide each time window should be in sec. default is 0.05. 
+% t is time range, default is [0.05 0.5];
+% you can specify a prefix for the movie.
+% method: how to normalize to prevent bias to deep sources.
+%   'meanAbs'   noise = mean(abs(wts))   +  rescale the data by 1e13 to get SNR values
+%   'rms'       noise = sqrt(mean(wts.*wts))    +  rescale the data by 1e13
+%       for both the above methods vs = vs / noise * scale factor
+%   'blMean'  vs=vs / mean(abs(baseline))
+%   'blMax'   vs=vs / max(abs(baseline))
+ 
 % parameters
 if ~existAndFull('Subs')
     Subs=cellstr(num2str([1:12]')); % folders of subjects
@@ -37,7 +51,12 @@ if ischar(GA)
     eval(['GA=ga.',gaName{1}])
 end
 str='';
-scale=1e-13;
+if strcmp(method(1:2),'bl')
+    scale=1;
+    s0=nearest(GA.time,0);
+else
+    scale=1e-13;
+end
 for subi=1:length(Subs)
     cd(folder)
     cd (strrep(Subs{subi},' ',''))
@@ -46,7 +65,16 @@ for subi=1:length(Subs)
     [~, ~, ActWgts]=readWeights(wts);
     cd ..
     %load SAM/noiseNormCov
-    ns=mean(abs(ActWgts),2);
+    switch method
+        case 'meanAbs'
+            ns=mean(abs(ActWgts),2);
+        case 'rms'
+            ns=sqrt(mean(ActWgts.^2,2));
+        case 'blMean'
+            ns=mean(abs(ActWgts*squeeze(GA.individual(subi,:,1:s0))),2);
+        case 'blMax'
+            ns=max(abs(ActWgts*squeeze(GA.individual(subi,:,1:s0))),[],2);
+    end
 %     cd folder
 %     GA=eval(conds{condi});
     for wini=1:length(toi)
@@ -78,9 +106,9 @@ for subi=1:length(Subs)
     end
     masktlrc([prefix,'+tlrc'],'MASKctx+tlrc');
     %!mv ',prefix,'+tlrc.HEAD /home/yuval/Copy/MEGdata/alice/func/',prefix,'_',num2str(subi),'+tlrc.HEAD" >> ~/alice2tlrc']);
-    [~,w]=unix(['mv ',prefix,'+tlrc.BRIK ',folder,'/briks/',prefix,'_',num2str(subi),'+tlrc.BRIK']);
-    [~,w]=unix(['mv ',prefix,'+tlrc.HEAD ',folder,'/briks/',prefix,'_',num2str(subi),'+tlrc.HEAD']);
-    str=[str,prefix,'_',num2str(subi),'+tlrc '];
+    [~,w]=unix(['mv ',prefix,'+tlrc.BRIK ',folder,'/briks/',prefix,num2str(subi),'+tlrc.BRIK']);
+    [~,w]=unix(['mv ',prefix,'+tlrc.HEAD ',folder,'/briks/',prefix,num2str(subi),'+tlrc.HEAD']);
+    str=[str,prefix,num2str(subi),'+tlrc '];
 end
 cd ..
 cd briks

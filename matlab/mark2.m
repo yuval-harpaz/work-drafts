@@ -81,29 +81,35 @@ cfg.highlightchannel=find(p<0.05);
 cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
 figure;topoplot248((mean(MissPSD,2)+mean(CorrPSD,2))./2,cfg)
 %% plot angle of selected channels
+conds={'Miss','Correct'};
 switch method
     case 'allSig' % all sig channels
         Pi=find(p<0.05);
-        for chi=Pi
-            plotChan(MissPh(chi,:)',CorrPh(chi,:)',datafinal.label{chi})
+        if isempty(Pi)
+            display('no sig results!')
+        else
+            for chi=Pi
+                plotChan(MissPh(chi,:)',CorrPh(chi,:)',datafinal.label{chi})
+            end
         end
     case 'mostSig' % most sig channel and peak PSD channel
         [P,Pi]=min(p);
         if P>0.05
             display('no sig results!')
         else
-            plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' most sig, p = ',num2str(P)]);
+            plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' most sig, p = ',num2str(P)],conds);
             [~,Pi]=max((mean(MissPSD,2)+mean(CorrPSD,2)));
-            plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' peak PSD, p = ',num2str(p(Pi))]);
+            plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' peak PSD, p = ',num2str(p(Pi))],conds);
         end
 end
-function plotChan(MissPh,CorrPh,chanName)
+disp(' ')
+function plotChan(MissPh,CorrPh,chanName,conds)
 figure('name',chanName); % A145
 subplot(2,1,1)
-circ_plot(MissPh,'pretty','bo',true,'linewidth',2,'color','r');
+circ_plotYH(MissPh,'pretty','bo',conds{1},true,'linewidth',2,'color','r');
 %title(chanName)
 subplot(2,1,2)
-circ_plot(CorrPh,'pretty','bo',true,'linewidth',2,'color','r');
+circ_plotYH(CorrPh,'pretty','bo',conds{2},true,'linewidth',2,'color','r');
 
 % 
 % subplot(2,2,4)
