@@ -80,6 +80,16 @@ cfg.highlight='labels';
 cfg.highlightchannel=find(p<0.05);
 cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
 figure;topoplot248((mean(MissPSD,2)+mean(CorrPSD,2))./2,cfg)
+
+MeanMissPh=circ_mean(missPh,[],2);
+MeanCorrPh=circ_mean(corrPh,[],2);
+cfg=[];
+% cfg.highlight='labels';
+% cfg.highlightchannel=find(p<0.05);
+% cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
+figure;topoplot248(MeanMissPh);title('Miss')
+figure;topoplot248(MeanCorrPh);title('Correct')
+
 %% plot angle of selected channels
 conds={'Miss','Correct'};
 switch method

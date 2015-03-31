@@ -99,7 +99,7 @@ for subi=1:length(Subs)
     cfg.TR=width*1000;
     VS2Brik(cfg,VS);
     %eval(['!echo "cd ',pwd,'" >> ~/alice2tlrc'])
-    if exist('ortho+orig.HEAD','file')
+    if exist('ortho+tlrc.HEAD','file')
         [~,w]=unix(['@auto_tlrc -apar ortho+tlrc -input ',prefix,'+orig -dxyz 5'])
     else
         [~,w]=unix(['@auto_tlrc -apar warped+tlrc -input ',prefix,'+orig -dxyz 5'])
