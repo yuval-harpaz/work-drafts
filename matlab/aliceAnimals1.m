@@ -5,10 +5,12 @@ Subs={'idan'  'inbal'  'liron'  'maor'  'odelia'	'ohad'  'yoni' 'mark'};
 %permuteMovie('MaSW_',1,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','Asw');
 vsWindows(Subs,avgMr,'general,3-35Hz,alla.wts',0.0125,[0.05 0.2],'Nat_','meanAbs');
 permuteMovie('Nat_',1.35,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','nat12');
+permuteMovie('Nat_',1.2,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','nat12_25');
 
 
-permuteMovie('ma12_',1.35,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','ma12');
-(varA,varB,Folder,mask,subBrik,pThr,sizeORt,prefix)
+
+%permuteMovie('ma12_',1.35,[],[],[],[0.1 0.075 0.05 0.025 0.01],'both','ma12');
+%(varA,varB,Folder,mask,subBrik,pThr,sizeORt,prefix)
 % 
 % 
 % cd /home/yuval/Data/Amyg

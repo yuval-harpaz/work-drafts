@@ -1,4 +1,4 @@
-function mark2(foi,method)
+function mark2(foi,toi,method)
 % foi is a vector of desired frequencies
 if ~exist('method','var')
     method='mostSig';
@@ -27,8 +27,9 @@ for subi=1:22
     load datafinal
     corri= find(datafinal.trialinfo(:,4)==2);
     missi= find(datafinal.trialinfo(:,4)==0);
-    s0=nearest(datafinal.time{1},0);
-    [~,F]=fftBasic(datafinal.trial{1}(1,1:s0),678.17);
+    s0=nearest(datafinal.time{1},toi(2));
+    sBL=nearest(datafinal.time{1},toi(1));
+    [~,F]=fftBasic(datafinal.trial{1}(1,sBL:s0),678.17);
     if length(foi)==1
         foii=nearest(F,foi);
         if foii==0
@@ -39,7 +40,7 @@ for subi=1:22
         foii=foii(foii>0);
     end
     for trli=1:length(corri)
-        f=fftBasic(datafinal.trial{corri(trli)}(:,1:s0),678.17);
+        f=fftBasic(datafinal.trial{corri(trli)}(:,sBL:s0),678.17);
         f=f(:,foii);
         [maxPSD,maxi]=max(abs(f(:,:)),[],2);
         corrF(1:248,trli)=F(maxi+foii(1)-1);
@@ -49,7 +50,7 @@ for subi=1:22
         end
     end
     for trli=1:length(missi)
-        f=fftBasic(datafinal.trial{missi(trli)}(:,1:s0),678.17);
+        f=fftBasic(datafinal.trial{missi(trli)}(:,sBL:s0),678.17);
         f=f(:,foii);
         [maxPSD,maxi]=max(abs(f(:,:)),[],2);
         missF(1:248,trli)=F(maxi+foii(1)-1);
@@ -67,6 +68,12 @@ for subi=1:22
     CorrR(1:248,subi) = circ_r(corrPh(:,1:nTrl), [],[], 2);
     CorrF(1:248,subi)=mean(corrF(:,1:nTrl),2);
     CorrPSD(1:248,subi)=mean(corrPSD(:,1:nTrl),2);
+    % averaging
+    cfg=[];
+    cfg.trials=corri(1:nTrl);
+    corr=ft_timelockanalysis(cfg,datafinal);
+    cfg.trials=missi(1:nTrl);
+    miss=ft_timelockanalysis(cfg,datafinal);
     disp(['done ',folder])
     cd ..
 end

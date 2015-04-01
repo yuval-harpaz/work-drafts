@@ -90,17 +90,9 @@ end
 clear avg
 save avgFilt avg*
 close all
-figure;
-plot(avg1_footL.time,avg1_footL.avg,'g')
-hold on
-plot(avg1_footL.time,avg2_footL.avg,'r')
-plot(avg1_footL.time,avg3_footL.avg,'k')
 
-s=nearest(avg1_footL.time,0.075);
-figure;topoplot248(avg1_footL.avg(:,s))
-figure;topoplot248(avg2_footL.avg(:,s))
-figure;topoplot248(avg3_footL.avg(:,s))
 
+%% left hand
 
 figure;
 plot(avg1_footL.time,avg1_handL.avg,'g')
@@ -108,10 +100,15 @@ hold on
 plot(avg1_handL.time,avg2_handL.avg,'r')
 plot(avg1_handL.time,avg3_handL.avg,'k')
 
-s=nearest(avg1_handL.time,0.03);
+s=nearest(avg1_handL.time,0.075);
 figure;topoplot248(avg1_handL.avg(:,s))
 figure;topoplot248(avg2_handL.avg(:,s))
 figure;topoplot248(avg3_handL.avg(:,s))
+
+[dataL, cfgL]=marikViUnite(avg1_handL,avg2_handL,avg3_handL);
+[srcL]=marikViMNE(dataL,cfgL,[0.07 0.08]);
+
+%% right hand
 
 figure;
 plot(avg1_footL.time,avg1_handR.avg,'g')
@@ -127,8 +124,7 @@ figure;topoplot248(avg3_handR.avg(:,s))
 [dataR, cfgR]=marikViUnite(avg1_handR,avg2_handR,avg3_handR);
 [srcR]=marikViMNE(dataR,cfgR,[0.02 0.03]);
 
-[dataL, cfgL]=marikViUnite(avg1_handL,avg2_handL,avg3_handL);
-[srcL]=marikViMNE(dataL,cfgL,[0.02 0.03]);
+%% both hands
 
 dataLR=dataL;
 dataLR.dataU.avg=dataL.dataU.avg+dataR.dataU.avg;
@@ -139,3 +135,39 @@ cfgLR=cfgL;
 [srcLR]=marikViMNE(dataLR,cfgLR,[0.02 0.03]);
 
 
+%% only foot
+figure;
+plot(avg1_footL.time,avg1_footL.avg,'g')
+hold on
+plot(avg1_footL.time,avg2_footL.avg,'g')
+plot(avg1_footL.time,avg3_footL.avg,'g')
+
+s=nearest(avg1_footL.time,0.075);
+figure;topoplot248(avg1_footL.avg(:,s))
+figure;topoplot248(avg2_footL.avg(:,s))
+figure;topoplot248(avg3_footL.avg(:,s))
+[dataF, cfgF]=marikViUnite(avg1_footL,avg2_footL,avg3_footL);
+[srcF]=marikViMNE(dataF,cfgF,[0.07 0.08]);
+
+%% left hand and foot
+dataHF=dataL;
+dataHF.dataU.avg=dataL.dataU.avg+dataF.dataU.avg;
+dataHF.data1.avg=dataL.data1.avg+dataF.data1.avg;
+dataHF.data2.avg=dataL.data2.avg+dataF.data2.avg;
+dataHF.data3.avg=dataL.data3.avg+dataF.data3.avg;
+cfgHF=cfgL;
+[srcHF]=marikViMNE(dataHF,cfgHF,[0.07 0.08]);
+
+%% weight 2 for foot
+dataF2=dataF;
+dataF2.data1.avg=2.*dataF.data1.avg;
+dataF2.data2.avg=2.*dataF.data2.avg;
+dataF2.data3.avg=2.*dataF.data3.avg;
+dataF2.dataU.avg=2.*dataF.dataU.avg;
+[srcF2]=marikViMNE(dataF2,cfgF,[0.07 0.08]);
+dataHF2=dataL;
+dataHF2.dataU.avg=dataL.dataU.avg+dataF2.dataU.avg;
+dataHF2.data1.avg=dataL.data1.avg+dataF2.data1.avg;
+dataHF2.data2.avg=dataL.data2.avg+dataF2.data2.avg;
+dataHF2.data3.avg=dataL.data3.avg+dataF2.data3.avg;
+[srcHF2]=marikViMNE(dataHF2,cfgHF,[0.07 0.08]);
