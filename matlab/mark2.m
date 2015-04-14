@@ -9,6 +9,12 @@ end
 if isempty(foi)
     foi=[8:12];
 end
+if ~exist('toi','var')
+    toi=[];
+end
+if isempty(toi)
+    toi=[-0.8 0];
+end
 if ~exist('sub1','dir')
     try
         cd /media/yuval/My_Passport/Mark_threshold_visual_detection/MEG_data/
@@ -20,11 +26,18 @@ if ~exist('sub1','dir')
         end
     end
 end
+
 %% compute phase
 for subi=1:22
+    
     folder=['sub',num2str(subi)];
     cd (folder)
     load datafinal
+    if subi==1;
+        grad=datafinal.grad;
+    else
+        datafinal.grad=grad;
+    end
     corri= find(datafinal.trialinfo(:,4)==2);
     missi= find(datafinal.trialinfo(:,4)==0);
     s0=nearest(datafinal.time{1},toi(2));
@@ -82,20 +95,56 @@ for chani=1:248
     p(chani) = circ_cmtest(CorrPh(chani,:),MissPh(chani,:));
 end
 %% plot PSD topography + sig channels
+
 cfg=[];
 cfg.highlight='labels';
 cfg.highlightchannel=find(p<0.05);
 cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
-figure;topoplot248((mean(MissPSD,2)+mean(CorrPSD,2))./2,cfg)
+figure;topoplot248((mean(MissPSD,2)+mean(CorrPSD,2))./2,cfg);
 
 MeanMissPh=circ_mean(missPh,[],2);
 MeanCorrPh=circ_mean(corrPh,[],2);
+% cmap=[0,0,0.562500000000000;0,0,0.625000000000000;0,0,0.687500000000000;0,0,0.750000000000000;0,0,0.812500000000000;0,0,0.875000000000000;0,0,0.937500000000000;0,0,1;0,0.0625000000000000,1;0,0.125000000000000,1;0,0.187500000000000,1;0,0.250000000000000,1;0,0.312500000000000,1;0,0.375000000000000,1;0,0.437500000000000,1;0,0.500000000000000,1;0,0.562500000000000,1;0,0.625000000000000,1;0,0.687500000000000,1;0,0.750000000000000,1;0,0.812500000000000,1;0,0.875000000000000,1;0,0.937500000000000,1;0,1,1;0.0625000000000000,1,0.937500000000000;0.125000000000000,1,0.875000000000000;0.187500000000000,1,0.812500000000000;0.250000000000000,1,0.750000000000000;0.312500000000000,1,0.687500000000000;0.375000000000000,1,0.625000000000000;0.437500000000000,1,0.562500000000000;0.500000000000000,1,0.500000000000000;0.562500000000000,1,0.437500000000000;0.625000000000000,1,0.375000000000000;0.687500000000000,1,0.312500000000000;0.750000000000000,1,0.250000000000000;0.812500000000000,1,0.187500000000000;0.875000000000000,1,0.125000000000000;0.937500000000000,1,0.0625000000000000;1,1,0;1,0.937500000000000,0;1,0.875000000000000,0;1,0.812500000000000,0;1,0.750000000000000,0;1,0.687500000000000,0;1,0.625000000000000,0;1,0.562500000000000,0;1,0.500000000000000,0;1,0.437500000000000,0;1,0.375000000000000,0;1,0.312500000000000,0;1,0.250000000000000,0;1,0.187500000000000,0;1,0.125000000000000,0;1,0.0625000000000000,0;1,0,0;0.937500000000000,0,0;0.875000000000000,0,0;0.812500000000000,0,0;0.750000000000000,0,0;0.687500000000000,0,0;0.625000000000000,0,0;0.562500000000000,0,0;0.500000000000000,0,0;];
+% cmapC=[cmap;flipud(cmap)];
+%cmapC(65,:)=[];
+
+% circular colormap
+C=[58 181 75;247 148 29;238 28 37;46 49 146;58 181 75]./255;
+cmapC=[];
+for ci=1:4
+    for sci=1:10
+        dif=sci/10-0.1;
+        cmapC(10*ci-10+sci,1:3)=C(ci,:).*(1-dif)+C(ci+1,:).*dif;
+    end
+end
+cmapC(end+1,:)=cmapC(1,:);
 cfg=[];
 % cfg.highlight='labels';
 % cfg.highlightchannel=find(p<0.05);
 % cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
-figure;topoplot248(MeanMissPh);title('Miss')
-figure;topoplot248(MeanCorrPh);title('Correct')
+cfg.colormap=cmapC;
+cfg.interpolate='nearest';
+cfg.style='straight';
+cfg.highlight='labels';
+cfg.highlightchannel=find(p<0.05);
+figure;topoplot248(MeanMissPh,cfg);title('Miss')
+colorbar
+figure;topoplot248(MeanCorrPh,cfg);title('Correct')
+colorbar
+[~,pr]=ttest(CorrR',MissR');
+cfg=[];
+cfg.zlim=[0 max([max(mean(MissR,2)) max(mean(CorrR,2)) ])];
+cfg.highlight='labels';
+cfg.highlightchannel=find(p<0.05);
+figure;topoplot248(mean(MissR,2),cfg);title('Miss')
+colorbar
+figure;topoplot248(mean(CorrR,2),cfg);title('Correct')
+colorbar
+
+cfg=[];
+cfg.zlim=[0.9 1];
+cfg.interpolation='linear';
+figure;topoplot248(1-p,cfg);
 
 %% plot angle of selected channels
 conds={'Miss','Correct'};
