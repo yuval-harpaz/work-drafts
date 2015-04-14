@@ -1,7 +1,9 @@
 %% make subject list
-cd /home/yuval/Data/marik/som2
+cd /home/yuval/Data/marik/som2/1
 
 [pnt,lf,vol]=sphereGrid;
+
+
 xyz=pnt(1,:);
 
 
