@@ -90,38 +90,53 @@ for subi=1:22
     disp(['done ',folder])
     cd ..
 end
-%% nonparametric test 
-for chani=1:248
-    p(chani) = circ_cmtest(CorrPh(chani,:),MissPh(chani,:));
-end
-%% plot PSD topography + sig channels
 
+%% plot PSD topography + sig channels
+[~,p]=ttest(MissPSD',CorrPSD');
 cfg=[];
 cfg.highlight='labels';
 cfg.highlightchannel=find(p<0.05);
 cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
-figure;topoplot248((mean(MissPSD,2)+mean(CorrPSD,2))./2,cfg);
+%figure;topoplot248((mean(MissPSD,2)+mean(CorrPSD,2))./2,cfg);
+figure;topoplot248(mean(MissPSD,2),cfg);title('Miss')
+figure;topoplot248(mean(CorrPSD,2),cfg);title('Correct')
 
-MeanMissPh=circ_mean(missPh,[],2);
-MeanCorrPh=circ_mean(corrPh,[],2);
+
+%% phase + circular colormap
+% flip up down doesn't work:
+%
 % cmap=[0,0,0.562500000000000;0,0,0.625000000000000;0,0,0.687500000000000;0,0,0.750000000000000;0,0,0.812500000000000;0,0,0.875000000000000;0,0,0.937500000000000;0,0,1;0,0.0625000000000000,1;0,0.125000000000000,1;0,0.187500000000000,1;0,0.250000000000000,1;0,0.312500000000000,1;0,0.375000000000000,1;0,0.437500000000000,1;0,0.500000000000000,1;0,0.562500000000000,1;0,0.625000000000000,1;0,0.687500000000000,1;0,0.750000000000000,1;0,0.812500000000000,1;0,0.875000000000000,1;0,0.937500000000000,1;0,1,1;0.0625000000000000,1,0.937500000000000;0.125000000000000,1,0.875000000000000;0.187500000000000,1,0.812500000000000;0.250000000000000,1,0.750000000000000;0.312500000000000,1,0.687500000000000;0.375000000000000,1,0.625000000000000;0.437500000000000,1,0.562500000000000;0.500000000000000,1,0.500000000000000;0.562500000000000,1,0.437500000000000;0.625000000000000,1,0.375000000000000;0.687500000000000,1,0.312500000000000;0.750000000000000,1,0.250000000000000;0.812500000000000,1,0.187500000000000;0.875000000000000,1,0.125000000000000;0.937500000000000,1,0.0625000000000000;1,1,0;1,0.937500000000000,0;1,0.875000000000000,0;1,0.812500000000000,0;1,0.750000000000000,0;1,0.687500000000000,0;1,0.625000000000000,0;1,0.562500000000000,0;1,0.500000000000000,0;1,0.437500000000000,0;1,0.375000000000000,0;1,0.312500000000000,0;1,0.250000000000000,0;1,0.187500000000000,0;1,0.125000000000000,0;1,0.0625000000000000,0;1,0,0;0.937500000000000,0,0;0.875000000000000,0,0;0.812500000000000,0,0;0.750000000000000,0,0;0.687500000000000,0,0;0.625000000000000,0,0;0.562500000000000,0,0;0.500000000000000,0,0;];
 % cmapC=[cmap;flipud(cmap)];
 %cmapC(65,:)=[];
 
-% circular colormap
-C=[58 181 75;247 148 29;238 28 37;46 49 146;58 181 75]./255;
+% this worked
+% C=[58 181 75;247 148 29;238 28 37;46 49 146;58 181 75]./255;
+% cmapC=[];
+% for ci=1:4
+%     for sci=1:10
+%         dif=sci/10-0.1;
+%         cmapC(10*ci-10+sci,1:3)=C(ci,:).*(1-dif)+C(ci+1,:).*dif;
+%     end
+% end
+% cmapC(end+1,:)=cmapC(1,:);
+C=[58 181 75;216 223 32;254 242 0;247 148 29;241 89 42;239 62 54;238 28 37;146 39 143;102 46 147;46 49 146;0 114 187;0 170 185]./255;
+C(end+1,:)=C(1,:);
 cmapC=[];
-for ci=1:4
+for ci=1:(size(C,1)-1)
     for sci=1:10
         dif=sci/10-0.1;
         cmapC(10*ci-10+sci,1:3)=C(ci,:).*(1-dif)+C(ci+1,:).*dif;
     end
 end
 cmapC(end+1,:)=cmapC(1,:);
+
+% nonparametric test 
+MeanMissPh=circ_mean(missPh,[],2);
+MeanCorrPh=circ_mean(corrPh,[],2);
+for chani=1:248
+    p(chani) = circ_cmtest(CorrPh(chani,:),MissPh(chani,:));
+end
 cfg=[];
-% cfg.highlight='labels';
-% cfg.highlightchannel=find(p<0.05);
-% cfg.zlim=[0 max([mean(MissPSD,2);mean(CorrPSD,2)])];
 cfg.colormap=cmapC;
 cfg.interpolate='nearest';
 cfg.style='straight';
@@ -131,51 +146,52 @@ figure;topoplot248(MeanMissPh,cfg);title('Miss')
 colorbar
 figure;topoplot248(MeanCorrPh,cfg);title('Correct')
 colorbar
+
 [~,pr]=ttest(CorrR',MissR');
 cfg=[];
 cfg.zlim=[0 max([max(mean(MissR,2)) max(mean(CorrR,2)) ])];
 cfg.highlight='labels';
-cfg.highlightchannel=find(p<0.05);
+cfg.highlightchannel=find(pr<0.05);
 figure;topoplot248(mean(MissR,2),cfg);title('Miss')
 colorbar
 figure;topoplot248(mean(CorrR,2),cfg);title('Correct')
 colorbar
 
-cfg=[];
-cfg.zlim=[0.9 1];
-cfg.interpolation='linear';
-figure;topoplot248(1-p,cfg);
-
-%% plot angle of selected channels
-conds={'Miss','Correct'};
-switch method
-    case 'allSig' % all sig channels
-        Pi=find(p<0.05);
-        if isempty(Pi)
-            display('no sig results!')
-        else
-            for chi=Pi
-                plotChan(MissPh(chi,:)',CorrPh(chi,:)',datafinal.label{chi})
-            end
-        end
-    case 'mostSig' % most sig channel and peak PSD channel
-        [P,Pi]=min(p);
-        if P>0.05
-            display('no sig results!')
-        else
-            plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' most sig, p = ',num2str(P)],conds);
-            [~,Pi]=max((mean(MissPSD,2)+mean(CorrPSD,2)));
-            plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' peak PSD, p = ',num2str(p(Pi))],conds);
-        end
-end
-disp(' ')
-function plotChan(MissPh,CorrPh,chanName,conds)
-figure('name',chanName); % A145
-subplot(2,1,1)
-circ_plotYH(MissPh,'pretty','bo',conds{1},true,'linewidth',2,'color','r');
-%title(chanName)
-subplot(2,1,2)
-circ_plotYH(CorrPh,'pretty','bo',conds{2},true,'linewidth',2,'color','r');
+% cfg=[];
+% cfg.zlim=[0.9 1];
+% cfg.interpolation='linear';
+% figure;topoplot248(1-p,cfg);
+% 
+% %% plot angle of selected channels
+% conds={'Miss','Correct'};
+% switch method
+%     case 'allSig' % all sig channels
+%         Pi=find(p<0.05);
+%         if isempty(Pi)
+%             display('no sig results!')
+%         else
+%             for chi=Pi
+%                 plotChan(MissPh(chi,:)',CorrPh(chi,:)',datafinal.label{chi})
+%             end
+%         end
+%     case 'mostSig' % most sig channel and peak PSD channel
+%         [P,Pi]=min(p);
+%         if P>0.05
+%             display('no sig results!')
+%         else
+%             plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' most sig, p = ',num2str(P)],conds);
+%             [~,Pi]=max((mean(MissPSD,2)+mean(CorrPSD,2)));
+%             plotChan(MissPh(Pi,:)',CorrPh(Pi,:)',[datafinal.label{Pi},' peak PSD, p = ',num2str(p(Pi))],conds);
+%         end
+% end
+% disp(' ')
+% function plotChan(MissPh,CorrPh,chanName,conds)
+% figure('name',chanName); % A145
+% subplot(2,1,1)
+% circ_plotYH(MissPh,'pretty','bo',conds{1},true,'linewidth',2,'color','r');
+% %title(chanName)
+% subplot(2,1,2)
+% circ_plotYH(CorrPh,'pretty','bo',conds{2},true,'linewidth',2,'color','r');
 
 % 
 % subplot(2,2,4)
