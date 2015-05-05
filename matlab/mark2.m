@@ -1,4 +1,4 @@
-function mark2(foi,toi,method)
+function mark2(foi,toi)
 % foi is a vector of desired frequencies
 if ~exist('method','var')
     method='mostSig';
@@ -29,7 +29,7 @@ end
 
 %% compute phase
 for subi=1:22
-    
+    clear corr* miss*
     folder=['sub',num2str(subi)];
     cd (folder)
     load datafinal
@@ -82,11 +82,11 @@ for subi=1:22
     CorrF(1:248,subi)=mean(corrF(:,1:nTrl),2);
     CorrPSD(1:248,subi)=mean(corrPSD(:,1:nTrl),2);
     % averaging
-    cfg=[];
-    cfg.trials=corri(1:nTrl);
-    corr=ft_timelockanalysis(cfg,datafinal);
-    cfg.trials=missi(1:nTrl);
-    miss=ft_timelockanalysis(cfg,datafinal);
+%     cfg=[];
+%     cfg.trials=corri(1:nTrl);
+%     corr=ft_timelockanalysis(cfg,datafinal);
+%     cfg.trials=missi(1:nTrl);
+%     miss=ft_timelockanalysis(cfg,datafinal);
     disp(['done ',folder])
     cd ..
 end

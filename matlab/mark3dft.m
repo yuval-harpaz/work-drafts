@@ -1,8 +1,8 @@
-function mark3(toi,fPlot)
-
+function mark3dft(toi,fPlot)
+F=1:30;
 %toi=[-0.8 0];
 if ~existAndFull('toi')
-    toi=[-0.5 0];
+    toi=[-0.8 0];
 end
 if ~exist('fPlot','var')
     fPlot=false;
@@ -20,8 +20,8 @@ if ~exist('./sub1','dir')
 end
 
 %% compute phase
-if exist(['results',num2str(toi(1)),'.mat'],'file')
-    load(['results',num2str(toi(1)),'.mat']);
+if exist(['resDFT',num2str(toi(1)),'.mat'],'file')
+    load(['resDFT',num2str(toi(1)),'.mat']);
 else
     for subi=1:22
         clear corr*
@@ -33,59 +33,55 @@ else
         sBL=nearest(datafinal.time{1},toi(1));
         if subi==1;
             grad=datafinal.grad;
-            [~,F]=fftBasic(datafinal.trial{1}(1,sBL:s0),678.17);
-            F=F(F<31);
         else
             datafinal.grad=grad;
         end
         corri= find(datafinal.trialinfo(:,4)==2);
         missi= find(datafinal.trialinfo(:,4)==0);
         nTrl=min([length(corri),length(missi)]);
-        corri=corri(1:nTrl);missi=missi(1:nTrl);
+        corri=corri(round(1:length(corri)/nTrl:length(corri)));
+        %corri=corri(1:nTrl);
+        missi=missi(round(1:length(missi)/nTrl:length(missi)));
+        %missi=missi(1:nTrl);
+        if length(missi)~=length(corri)
+            error('told you! wrong n')
+        end
+        if length(missi)>length(unique(missi)) || length(corri)>length(unique(corri))
+            error ('duplicate indices!')
+        end
         %for foii=1:length(F)
         for trli=1:length(corri)
-            f=fftBasic(datafinal.trial{corri(trli)}(:,sBL:s0),678.17);
-            corrF=f(:,1:length(F));
-            f=fftBasic(datafinal.trial{missi(trli)}(:,sBL:s0),678.17);
-            missF=f(:,1:length(F));
-            for chani=1:248
+            for foi=F
                 
-                corrPh(chani,trli,1:length(F))=mod(phase(corrF(chani,:)),2*pi);
-                missPh(chani,trli,1:length(F))=mod(phase(missF(chani,:)),2*pi);
-                
+                [~,est] = dft05(datafinal.trial{corri(trli)}(:,sBL:s0),datafinal.fsample, foi);
+                ang=angle(est); % this gives instanteneous phase. maybe unwarp not necessary
+                corrPh(1:248,trli,foi)=2*pi-mod(angle(est(:,1)),2*pi);
+                [~,est] = dft05(datafinal.trial{missi(trli)}(:,sBL:s0),datafinal.fsample, foi);
+                ang=angle(est); % this gives instanteneous phase. maybe unwarp not necessary
+                missPh(1:248,trli,foi)=2*pi-mod(angle(est(:,1)),2*pi);
             end
         end
-        for foii=1:length(F)
-            MissPh(1:248,subi,foii) = circ_mean(missPh(:,:,foii),[],2);
-            MissR(1:248,subi,foii) = circ_r(missPh(:,:,foii), [],[], 2);
-            %MissF(1:248,subi)=mean(missF(:,:),2);
-            %MissPSD(1:248,subi)=mean(missPSD(:,:),2);
-            CorrPh(1:248,subi,foii) = circ_mean(corrPh(:,:,foii),[],2);
-            CorrR(1:248,subi,foii) = circ_r(corrPh(:,:,foii), [],[], 2);
-            %CorrF(1:248,subi)=mean(corrF(:,:),2);
-            %CorrPSD(1:248,subi)=mean(corrPSD(:,:),2);
+        for foi=1:length(F)
+            MissPh(1:248,subi,foi) = circ_mean(missPh(:,:,foi),[],2);
+            MissR(1:248,subi,foi) = circ_r(missPh(:,:,foi), [],[], 2);
+            CorrPh(1:248,subi,foi) = circ_mean(corrPh(:,:,foi),[],2);
+            CorrR(1:248,subi,foi) = circ_r(corrPh(:,:,foi), [],[], 2);
         end
-        % averaging
-        %     cfg=[];
-        %     cfg.trials=corri(:);
-        %     corr=ft_timelockanalysis(cfg,datafinal);
-        %     cfg.trials=missi(:);
-        %     miss=ft_timelockanalysis(cfg,datafinal);
         disp(['done ',folder])
         cd ..
     end
-    save (['results',num2str(toi(1)),'.mat'],'F','toi','CorrR','CorrPh','MissR','MissPh')
+    save (['resDFT',num2str(toi(1)),'.mat'],'F','toi','CorrR','CorrPh','MissR','MissPh')
 end
 
-for foii=1:length(F)
+for foi=F
     for chani=1:248
-        prC(chani) = circ_rtest(CorrPh(chani,:,foii));
+        prC(chani) = circ_rtest(CorrPh(chani,:,foi));
     end
     for chani=1:248
-        prM(chani) = circ_rtest(MissPh(chani,:,foii));
+        prM(chani) = circ_rtest(MissPh(chani,:,foi));
     end
-    nSigC(foii)=sum(prC<0.05);
-    nSigM(foii)=sum(prM<0.05);
+    nSigC(foi)=sum(prC<0.05);
+    nSigM(foi)=sum(prM<0.05);
 end
 figure;
 disp('done')
@@ -99,10 +95,8 @@ hold on
 plot(F,squeeze(mean(mean(MissR,1),2)),'r')
 legend('correct','miss')
 
-%[~,pr]=ttest(CorrR(:,:,5)',MissR(:,:,5)');
-
 if fPlot
-    fi=nearest(F,fPlot)
+    fi=nearest(F,fPlot);
     
     for chani=1:248
         prC(chani) = circ_rtest(CorrPh(chani,:,fi));
