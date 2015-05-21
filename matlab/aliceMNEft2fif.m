@@ -9,3 +9,15 @@ for subi=1:8
     fiff_write_evoked(['MNE/',sf{subi},'ftWbW-ave.fif'],data)
     cd ..
 end
+
+%% 
+cd /home/yuval/Copy/MEGdata/alice
+%Data=fiff_read_evoked(['nat-ave.fif']);
+for subi=1:8
+    cd (sf{subi})
+    data=fiff_read_evoked(['MNE/',sf{subi},'_wbw-ave.fif']);
+    load avgWbW2 avgWbWmeg
+    data.evoked.epochs=avgWbWmeg.avg(ind,:);
+    fiff_write_evoked(['MNE/',sf{subi},'ftWbW-ave.fif'],data)
+    cd ..
+end

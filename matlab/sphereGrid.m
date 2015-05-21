@@ -14,7 +14,7 @@ vol=[];
 vol.o=o*100;vol.r=r*100;
 vol.unit='cm';
 vol.type='singlesphere';
-pnt = GridSphereYH(500);
+pnt = GridSphereYH(N);
 pnt=pnt*(vol.r-inwardShift);
 pnt=pnt+repmat(vol.o,length(pnt),1);
 % 
