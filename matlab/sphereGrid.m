@@ -6,13 +6,13 @@ if ~existAndFull('N')
     N=642;
 end
 if ~existAndFull('inwardShift')
-    inwardShift=1;
+    inwardShift=10;
 end
 hs=ft_read_headshape('hs_file');
 [o,r] = fitsphere(hs.pnt);
 vol=[];
-vol.o=o*100;vol.r=r*100;
-vol.unit='cm';
+vol.o=o*1000;vol.r=r*1000;
+vol.unit='mm';
 vol.type='singlesphere';
 pnt = GridSphereYH(N);
 pnt=pnt*(vol.r-inwardShift);
@@ -24,7 +24,7 @@ pnt=pnt+repmat(vol.o,length(pnt),1);
 % plot3pnt(hs.pnt*100,'.k')
 %
 hdr=ft_read_header(source);
-grad=ft_convert_units(hdr.grad,'cm');
+grad=ft_convert_units(hdr.grad,'mm');
 cfg = [];
 cfg.grad = grad;
 cfg.channel =grad.label(1:248);

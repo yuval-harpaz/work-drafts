@@ -70,10 +70,10 @@ end
 pnt_complex(:,:,2)=A; % one perpendicular dipole (A for anterior)
 pnt_complex(:,:,3)=C; % second (crossed) perpendicular dipole
 pnt_complex(:,:,4)=R; % radial dipole
-vol.o=O;
-vol.r=r;
-figure;
-ft_plot_vol(vol,'facealpha',0.9)
-hold on
-line([pnt(:,1)';A(:,1)'],[pnt(:,2)';A(:,2)'],[pnt(:,3)';A(:,3)'],'color',[0,0,0])
-line([pnt(:,1)';C(:,1)'],[pnt(:,2)';C(:,2)'],[pnt(:,3)';C(:,3)'],'color',[1,0,0])
+% vol.o=O;
+% vol.r=r;
+% figure;
+% ft_plot_vol(vol,'facealpha',0.9)
+% hold on
+% line([pnt(:,1)';A(:,1)'],[pnt(:,2)';A(:,2)'],[pnt(:,3)';A(:,3)'],'color',[0,0,0])
+% line([pnt(:,1)';C(:,1)'],[pnt(:,2)';C(:,2)'],[pnt(:,3)';C(:,3)'],'color',[1,0,0])
