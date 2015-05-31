@@ -8,7 +8,7 @@ pnt_complex2=findPerpendicular(pnt2);
 pnt_complex1=findPerpendicular(pnt1);
 pnt=[pnt1(:,:,1);pnt2(:,:,1)];
 ini=true(length(pnt),1);
-ini(pnt(:,3)<vol1.o(3))=false; % keep only top half sphere
+ini(pnt(:,3)<vol.o(3))=false; % keep only top half sphere
 ini(pnt(:,2)<min(hs(:,2)'+10))=false;
 ini(pnt(:,2)>max(hs(:,2)'-10))=false;
 ini=find(ini);
@@ -77,13 +77,17 @@ cfg=[];
 cfg.zlim=[-max(abs(M)) max(abs(M))];
 cfg.highlight='labels';
 
-[mostActive,neighbours]=clusterSensors(data.dataU,0.1,'97%',50,1);
+%[mostActive,neighbours]=clusterSensors(data.dataU,data.dataU.time(samp),'97%',50,1);
+%cfg.channel = {'A46', 'A128'}
+load mostActive
+load neighb
+neighbours=neighb;
 cfg.highlightchannel=find(mostActive(1:248));
 figure;topoplot248(M(1:248),cfg);title('set1')
-cfg.highlightchannel=find(mostActive(249:248*2));
-figure;topoplot248(M(249:248*2),cfg);title('set2')
-cfg.highlightchannel=find(mostActive(248*2+1:248*3));
-figure;topoplot248(M(248*2+1:248*3),cfg);title('set3')
+% cfg.highlightchannel=find(mostActive(249:248*2));
+% figure;topoplot248(M(249:248*2),cfg);title('set2')
+% cfg.highlightchannel=find(mostActive(248*2+1:248*3));
+% figure;topoplot248(M(248*2+1:248*3),cfg);title('set3')
 
 cfg.highlightchannel=find(neighbours(1:248));
 figure;topoplot248(M(1:248),cfg);title('set1')
@@ -92,7 +96,7 @@ figure;topoplot248(M(249:248*2),cfg);title('set2')
 cfg.highlightchannel=find(neighbours(248*2+1:248*3));
 figure;topoplot248(M(248*2+1:248*3),cfg);title('set3')
 
-[srci]=chooseNearSrc(data.dataU,pnt,mostActive,40);
+[srci]=chooseNearSrc(data.dataU,pnt,mostActive,50);
 
 disp([num2str(sum(neighbours)),' channels and ',num2str(sum(srci)),' sources'])
 
