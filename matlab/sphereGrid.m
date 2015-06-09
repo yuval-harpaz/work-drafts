@@ -1,7 +1,10 @@
-function [pnt,lf,vol]=sphereGrid(N,inwardShift)
+function [pnt,lf,vol]=sphereGrid(N,inwardShift,symm)
 % N can be 12, 42, 162, 642, ... points. see GridSphere for more
 % inwardShift is how much inward from hs sphere the brain is in cm
 % hs_file and data (c,rf..) has to be present
+if ~existAndFull('symm')
+    symm=true;
+end
 if ~existAndFull('N')
     N=642;
 end
@@ -14,7 +17,7 @@ vol=[];
 vol.o=o*1000;vol.r=r*1000;
 vol.unit='mm';
 vol.type='singlesphere';
-pnt = GridSphereYH(N);
+pnt = GridSphereYH(N,symm);
 pnt=pnt*(vol.r-inwardShift);
 pnt=pnt+repmat(vol.o,length(pnt),1);
 % 
