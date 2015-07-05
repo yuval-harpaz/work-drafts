@@ -1,3 +1,6 @@
+%% Jun 2015
+aliceSymm
+
 %% Jan 2015
 open aliceExplore2015
 open aliceExploreGavg

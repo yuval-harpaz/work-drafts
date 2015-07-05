@@ -1,6 +1,6 @@
 %% sam, first run
 
-cd /home/yuval/Data/camera/1;
+cd /home/yuval/Data/marik/camera/1;
 load headmodel
 load ../leftIndAvgs
 %t=0.052;

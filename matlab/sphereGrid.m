@@ -1,7 +1,9 @@
-function [pnt,lf,vol]=sphereGrid(N,inwardShift,symm)
-% N can be 12, 42, 162, 642, ... points. see GridSphere for more
+function [pnt,lf,vol]=sphereGrid(N,inwardShift,symm,Nspheres)
+% N can be 12, 42, 162, 642, 2562, 10242... points. see GridSphere for more
 % inwardShift is how much inward from hs sphere the brain is in cm
 % hs_file and data (c,rf..) has to be present
+% when Nspheres > 1 there will be created this number of concentric spheres.
+% step between spheres will be the distance between two points
 if ~existAndFull('symm')
     symm=true;
 end
@@ -11,22 +13,35 @@ end
 if ~existAndFull('inwardShift')
     inwardShift=10;
 end
+if ~existAndFull('Nspheres')
+    Nspheres=1;
+end
 hs=ft_read_headshape('hs_file');
 [o,r] = fitsphere(hs.pnt);
 vol=[];
 vol.o=o*1000;vol.r=r*1000;
 vol.unit='mm';
 vol.type='singlesphere';
-pnt = GridSphereYH(N,symm);
-pnt=pnt*(vol.r-inwardShift);
-pnt=pnt+repmat(vol.o,length(pnt),1);
+pntTemp = GridSphereYH(N,symm);
+pnt=pntTemp*(vol.r-inwardShift)+repmat(vol.o,length(pntTemp),1);
+insh=inwardShift;
+dist=sqrt(sum([pnt(end,:)-pnt(end-1,:)].^2));
+for inwardi=2:Nspheres
+    insh=insh+dist;
+    pnt=[pnt;pntTemp*(vol.r-insh)+repmat(vol.o,length(pntTemp),1)];
+end
+        
+% pnt=pnt*(vol.r-inwardShift);
+% pnt=pnt+repmat(vol.o,length(pnt),1);
 % 
 % ft_plot_vol(vol)
 % hold on
 % plot3pnt(pnt1,'or')
 % plot3pnt(hs.pnt*100,'.k')
 %
+warning off
 hdr=ft_read_header(source);
+warning on
 grad=ft_convert_units(hdr.grad,'mm');
 cfg = [];
 cfg.grad = grad;

@@ -1,5 +1,4 @@
-% CHECK how come with fieldtrip and pinv you get the same moment but not
-% the same Vmodel
+
 cd /home/yuval/Data/marik/som2/1
 load grid
 Grid=grid;
