@@ -1,4 +1,4 @@
-function [powLR,R]=beamformer_symmetric(cfg,data,data_cov)
+function [powLR,R]=beamformer(cfg,data,data_cov)
 % you must give data with averaged data (fieldtrip) and cfg.latency such as
 % [0.09 0.11]
 %
@@ -16,8 +16,11 @@ function [powLR,R]=beamformer_symmetric(cfg,data,data_cov)
 
 cfg.wtsmethod='1by1';
 cfg.nonlinear='no';
-cfg.symmetry='y';
+
 cfg.method='pinv';
+if ~isfield(cfg,'symmetry')
+    cfg.symmetry='no'; % 'y' for y axis symmetry, the only one supported
+end
 if ~isfield(cfg,'grid')
     [~,cfg.grid,cfg.vol]=sphereGrid([],10,[],4);
 end
@@ -70,60 +73,39 @@ t2=nearest(data.time,cfg.latency(2));
 powLR=zeros(size(cfg.grid.pos,1),1);
 disp('computing weights for source : ')
 
-switch cfg.wtsmethod
-    case '1by1'
-        weights=zeros(length(mom),248);
-        noise=[];
-        for voxi=1:length(mom)
-            opt_vox_or  = ori(voxi,:);
-            if isempty(cfg.grid.leadfield{voxi})
-                powLR(voxi)=0;
+
+weights=zeros(length(mom),248);
+noise=[];
+for voxi=1:length(mom)
+    opt_vox_or  = ori(voxi,:);
+    if isempty(cfg.grid.leadfield{voxi})
+        powLR(voxi)=0;
+    else
+        gain        = cfg.grid.leadfield{voxi} * opt_vox_or';
+        trgain_invC = gain' * inv_cov;
+        weights(voxi,1:248)  = trgain_invC / (trgain_invC * gain);
+        if ischar(cfg.noise) % compute noise from weights
+            if strcmp(cfg.noise,'wts')
+                noise  = mean(abs(weights(voxi,:)));
             else
-                gain        = cfg.grid.leadfield{voxi} * opt_vox_or';
-                trgain_invC = gain' * inv_cov;
-                weights(voxi,1:248)  = trgain_invC / (trgain_invC * gain);
-                if ischar(cfg.noise) % compute noise from weights
-                    if strcmp(cfg.noise,'wts')
-                        noise  = mean(abs(weights(voxi,:)));
-                    else
-                        error('unknown noise method')
-                    end
-                elseif size(cfg.noise)==size(data_cov) % use noise_cov to compute noise
-                    trgain_invC = gain' * inv_noise;
-                    weightsNoise  = trgain_invC / (trgain_invC * gain);
-                    noise=abs(mean(weightsNoise * data.avg(1:248,t1:t2)));
-                elseif size(cfg.noise,1)==size(data_cov,1) % use noise data to compute noise
-                    noise=abs(mean(weights(voxi,1:248) * cfg.noise));
-                elseif cfg.noise==0; % no noise normalizations, raw VS
-                    noise=1;
-                else
-                    error('something went wrong when assessing noise')
-                end
-                powLR(voxi)=abs(mean(weights(voxi,1:248) * data.avg(1:248,t1:t2)))./noise;
-                prog(voxi)
+                error('unknown noise method')
             end
+        elseif size(cfg.noise)==size(data_cov) % use noise_cov to compute noise
+            trgain_invC = gain' * inv_noise;
+            weightsNoise  = trgain_invC / (trgain_invC * gain);
+            noise=abs(mean(weightsNoise * data.avg(1:248,t1:t2)));
+        elseif size(cfg.noise,1)==size(data_cov,1) % use noise data to compute noise
+            noise=abs(mean(weights(voxi,1:248) * cfg.noise));
+        elseif cfg.noise==0; % no noise normalizations, raw VS
+            noise=1;
+        else
+            error('something went wrong when assessing noise')
         end
-    case 'pairs'
-        [left,right,inside]=findLRpairs(cfg.grid,cfg.vol);
-        
-        for voxi=1:length(left)
-            opt_vox_orL  = mom(left(voxi),:);
-            opt_vox_orR  = mom(right(voxi),:);
-            gain        = cfg.grid.leadfield{left(voxi)} * opt_vox_orL'+cfg.grid.leadfield{right(voxi)} * opt_vox_orR';
-            
-            trgain_invC = gain' * inv_cov;
-            %weights(voxi,1:248)  = trgain_invC / (trgain_invC * gain);
-            Weights=gain'*inv_cov/(gain'*inv_cov*gain);
-            %pow(voxi)=weights * all_cov * weights';
-            noiseLR  = mean(abs(Weights));
-            momentLR=abs(mean(Weights * data.avg(1:248,t1:t2)));
-            powlr=momentLR./noiseLR;
-            
-            powLR(left(voxi))=(opt_vox_orL(1)./(opt_vox_orL(1)+opt_vox_orR(1))).*powlr;
-            powLR(right(voxi))=(opt_vox_orR(1)./(opt_vox_orL(1)+opt_vox_orR(1))).*powlr;
-            prog(voxi)
-        end
+        powLR(voxi)=abs(mean(weights(voxi,1:248) * data.avg(1:248,t1:t2)))./noise;
+        prog(voxi)
+    end
 end
+
 powLR(isnan(powLR))=0;
 disp('')
 disp('plotting')

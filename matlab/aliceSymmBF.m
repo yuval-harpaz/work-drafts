@@ -51,11 +51,31 @@ for subi=1:8
 %         dipout.mom{voxi} = SAMweights * data.avg(1:248,:);
         prog(voxi)
     end
-
+    pow(subi,1:2568)=moment./noise;
+    
+    [left,right,inside]=findLRpairs(cfg.grid,cfg.vol);
+    powLR=zeros(size(moment));
+    for voxi=1:length(left)
+        opt_vox_orL  = mom(left(voxi),:);
+        opt_vox_orR  = mom(right(voxi),:);
+        gain        = lf.leadfield{left(voxi)} * opt_vox_orL'+lf.leadfield{right(voxi)} * opt_vox_orR';
+        
+        trgain_invC = gain' * inv_cov;
+        %weights(voxi,1:248)  = trgain_invC / (trgain_invC * gain);
+        Weights=gain'*invCov/(gain'*invCov*gain);
+        %pow(voxi)=weights * all_cov * weights';
+        noiseLR  = mean(abs(Weights));
+        momentLR=abs(mean(Weights * data.avg(1:248,nearest(data.time,t(1)):nearest(data.time,t(2)))));
+        powlr=momentLR./noiseLR;
+        
+        powLR(left(voxi))=(opt_vox_orL(1)./(opt_vox_orL(1)+opt_vox_orR(1))).*powlr;
+        powLR(right(voxi))=(opt_vox_orR(1)./(opt_vox_orL(1)+opt_vox_orR(1))).*powlr;
+        prog(voxi)
+    end
 %     POSL(subi)=dip2.grid_index(1);
 %     MOML(subi,1:3)=dip2.dip.mom(1:3);
 %     R(1:2568,subi)=r;
-    pow(subi,1:2568)=moment./noise;
+        disp('');
 end
 pow(pow==NaN)=0;
 hs=ft_read_headshape('hs_file');
