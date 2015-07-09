@@ -23,6 +23,13 @@ if ~isfield(cfg,'symmetry')
 end
 if ~isfield(cfg,'grid')
     [~,cfg.grid,cfg.vol]=sphereGrid([],10,[],4);
+else
+    cfg.grid=ft_convert_units(cfg.grid,'mm');
+    try
+        cfg.vol=ft_convert_units(cfg.vol,'mm');
+    catch
+        error('if you give grid you have to give vol too')
+    end
 end
 if ~exist('data_cov','var')
     data_cov=[];
@@ -47,14 +54,14 @@ if ~isfield(cfg,'noise')
     cfg.noise='wts';
 end
 %cfg.latency=[0.09 0.11];
-
+%if ~isfield(cfg,'ori')
 [~,R,mom]=dipolefitBIU(cfg,data);
-%mom1=mom(1,:);
 XX=sqrt(1./sum(mom.^2,2));
 XX(XX==Inf)=0; % this is about normalizing the moment to have vector length of 1
 ori=mom.*repmat(XX,1,3);
 
 inv_cov = pinv(data_cov + lambda * eye(size(data_cov)));
+
 if size(cfg.noise)==size(data_cov)
     noise_cov=cfg.noise;
 else
@@ -107,19 +114,23 @@ for voxi=1:length(mom)
 end
 
 powLR(isnan(powLR))=0;
-disp('')
-disp('plotting')
+
 % moment(isnan(moment))=0;
 % noise=mean(abs(weights),2);
 % noise(isnan(noise))=0;
 % pow=moment'./noise;
 % pow(isnan(pow))=0;
-hs=ft_read_headshape('hs_file');
-figure;
-scatter3pnt(hs.pnt*1000,5,'k');
-hold on
-scatter3pnt(cfg.grid.pos(cfg.grid.inside,:),25,powLR(cfg.grid.inside,:));
-view([-90 0])
+if length(cfg.grid.pos)<20000
+    disp('   ')
+    disp('   ')
+    disp('plotting')
+    hs=ft_read_headshape('hs_file');
+    figure;
+    scatter3pnt(cfg.grid.pos(cfg.grid.inside,:),25,powLR(cfg.grid.inside,:));
+    hold on
+    scatter3pnt(hs.pnt*1000,5,'k');
+    view([-90 0])
+end
 
 % %% checking R for individual sources
 % R1=zeros(size(R));
