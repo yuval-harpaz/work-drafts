@@ -87,90 +87,14 @@ for pnti=1:length(pnt)
     gain(1:744,length(pnt)+pnti)=dip;
 end
 
-%% 
-samp=138; % 158 185
-M=data.dataU.avg(:,samp);
+%% foot
+samp=180 ; % 145
+[dataF, ~]=marikViUnite(avg1_footL,avg2_footL,avg3_footL);
+figure;plot(data.data1.time,data.data1.avg)
+MF=dataF.dataU.avg(:,samp);
 
-%[mostActive,neighbours]=clusterSensors(data.dataU,data.dataU.time(samp),'97%',50,1);
-%cfg.channel = {'A46', 'A128'}
-load mostActive
-coordAct=mean(data.dataU.grad.chanpos(mostActive,:));
-load neighb
-neighbours=neighb;
+topoplot248(MF(1:248))
 
-% 
-[srci]=chooseNearSrc(data.dataU,pnt,coordAct,50);
-% disp([num2str(sum(neighbours)),' channels and ',num2str(sum(srci)),' sources'])
-% 
-src1=find(layer==1.*srci);
-src2=find(layer==2.*srci);
-src3=find(layer==3.*srci);
-Pow=zeros(length(srci)*2,1);
-tic
-for permi=1:100000
-    Ran=[];
-    for layeri=1:3
-        eval(['lenLayer=length(src',num2str(layeri),');'])
-        [~,ran]=sort(rand(1,lenLayer));
-        eval(['selected=src',num2str(layeri),'(ran(1:5));'])
-        Ran=[Ran;selected];
-    end
-    srcPerm=false(size(srci));
-    srcPerm(Ran)=true;
-    Gain=gain(:,[srcPerm;srcPerm]);
-    source=Gain\M;
-    recon=Gain*source;
-    R=corr(recon,M).^2;
-    pow=zeros(size(Pow));
-    pow([srcPerm;srcPerm])=source*R;
-    Pow=Pow+pow;
-    prog(permi)
-end
-toc
-Pow1=sqrt(Pow(1:920).^2+Pow(921:1840).^2);
-figure;
-scatter3pnt(pnt,25,Pow1)
-[~,maxPNT]=max(Pow1);
-hold on
-scatter3(pnt(maxPNT,1),pnt(maxPNT,2),pnt(maxPNT,3),30,0)
-
-%% whole head permutations
-
-Pow=zeros(length(srci)*2,1);
-tic
-for permi=1:10000
-    Ran=[];
-    for layeri=1:3
-        src=find(layer==layeri);
-        lenLayer=sum(layer==layeri);
-        [~,ran]=sort(rand(1,lenLayer));
-        selected=src(ran(1:5));
-        Ran=[Ran;selected];
-    end
-    srcPerm=false(size(srci));
-    srcPerm(Ran)=true;
-    Gain=gain(:,[srcPerm;srcPerm]);
-    source=Gain\M;
-    recon=Gain*source;
-    R=corr(recon,M).^2;
-    pow=zeros(size(Pow));
-    pow([srcPerm;srcPerm])=source*R;
-    Pow=Pow+pow;
-    prog(permi)
-end
-toc
-Pow1=sqrt(Pow(1:920).^2+Pow(921:1840).^2);
-figure;
-scatter3pnt(pnt,25,Pow1)
-[~,maxPNT]=max(Pow1);
-hold on
-scatter3(pnt(maxPNT,1),pnt(maxPNT,2),pnt(maxPNT,3),30,0)
-
-[~,sortPNT]=sort(Pow1,'descend');
-sortPNT(1:5)
-
-
-%% no layers
 
 Pow=zeros(length(srci)*2,1);
 tic
@@ -184,9 +108,9 @@ for permi=1:100000
     srcPerm=false(size(srci));
     srcPerm(Ran)=true;
     Gain=gain(:,[srcPerm;srcPerm]);
-    source=Gain\M;
+    source=Gain\MF;
     recon=Gain*source;
-    R=corr(recon,M).^2;
+    R=corr(recon,MF).^100;
     pow=zeros(size(Pow));
     pow([srcPerm;srcPerm])=source*R;
     Pow=Pow+pow;
@@ -203,43 +127,20 @@ scatter3(pnt(maxPNT,1),pnt(maxPNT,2),pnt(maxPNT,3),30,0)
 [~,sortPNT]=sort(Pow1,'descend');
 sortPNT(1:5)
 
-%% LR flip
 
-load LRpairs
-Mfliped=M;
-for i=1:248
-    [~,chi]=ismember(data.data1.label{i}(1:end-2),LRpairs(:,1));
-    if chi>0
-        chPairi=find(ismember(data.data1.label,[LRpairs{chi,2},'_1']));
-        Mfliped(chPairi)=M(i);
-        Mfliped(chPairi+248)=M(i+248);
-        Mfliped(chPairi+248*2)=M(i+248*2);
-    end
-    [~,chi]=ismember(data.data1.label{i}(1:end-2),LRpairs(:,2));
-    if chi>0
-        chPairi=find(ismember(data.data1.label,[LRpairs{chi,1},'_1']));
-        Mfliped(chPairi)=M(i);
-        Mfliped(chPairi+248)=M(i+248);
-        Mfliped(chPairi+248*2)=M(i+248*2);
-    end 
-end
-Msum=M-Mfliped;
-
-Pow=zeros(length(layer)*2,1);
+%% hand+foot
+MHF=M+MF;%*2.5;
+Pow=zeros(length(srci)*2,1);
 tic
-for permi=1:100000
-    Ran=[];
-    
-    [~,ran]=sort(rand(1,length(layer)));
-    selected=ran(1:5);
-    Ran=[Ran;selected];
-    
-    srcPerm=false(size(layer));
+for permi=1:10000
+    [~,ran]=sort(rand(1,length(srci)));
+    Ran=ran(1:5);
+    srcPerm=false(size(srci));
     srcPerm(Ran)=true;
     Gain=gain(:,[srcPerm;srcPerm]);
-    source=Gain\Mfliped;
+    source=Gain\MHF;
     recon=Gain*source;
-    R=corr(recon,Mfliped).^2;
+    R=corr(recon,MHF).^100;
     pow=zeros(size(Pow));
     pow([srcPerm;srcPerm])=source*R;
     Pow=Pow+pow;
@@ -256,6 +157,32 @@ scatter3(pnt(maxPNT,1),pnt(maxPNT,2),pnt(maxPNT,3),30,0)
 [~,sortPNT]=sort(Pow1,'descend');
 sortPNT(1:5)
 
+%% one layers
 
+MHF248=MHF(1:248);%*2.5;
+Pow=zeros(length(srci)*2,1);
+tic
+for permi=1:10000
+    [~,ran]=sort(rand(1,length(srci)));
+    Ran=ran(1:10);
+    srcPerm=false(size(srci));
+    srcPerm(Ran)=true;
+    Gain=gain(1:248,[srcPerm;srcPerm]);
+    source=Gain\MHF248;
+    recon=Gain*source;
+    R=corr(recon,MHF248).^100;
+    pow=zeros(size(Pow));
+    pow([srcPerm;srcPerm])=source*R;
+    Pow=Pow+pow;
+    prog(permi)
+end
+toc
+Pow1=sqrt(Pow(1:920).^2+Pow(921:1840).^2);
+figure;
+scatter3pnt(pnt,25,Pow1)
+[~,maxPNT]=max(Pow1);
+hold on
+scatter3(pnt(maxPNT,1),pnt(maxPNT,2),pnt(maxPNT,3),30,0)
 
-
+[~,sortPNT]=sort(Pow1,'descend');
+sortPNT(1:5)
