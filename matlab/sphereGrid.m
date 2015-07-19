@@ -39,10 +39,16 @@ end
 % plot3pnt(pnt1,'or')
 % plot3pnt(hs.pnt*100,'.k')
 %
-warning off
-hdr=ft_read_header(source);
-warning on
-grad=ft_convert_units(hdr.grad,'mm');
+
+if exist gead.mat
+    load grad
+else
+    warning off
+    hdr=ft_read_header(source);
+    warning on
+    grad=ft_convert_units(hdr.grad,'mm');
+end
+
 cfg = [];
 cfg.grad = grad;
 cfg.channel =grad.label(1:248);
