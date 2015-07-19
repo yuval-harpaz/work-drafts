@@ -40,7 +40,7 @@ end
 % plot3pnt(hs.pnt*100,'.k')
 %
 
-if exist gead.mat
+if exist ('./grad.mat','file')
     load ('./grad.mat')
     grad=ft_convert_units(grad,'mm');
 else
