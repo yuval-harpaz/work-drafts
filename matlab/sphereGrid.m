@@ -42,7 +42,7 @@ end
 
 if exist gead.mat
     load ('./grad.mat')
-    grad=ft_convert_units(hdr.grad,'mm');
+    grad=ft_convert_units(grad,'mm');
 else
     warning off
     hdr=ft_read_header(source);
