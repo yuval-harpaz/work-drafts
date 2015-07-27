@@ -9,7 +9,7 @@ cfg.symmetry='anatomy';
 cfg.method='pinv';
 cfg.vol.type='singlesphere';
 cfg.vol.unit='mm';
-
+cfg.pairs=true;
 subi=1
 cd ~/Data/alice/
 cd(sf{subi})
@@ -54,6 +54,10 @@ hs=ft_read_headshape('hs_file');
 cfg.grid=ft_convert_units(ftLeadfield,'mm');
 cfg.ori=priOri;
 [dip,R,mom]=dipolefitBIU(cfg,eval(['Mr',num2str(subi)]))
+save MNE/R100 R
+save MNE/dip100 dip
+
+
 
 eval(['M=mean(Mr',num2str(subi),'.avg(1:248,nearest(Mr',num2str(subi),'.time,t(1)):nearest(Mr',num2str(subi),'.time,t(2))),2);'])
 
