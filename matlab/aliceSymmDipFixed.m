@@ -73,7 +73,13 @@ cfg.ori=priOri;
 save MNE/R100 R
 save MNE/dip100 dip
 
-
+%%
+cd /home/yuval/Copy/MEGdata/alice/idan/MNE
+load dip100
+plot3pnt(dip.cfg.grid.pos,'ok')
+hold on
+ft_plot_dipole(dip.cfg.grid.pos(dip.grid_index(1),:),dip.dip.mom(1:3),'units','mm','color','b')
+ft_plot_dipole(dip.cfg.grid.pos(dip.grid_index(2),:),dip.dip.mom(4:6),'units','mm','color','b')
 
 % eval(['M=mean(Mr',num2str(subi),'.avg(1:248,nearest(Mr',num2str(subi),'.time,t(1)):nearest(Mr',num2str(subi),'.time,t(2))),2);'])
 % 

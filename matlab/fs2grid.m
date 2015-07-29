@@ -55,7 +55,7 @@ else
     ori=[];
 end
 clear lh* rh*
-if ~doLRpairs
+if ~doLRpairs && cfg.subset
     if size(fwd.sol.data,2)==fwd.nsource
         for posi=1:length(Grid.pos)
             Grid.leadfield{1,posi}=fwd.sol.data(:,posi);
