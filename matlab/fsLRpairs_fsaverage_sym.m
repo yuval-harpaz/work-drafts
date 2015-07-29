@@ -25,3 +25,4 @@ save /usr/local/freesurfer/subjects/fsaverage_sym/surf/pairs lPair rPair
 % rh.pial=mne_read_surface('/usr/local/freesurfer/subjects/aliceIdan/surf/rh.pial');
 % xhemilh.pial=mne_read_surface('/usr/local/freesurfer/subjects/aliceIdan/xhemi/surf/lh.pial');
 % xhemirh.pial=mne_read_surface('/usr/local/freesurfer/subjects/aliceIdan/xhemi/surf/rh.pial');
+
