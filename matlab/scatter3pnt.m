@@ -26,9 +26,11 @@ end
 view([-90,90])
 maxrange=max([range(x),range(y),range(z)]);
 midsize=maxrange*0.6;
-xlim([mean(x)-midsize,mean(x)+midsize])
-ylim([mean(y)-midsize,mean(y)+midsize])
-zlim([mean(z)-midsize,mean(z)+midsize])
+if length(x)>2
+    xlim([mean(x)-midsize,mean(x)+midsize])
+    ylim([mean(y)-midsize,mean(y)+midsize])
+    zlim([mean(z)-midsize,mean(z)+midsize])
+end
 axis vis3d
 if exist('C','var')
     if ~ischar(C)
