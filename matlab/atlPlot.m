@@ -1,6 +1,16 @@
-
+function atlPlot(month)
+% month = 8;
+if ~exist('month','var')
+    month=datestr(date,5);
+end
+if ~ischar(month)
+    month=num2str(month);
+end
+if length(month)==1
+    month=['0',month];
+end
 cd ~/Documents/ATL/
-[~,w]=unix('wget -O atl.dat --user=qd --password=79653 ftp://132.71.85.91/StorageCard/DAT_Files/ATL-Log-2015-08.dat');
+[~,w]=unix(['wget -O atl.dat --user=qd --password=79653 ftp://132.71.85.91/StorageCard/DAT_Files/ATL-Log-2015-',month,'.dat']);
 
 !grep DT#2015 atl.dat > atl.txt
 table=importdata('atl.txt');
