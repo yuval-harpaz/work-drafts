@@ -40,7 +40,10 @@ t2=nearest(empty.time,0.11);
 % scatter3pnt(brain,25,noise);
 noise1=mean(abs(wts),2);
 %scatter3pnt(brain,25,noise1);
+figure;
 scatter3pnt(brain,25,abs(source)./noise1);
+pct=1;
+caxis([prctile(source./noise1,pct) prctile(source./noise1,100-pct)])
 view([0 -80])
 %% SAMNwts
 Nwts=zeros(size(wts));
@@ -67,12 +70,14 @@ save idan/SAM/Nwts7 Nwts
 
 Nsource=mean(Nwts*Mr1.avg(1:248,t1:t2),2);
 figure;scatter3pnt(brain,25,abs(Nsource)./noise1);
+pct=5;
+caxis([prctile(Nsource./noise1,pct) prctile(Nsource./noise1,100-pct)])
 view([0 -80])
 
 %% SAMNwts, one contralateral source
 Nwts8=zeros(size(wts));
 for pnti=1:length(brain)
-    !echo 7 > idan/SAM/Tetra.txt
+    !echo 8 > idan/SAM/Tetra.txt
     Xi=brain(pnti,1)*100;
     Yi=brain(pnti,2)*100;
     Zi=brain(pnti,3)*100;
@@ -94,5 +99,7 @@ save idan/SAM/Nwts8 Nwts8
 
 Nsource8=mean(Nwts8*Mr1.avg(1:248,t1:t2),2);
 figure;scatter3pnt(brain,25,abs(Nsource8)./noise1);
+pct=5;
+caxis([prctile(Nsource8./noise1,pct) prctile(Nsource8./noise1,100-pct)])
 view([0 -80])
 
