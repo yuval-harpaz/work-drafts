@@ -17,13 +17,5 @@ charYH6;
 % ttest one cond
 charYH7('closed','Delta')
 % permutations one condition
-permuteBriks1('closed_Delta_R+tlrc',0,'Char_',[],[],[]);
-!mv perm/realTest+tlrc.BRIK ./closed_Delta_R_TT+tlrc.BRIK
-!mv perm/realTest+tlrc.HEAD ./closed_Delta_R_TT+tlrc.HEAD
-!mv perm/permResults* ./closed_Delta_R_TT.mat
-
-permuteBriks1('closed_Theta_R+tlrc',0,'Char_');
-!mv perm/realTest+tlrc.BRIK ./closed_Theta_R_TT+tlrc.BRIK
-!mv perm/realTest+tlrc.HEAD ./closed_Theta_R_TT+tlrc.HEAD
-!mv perm/permResults* ./closed_Theta_R_TT.mat
+charYH8
 
