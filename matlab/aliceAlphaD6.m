@@ -19,9 +19,10 @@ for subi=1:8
     for piskai=[2 4 8 12 14 16]
         %load(['files/seg',num2str(piskai)])
         %load files/evt
+        load(['files/seg',num2str(piskai)],'samps')
         s0=trigS(find(trigV==2));
         s1=round((samps(end,1)-samps(1,1))./1024*1017+s0);
-        if s1>trigS(find(trigV==2)+1)
+        if s1>trigS(find(trigV==piskai)+1)
             error('reading is in the break!')
         end
         cfg.trl=[s0 s1 0];
@@ -40,19 +41,12 @@ for subi=1:8
         Fread(1:size(f,1),1:100,1+size(Fread,3)*(size(Fread,1)>0):size(f,3)+size(Fread,3)*(size(Fread,1)>0))=f(:,1:100,:);
         
     end
-    Fread=Fread(:,:,1:60);
+    choice=round(1:size(Fread,3)/120:size(Fread,3));
+    if length(choice)~=120
+        error('must be 120sec')
+    end
+    Fread=Fread(:,:,choice);
     Fread=mean(Fread,3);
-%     bad=[22 44 133 134];
-%     
-%     for badi=1:length(bad)
-%         badRep=[bad(badi)-1 bad(badi)+1];
-%         if bad(badi)==133
-%             badRep=[101 182];
-%         elseif bad(badi)==134
-%             badRep=[102 183];
-%         end
-%         Fread(bad(badi),:)=(Fread(badRep(1),:)+Fread(badRep(2),:))./2;
-%     end
 
     % rest 1
     resti=102;
@@ -68,6 +62,8 @@ for subi=1:8
 %     f=abs(fftRaw(fn,t0,dur,1));
     Frest=f(:,1:100,1:60);
     Frest=mean(Frest,3);
+    Frest1=load('freqD','Frest');
+    Frest=(Frest+Frest1.Frest)./2;
     save freqD2 F*
     alphaRead(subi,1:248)=squeeze(max(Fread(:,9:11),[],2));
     alphaRest(subi,1:248)=squeeze(max(Frest(:,9:11),[],2));
@@ -85,3 +81,17 @@ title READ
 
 figure;topoplot248(mean(alphaRest),cfg);
 title REST
+
+load LRpairs
+load ~/ft_BIU/matlab/plotwts
+[~,Li]=ismember(LRpairs(:,1),wts.label);
+[~,Ri]=ismember(LRpairs(:,2),wts.label);
+readL=mean(alphaRead(:,Li),2);
+readR=mean(alphaRead(:,Ri),2);
+restL=mean(alphaRest(:,Li),2);
+restR=mean(alphaRest(:,Ri),2);
+rest=mean(alphaRest,2);
+read=mean(alphaRead,2);
+[~,p]=ttest(readL,restL)
+[~,p]=ttest(readR,restR)
+[~,p]=ttest(read,rest)

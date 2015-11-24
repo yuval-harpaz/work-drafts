@@ -1,6 +1,13 @@
 %% Nov 2015
+% rest1 60sec and first 60sec of reading
 aliceAlphaD3
-
+open aliceAlphaD5
+% using also last rest, 120sec per condition
+aliceAlphaD6
+% News Thamil and Loud
+aliceAlphaD7
+% ttests + rm_anova2
+open aliceAlphaD8
 %% Jun 2015
 aliceSymm
 

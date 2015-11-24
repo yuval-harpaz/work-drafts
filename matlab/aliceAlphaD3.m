@@ -22,7 +22,7 @@ for subi=1:8
         load files/evt
         s0=trigS(find(trigV==2));
         s1=round((samps(end,1)-samps(1,1))./1024*1017+s0);
-        if s1>trigS(find(trigV==2)+1)
+        if s1>trigS(find(trigV==piskai)+1)
             error('reading is in the break!')
         end
         cfg.trl=[s0 s1 0];

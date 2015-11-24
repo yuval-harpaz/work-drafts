@@ -34,3 +34,13 @@ read=mean(alphaRead,2);
 [~,p]=ttest(readL,restL)
 [~,p]=ttest(readR,restR)
 [~,p]=ttest(read,rest)
+% sig better with max
+readL=max(alphaRead(:,Li),[],2);
+readR=max(alphaRead(:,Ri),[],2);
+restL=max(alphaRest(:,Li),[],2);
+restR=max(alphaRest(:,Ri),[],2);
+rest=max(alphaRest,[],2);
+read=max(alphaRead,[],2);
+[~,p]=ttest(readL,restL)
+[~,p]=ttest(readR,restR)
+[~,p]=ttest(read,rest)
