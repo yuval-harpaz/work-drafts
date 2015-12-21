@@ -18,6 +18,7 @@ for condi=1:6
             end
             Pow(subi,:)=pow;
             PowNan=Pow;
+            FIXME, see charYH13
             PowNan(Pow>(median(Pow(:))*4))=nan;
 %             figure;
 %             plot(Pow')

@@ -1,4 +1,4 @@
-function [R,P]=charYH4(freqMethod, chanMethod, start, lots)
+function [R,P]=charYH4(chanMethod, freqMethod, start, lots)
 % chanMethod='max'; % 'mean' 'min'
 % freqMethod = 'max'; % 'mean'
 % start = 5; at which sample to start (5 = 2.5s)
@@ -41,16 +41,19 @@ for condi=[3,5]
             if subi==1
                 Pow=nan(40,size(pow,2));
             end
-            Pow(subi,:)=pow;
-            PowNan=Pow;
-            PowNan(Pow>(median(Pow(:))*4))=nan;
+%             Pow(subi,:)=pow;
+%             PowNan=Pow;
+%             PowNan(Pow>(median(Pow(:))*4))=nan;
+            PowNan=pow;
+            PowNan(pow>(median(pow)*4))=nan;
+            Pow(subi,:)=PowNan;
 %             figure;
 %             plot(Pow')
 %             hold on
 %             plot(PowNan','k')
 %             line([1,243],[median(Pow(:))*4,median(Pow(:))*4],'color','m')
         end
-        PowAvg=nanmean(PowNan);
+        PowAvg=nanmean(Pow);
         PowAvg=PowAvg(start:end);
         if condi==3
             aud=audioChar(start:end);

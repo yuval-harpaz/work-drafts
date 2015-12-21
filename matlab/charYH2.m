@@ -1,5 +1,5 @@
-function powMed=charYH2(freqMethod, chanMethod)
-% chanMethod='max'; % 'mean' 'min'
+function powMed=charYH2(chanMethod, freqMethod)
+% chanMethod='max'; % 'sum' 'min'
 % freqMethod = 'max'; % 'mean'
 bands={'Delta','Theta','Alpha','Beta','Gamma'};
 freqs=[1,4;4,8;8,13;13,25;25,40];
@@ -25,10 +25,16 @@ for subi=1:40
             switch freqMethod
                 case 'max'
                     pow=max(data,[],3);
+                case 'sum'
+                    pow=sum(data,3);
             end
             switch chanMethod
                 case 'max'
                     pow=max(pow,[],1);
+                case 'sum'
+                    pow=sum(pow,1);
+                case 'min'
+                    pow=min(pow,[],1);
             end
             if ~exist('YH','dir')
                 mkdir YH
@@ -38,9 +44,13 @@ for subi=1:40
             save(['YH/',conds{condi},'_',bands{bandi},'_',freqMethod,'_',chanMethod],'pow')
         end
     end
-    save YH/TRL TRL
-    save YH/good good
+    %save YH/TRL TRL
+    %save YH/good good
     cd ../
     disp(['DONE SUB ',num2str(subi)])
 end
-save (['powMed_',freqMethod,'_',chanMethod], 'powMed')
+if exist(['powMed_',freqMethod,'_',chanMethod,'.mat'],'file')
+    warning('file exists')
+else
+    save (['powMed_',freqMethod,'_',chanMethod], 'powMed')
+end
