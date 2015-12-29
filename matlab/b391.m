@@ -325,3 +325,88 @@ figure;
 plot3pnt(hs.pnt,'.k')
 hold on
 scatter3pnt(Grid.pos,15,VS)  
+
+%% brain connectivity toolbox
+cd /home/yuval/Data/epilepsy/b391
+load peaks
+load labels
+times={};
+for vsi=[2,4,5,6,7,8,9]
+    pik=peaks{vsi};
+    for vsj=[2,4,5,6,7,8,9] 
+        times{vsi,1}{vsj}=[];
+        count=0;
+        for peaki=1:length(pik)
+            if pik(peaki)>1018
+                peri=find(abs(pik(peaki)-peaks{vsj})<2034);
+                if ~isempty(peri)
+                    times{vsi,1}{vsj}=[times{vsi,1}{vsj},peaks{vsj}(peri)-pik(peaki)];
+                    count=count+1;
+                end
+            end
+        end
+    end   
+end
+t1=2034.5*1.025;
+edges=[-t1:2034.5/20:t1];
+time=round((diff(edges)./2+edges(1:end-1))/2034.5*1000);
+
+graph=zeros(7);
+grpi=0;
+grpj=0;
+for vsi=[2,4,5,6,7,8,9]
+    grpi=grpi+1;
+    for vsj=[2,4,5,6,7,8,9]
+        grpj=grpj+1;
+        if grpj==8
+            grpj=1;
+        end
+        if vsi~=vsj
+            
+            %sym=sum(histc(times{vsc(vsi)}{vsc(vsj)},[-51 51]));
+            %pre03=sum(histc(times{vsc(vsi)}{vsc(vsj)},round([-0.3 -0.025]*2034.5)));
+            %pre05=sum(histc(times{vsc(vsi)}{vsc(vsj)},round([-0.5 -0.025]*2034.5)));
+            binedData=histc(times{vsi}{vsj},edges);
+            binedData(end-1)=binedData(end-1)+binedData(end);
+            binedData(end)=[];
+%             figure;
+%             bar(time,binedData); xlim([-1000 1000])
+%             title(['timelock on ',num2str(vsi),', spikes on ',num2str(vsj)])
+            graph(grpi,grpj)=sum(binedData(16:20))./sum(binedData(1:5));
+        end
+    end
+end
+
+
+graph=zeros(7);
+grpi=0;
+grpj=0;
+for vsi=[2,4,5,6,7,8,9]
+    grpi=grpi+1;
+    for vsj=[2,4,5,6,7,8,9]
+        grpj=grpj+1;
+        if grpj==8
+            grpj=1;
+        end
+        if vsi~=vsj
+            
+            %sym=sum(histc(times{vsc(vsi)}{vsc(vsj)},[-51 51]));
+            %pre03=sum(histc(times{vsc(vsi)}{vsc(vsj)},round([-0.3 -0.025]*2034.5)));
+            %pre05=sum(histc(times{vsc(vsi)}{vsc(vsj)},round([-0.5 -0.025]*2034.5)));
+            binedData=histc(times{vsi}{vsj},edges);
+            binedData(end-1)=binedData(end-1)+binedData(end);
+            binedData(end)=[];
+%             figure;
+%             bar(time,binedData); xlim([-1000 1000])
+%             title(['timelock on ',num2str(vsi),', spikes on ',num2str(vsj)])
+            graph(grpi,grpj)=sum(binedData(1:5));
+        end
+    end
+end
+[idBL,odBL,degBL] = strengths_dir(graph)
+
+load('graphSum.mat')
+[id,od,deg] = strengths_dir(graph)
+id./ibBL
+id./idBL
+od./odBL
