@@ -13,7 +13,7 @@ for subi=1:length(Subs)
         cfg=[];
         cfg.badChan=[246];
         cfg.ampLinThr=0;
-        cfg.dataFiltFreq=0.1;
+        cfg.dataFiltFreq=1;
         correctHB(fn,[],[],[],cfg);
         unix(['mv hb_',fn,' hbAvgAmp_c,rfDC']);
         saveas(2,'avgHB.png')
@@ -50,6 +50,7 @@ for subi=1:length(Subs)
             cfg.bpfreq=[1 40];
             cfg.demean='yes';
             cfg.channel='MEG';
+            cfg.trl=[1,100000,1];
             %         cfg.padding=0.5;
             data=ft_preprocessing(cfg);
             data=ft_resampledata([],data);
@@ -70,8 +71,11 @@ for subi=1:length(Subs)
         end
         
         %trials=zeros(246,207,size(trl,1)-2);
+        
         for trli=2:(size(trl,1)-1)
-            trials(1:length(comp.topolabel),1:413,trli-1)=abs(comp.trial{1}(:,trl(trli,1):trl(trli,2)));
+            try
+                trials(1:length(comp.topolabel),1:413,trli-1)=abs(comp.trial{1}(:,trl(trli,1):trl(trli,2)));
+            end
         end
         rat=mean(squeeze(max(abs(trials(:,193:220,:)),[],2)./max(abs(trials(:,1:28,:)),[],2)),2);
         if max(rat)>2
@@ -82,10 +86,10 @@ for subi=1:length(Subs)
     end
 end
 cd /media/yuval/win_disk/Data/connectomeDB/MEG
-save leftover leftover pref
+%save leftover leftover pref
 
 % test a subject
-subi=10;filei=1;
+subi=9;filei=1;
 
 cd /media/yuval/win_disk/Data/connectomeDB/MEG
 cd(num2str(Subs(subi)))
@@ -98,3 +102,10 @@ cfg.layout='4D248.lay';
 ft_databrowser(cfg,comp)
 
 load trl.mat
+for trli=2:(size(trl,1)-1)
+    try
+        trials(1:length(comp.topolabel),1:413,trli-1)=abs(comp.trial{1}(:,trl(trli,1):trl(trli,2)));
+    end
+end
+rat=mean(squeeze(max(abs(trials(:,193:220,:)),[],2)./max(abs(trials(:,1:28,:)),[],2)),2);
+find(rat2>2) 
