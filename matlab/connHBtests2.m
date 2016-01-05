@@ -109,3 +109,34 @@ for trli=2:(size(trl,1)-1)
 end
 rat=mean(squeeze(max(abs(trials(:,193:220,:)),[],2)./max(abs(trials(:,1:28,:)),[],2)),2);
 find(rat2>2) 
+
+%% Sheraz
+cd /home/yuval/Copy/MEGdata/alpha/sheraz
+fileName='sub01_raw.fif';
+hdr=ft_read_header(fileName);
+trl=[1,hdr.nSamples,0];
+cfg=[];
+cfg.trl=trl;
+cfg.demean='yes';
+cfg.dataset=fileName;
+cfg.channel='MEGMAG';
+mag=ft_preprocessing(cfg);
+meanMAG=mean(mag.trial{1,1});
+cfg.channel='MEG';
+meg=ft_preprocessing(cfg);
+figOptions.label=meg.label;
+figOptions.layout='neuromag306mag.lay';
+clear mag
+[cleanMEG,tempMEG,periodMEG,mcgMEG,RtopoMEG]=correctHB(meg.trial{1,1},meg.fsample,0,meanMAG);
+
+infile='rest-raw.fif';
+outfile='clean-raw.fif';
+raw=fiff_setup_read_raw(infile);
+
+[data,times] = fiff_read_raw_segment(raw,raw.first_samp,raw.last_samp,1:248);
+
+%% ctf
+cd /home/yuval/Data
+load /home/yuval/Data/ArtifactRemoval.ds/ECG308
+
+correctHB([],[],[],ECG);
