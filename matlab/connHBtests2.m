@@ -138,5 +138,32 @@ raw=fiff_setup_read_raw(infile);
 %% ctf
 cd /home/yuval/Data
 load /home/yuval/Data/ArtifactRemoval.ds/ECG308
-
 correctHB([],[],[],ECG);
+
+%check HB topography
+cd /home/yuval/Data
+load('/home/yuval/Data/ArtifactRemoval.ds/hbCleanECG.mat', 'HBtimes')
+trl=round(HBtimes*1200)'-300;
+trl(:,2)=trl+900;
+trl(:,3)=-300;
+trl=trl(1:9,:);
+cfg = [];
+cfg.dataset = 'ArtifactRemoval.ds'; 
+cfg.channel='MEG';
+cfg.trl=trl;
+cfg = ft_definetrial(cfg);
+cfg.demean='yes';
+cfg.baselinewindow=[-0.25 -0.15];
+cfg.bpfilter='yes';
+cfg.bpfreq=[5 40];
+data = ft_preprocessing(cfg);
+avg=ft_timelockanalysis([],data);
+plot(avg.time,avg.avg)
+cfg=[];
+cfg.interactive='yes';
+cfg.xlim=[0 0];
+ft_topoplotER(cfg,avg);
+
+load /home/yuval/Data/ArtifactRemoval.ds/ECG308
+cfg.matchMethod='topo';
+[~,HBtimes,templateHB,Period,MCG,Rtopo]=correctHB([],[],[],ECG,cfg);
