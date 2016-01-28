@@ -24,21 +24,26 @@ for HBi=1:(length(HBtimes)-1)
 end
 frequency(HBs1-pre:end)=periods(end);
 
-    
-    
-s1=1;s2=20345;
+s1=1;s2=ceil(data.fsample*100);
+MEG=data.trial{1}(248,s1:s2);
+ECG=data.trial{1}(249,s1:s2);
+MCG=mean(data.trial{1}(1:248,s1:s2));
+frequency=frequency(s1:s2);
+
+
+
 datain={};
-datain.data(1,1,1,1:s2-s1+1)=data.trial{1}(248,s1:s2)*10^13;
+datain.data(1,1,1,1:length(MEG))=MEG;
 datain.dt=1/data.fsample;
 
 dataref={};
 dataref{1}.dt=datain.dt; % seconds between MEG samples
-dataref{1}.data=mean(data.trial{1}(1:248,s1:s2))*10^13;
+dataref{1}.data=ECG;
 dataref{1}.freqlist = 40:60; % beats per minute
-dataref{1}.frequency=frequency(s1:s2);
+dataref{1}.frequency=frequency;
 dataref{1}.N=1;
 dataref{1}.qr=0.5;
-dataref{1}.downt=0.001;
+dataref{1}.downt=0.1;
 dataout=drifter(datain,dataref);
 figure;
 plot(data.time{1}(s1:s2),squeeze(dataout.data),'k')
