@@ -54,8 +54,8 @@ end
 cd /media/yuval/YuvalExtDrive/Data/Aviva/MEG/
 save coh Coh*
 
-figure;imagesc(median(rr-ww,3));colorbar
-figure;imagesc(median(rrN-wwN,3));colorbar
+figure;imagesc(median(Coh,3));colorbar
+
 
 TT=ones(6);
 conti=1:12;
@@ -63,7 +63,7 @@ medi=[13:20,22:26];
 for i=1:6
     for j=1:6
         if i~=j
-            [~,TT(i,j)]=ttest2(rr(i,j,conti)-ww(i,j,conti),rr(i,j,medi)-ww(i,j,medi));
+            [~,TT(i,j)]=ttest2(Coh(i,j,conti),Coh(i,j,medi));
         end
     end
 end
@@ -76,7 +76,7 @@ medi=[13:20,22:26];
 for i=1:6
     for j=1:6
         if i~=j
-            [~,TT(i,j)]=ttest2(rrN(i,j,conti)-wwN(i,j,conti),rrN(i,j,medi)-wwN(i,j,medi));
+            [~,TT(i,j)]=ttest2(CohN(i,j,conti),CohN(i,j,medi));
         end
     end
 end
