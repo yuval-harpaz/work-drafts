@@ -82,4 +82,3 @@ for i=1:6
 end
 min(min(TT))
 figure;imagesc(1-TT,[0 1]);colorbar
-
