@@ -14,29 +14,80 @@ for subi=[1,3:10]
     cfg.channel={'MEG','-A2'};
     cfg.trl=[1,203450,0];
     data=ft_preprocessing(cfg);
-    cfg=[];
-    %cfg.method='pca';
-    %cfg.numcomponent=10;
-    comp=ft_componentanalysis(cfg,data);
-    cfg=[];
-    cfg.layout='4D248.lay';
-    cfg.blocksize = 1;
-    ft_databrowser(cfg,comp)
-    G2=g2loop(comp.trial{1}(:,1:20345),2034);
-    compi=find(G2>median(G2)*5);
+    rr=corr(data.trial{1}');
+    
+    cfg.dataset=['hb_',fn];
+    datahb=ft_preprocessing(cfg);
+    rrhb=corr(datahb.trial{1}');
+    clear datahb
+    
+    rr(logical(eye(length(rr))))=nan;
+    r=rr(:);
+    nani=isnan(r);
+    r(nani)=[];
+    
+    rrhb(logical(eye(length(rrhb))))=nan;
+    rhb=rrhb(:);
+    rhb(nani)=[];
+    
+    figure;
+    scatter(abs(r),abs(rhb),'.')
+    lims=[0 1];
+    xlim(lims)
+    ylim(lims)
+    hold on
+    line(lims,lims,'color','k')
+    xlabel('r raw data')
+    ylabel('r 5cat data')
+    
+    
+    if exist('comp.mat','file')
+        load comp
+    else
+        cfg=[];
+        comp=ft_componentanalysis(cfg,data);
+%         cfg=[];
+%         cfg.layout='4D248.lay';
+%         cfg.blocksize = 1;
+%         ft_databrowser(cfg,comp)
+        G2=g2loop(comp.trial{1}(:,1:20345),2034);
+        compi=find(G2>median(G2)*5);
+        save comp comp compi
+    end
     cfg=[];
     cfg.component=compi;
     datapca=ft_rejectcomponent(cfg,comp,data);
-    save comp comp compi
+    clear data
     clear comp
-    rr=corr(data.trial{1}');
-    rr(logical(eye(length(rr))))=nan;
     rrpca=corr(datapca.trial{1}');
-    rrpca(logical(eye(length(rr))))=nan;
     clear datapca
-    %topo=nanmean(abs(rr));
+    rrpca(logical(eye(length(rr))))=nan;
+    rpca=rrpca(:);
+    rpca(nani)=[];
+    
+    figure;
+    scatter(abs(r),abs(rpca),'.')
+    lims=[0 1];
+    xlim(lims)
+    ylim(lims)
+    hold on
+    line(lims,lims,'color','k')
+    xlabel('r raw data')
+    ylabel('r pca data')
+    
+    rdif=abs(rr)-abs(rrhb);
+    topo=[];
+    topo([1,3:248],1)=nanmin(rdif);
     %topo=nanmax(abs(rr));
-    %topo(2)=(topo(46)+topo(186))./2;
+    topo(2)=(topo(46)+topo(186))./2;
+    figure;topoplot248(-topo)
+    
+    rdif=abs(rr)-abs(rrpca);
+    topo=[];
+    topo([1,3:248],1)=nanmean(abs(rdif));
+    %topo=nanmax(abs(rr));
+    topo(2)=(topo(46)+topo(186))./2;
+    
     % figure;topoplot248(topo)
     %topopca=nanmean(abs(rrpca));
     %topopca=nanmax(abs(rrpca));
@@ -50,20 +101,8 @@ for subi=[1,3:10]
 %     line(lims,lims,'color','k')
 %     xlabel('r raw data')
 %     ylabel('r pca data')
-    r=rr(:);
-    nani=isnan(r);
-    rpca=rrpca(:);
-    r(nani)=[];
-    rpca(nani)=[];
-    figure;
-    scatter(abs(r),abs(rpca),'.')
-    lims=[0 1];
-    xlim(lims)
-    ylim(lims)
-    hold on
-    line(lims,lims,'color','k')
-    xlabel('r raw data')
-    ylabel('r pca data')
+
+    
     
     clear data
     
@@ -80,15 +119,7 @@ for subi=[1,3:10]
     clear datahb
     rhb=rrhb(:);
     rhb(nani)=[];
-    figure;
-    scatter(abs(r),abs(rhb),'.')
-    lims=[0 1];
-    xlim(lims)
-    ylim(lims)
-    hold on
-    line(lims,lims,'color','k')
-    xlabel('r raw data')
-    ylabel('r 5cat data')
+    
 end
 cd /media/yuval/win_disk/Data/connectomeDB/MEG
 save E_Mstats means SDs ranges

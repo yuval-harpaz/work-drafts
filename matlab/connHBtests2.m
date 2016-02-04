@@ -141,8 +141,8 @@ load /home/yuval/Data/ArtifactRemoval.ds/ECG308
 correctHB([],[],[],ECG);
 
 %check HB topography
-cd /home/yuval/Data
-load('/home/yuval/Data/ArtifactRemoval.ds/hbCleanECG.mat', 'HBtimes')
+cd /home/yuval/Data/CTF
+load('ArtifactRemoval.ds/hbCleanECG.mat', 'HBtimes')
 trl=round(HBtimes*1200)'-300;
 trl(:,2)=trl+900;
 trl(:,3)=-300;
