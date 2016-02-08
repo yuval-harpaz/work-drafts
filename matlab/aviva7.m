@@ -4,7 +4,7 @@ bands={'theta','beta','gamma','gammah','gammahh'};
 cd /media/yuval/YuvalExtDrive/Data/Aviva/MEG/
 load subCoor
 load goodSubs
-for bandi=1:length(bands)
+for bandi=1;%:length(bands)
     for subi=1:length(subCoor)
         cd /media/yuval/YuvalExtDrive/Data/Aviva/MEG/
         sub=subCoor{subi,1};

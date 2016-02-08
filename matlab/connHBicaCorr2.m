@@ -1,6 +1,6 @@
 %% plot ica issues
 
-load /media/yuval/win_disk/Data/connectomeDB/MEGposCorr
+load /media/yuval/win_disk/Data/connectomeDB/MEG/posCorr
 posCorr(:,:,2)=[];
 % figure;
 % plot(squeeze(mean(posCorr,3))','linewidth',2)
