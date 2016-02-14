@@ -1,3 +1,5 @@
+cd /home/yuval/Data/epilepsy/b409/session2/2
+
 cfg=[];
 cfg.dataset='hb,lf_c,rfhp1.0Hz';
 cfg.demean='yes';
@@ -67,4 +69,14 @@ hold on
 plot(mean(avg(Ri,:)),'r')
 plot(mean(abs(avg)),'k')
 
+rimda(avg(:,300));
+
+
+%% Rimda 4D
+cd /home/yuval/Data/epilepsy/b409/session2/2
+load avg
+load pnt
+load gain
+rimda(avg(:,300));
+rimda(avg(:,250:350));
 
