@@ -78,5 +78,4 @@ load avg
 load pnt
 load gain
 rimda(avg(:,300));
-rimda(avg(:,250:350));
-
+rimda(avg(:,295:360));
