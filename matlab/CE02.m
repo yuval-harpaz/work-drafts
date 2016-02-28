@@ -7,22 +7,27 @@ cfg.dataset=DIR.name; %change for each subject
 cfg.trialdef.pre = 0.5;
 cfg.trialdef.post = 1.5;
 cfg.trialdef.offset = -0.5;
-cfg.trl=createTRL(cfg);
-
+trl=CEcreateTRL(cfg);
+save trl trl
 %% find muscle artifacts
 % preprocess data for artifact rejection
 cfg.continuous='yes';
 cfg.channel={'all','-Status','-EXG8'};
 cfg.reref         = 'yes';
 cfg.refchannel    = [69 70];
+cfg.demean='yes';
 data=ft_preprocessing(cfg);
+
+avg=ft_timelockanalysis([],data);
+plot(avg.time,avg.avg)
 
 % view artifacts using Fieldtrip
 cfg=[];
 cfg.method='summary';
 cfg.preproc.hpfreq=60;
 cfg.preproc.hpfilter='yes';
-clean=ft_rejectvisual(cfg, tempData);
+clean=ft_rejectvisual(cfg, data);
+
 
 
 %% preprocess the data
