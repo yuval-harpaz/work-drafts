@@ -1,6 +1,7 @@
 clear
 
 %% ssp+ica by time window
+% SSP is okay, not so much for the last subject
 
 cd /media/yuval/win_disk/Data/connectomeDB/MEG
 load Subs
@@ -99,22 +100,8 @@ HB=mean(HBall);
 HB=HB-HB(1);
 time=-0.1:1/2034.5:0.65;
 
-% bars=[mean(posCorrSSP);mean(posCorrHB);mean(posCorrICA2);mean(posCorrRaw)];
-% figure;
-% plot(time,HB./max(HB).*max(mean(posCorrRaw(:,1))),'r')
-% hold on
-% bar(win0t,bars');
-% legend('timecourse','SSP','Template','ICA','Raw')
-% 
-% bars=[median(posCorrSSP./posCorrRaw);median(posCorrHB./posCorrRaw);median(posCorrICA2./posCorrRaw)]-1;
-% figure;
-% plot(time,HB./max(HB).*max(max(bars)),'r')
-% hold on
-% bar(win0t,bars')
-% legend('timecourse','SSP','Template','ICA')
-% 
-% 
 
+% 8 subjects
 bars=[mean(posCorrSSP(1:8,:));mean(posCorrHB(1:8,:));mean(posCorrICA2(1:8,:));mean(posCorrRaw(1:8,:))];
 figure;
 plot(time,HB./max(HB).*max(mean(posCorrRaw(1:8,1))),'r')
@@ -122,6 +109,7 @@ hold on
 bar(win0t,bars');
 legend('timecourse','SSP','Template','ICA','Raw')
 lims=ylim;
+% subject 10
 bars=[posCorrSSP(9,:);posCorrHB(9,:);posCorrICA2(9,:);posCorrRaw(9,:)]
 figure;
 plot(time,HB./max(HB).*max(mean(posCorrRaw(1:8,1))),'r')

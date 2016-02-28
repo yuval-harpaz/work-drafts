@@ -99,26 +99,90 @@ end
 % load ctf data and plant it in the ft structure and do the same
 cd /home/yuval/Data/OMEGA
 DIR=dir('MNI*');
+    win0t=0:0.1:0.6;
+win0=round(2034.5*win0t);
+step=ceil((win0(2)-win0(1))./2);
 for subi=1:length(DIR)
     clear ctf Rtopo data
     cd /home/yuval/Data/OMEGA
     sub=DIR(subi).name;
     cd(sub)
-    
-sign=Rtopo>0;
-sign=2*(sign-0.5);
-for chi=1:length(sign)
-    data(:,chi)=data(:,chi).*sign(chi);
-end
-rr=corr(data);
-rr(logical(eye(270)))=nan;
-r=nanmean(nanmean(rr)); % 0.08
-clear data
-load HBdata HBdata
-for chi=1:length(sign)
-    HBdata.trial{1}(chi,:)=HBdata.trial{1}(chi,:).*sign(chi);
-end
-
-
-
-end
+    load Rtopo
+    sign=Rtopo>0;
+    sign=2*(sign-0.5);
+    load HBdata
+    HBdata.trial{1}=HBdata.trial{1}(:,1:HBdata.fsample*100);
+    HBdata.time{1}=HBdata.time{1}(:,1:HBdata.fsample*100);
+    cfg=[];
+    cfg.demean='yes';
+    cfg.bpfilter='yes';
+    cfg.bpfreq=[1 70];
+    %cfg.channel={'MEG','-A2'};
+    %cfg.trl=[1,203450,0];
+    cleaned=ft_preprocessing(cfg,HBdata);
+    cleaned=cleaned.trial{1};
+    load HBdata
+    HBdata.trial{1}=[];
+    data=HBdata;
+    clear HBdata
+    load ctf
+    megi=ctf.sensor.index.meg;
+    for triali=1:100
+        data.trial{1}(1:length(data.label),[(triali-1)*data.fsample+1:triali*data.fsample])=ctf.data{triali}(:,megi)';
+    end
+    clear ctf
+    data.time{1}=data.time{1}(1:data.fsample*100);
+    datars=ft_resampledata([],data);
+    comp=ft_componentanalysis([],datars);
+    save comp comp
+%     %load comp
+    compg2=g2loop(comp.trial{1}(1:40,:),comp.fsample);
+    compii=find(compg2(1:40)>median(compg2)*3);
+    load Rtopo
+    sign=Rtopo>0;
+    sign=2*(sign-0.5);
+    meanMEG=sign'*datars.trial{1};
+    rm=corr(meanMEG',comp.trial{1}(1:40,:)');
+%     [comprv,compri]=max(rm);
+%     if abs(comprv)<0.4
+%         error('low corr with meanMEG')
+%     end
+%     if sum(abs(rm)>0.4)>1 && sum(ismember(find(abs(rm)>0.4),compii))~=length(compii)
+%         error('more comps with correlatios!')
+%     end
+%     if ~ismember(compri,compii)
+%         error('max corr not with high g2')
+%     end
+%     cfg=[];
+%     cfg.component=compii;
+%     datapca2=ft_rejectcomponent(cfg,comp,data);
+%     cfg=[];
+%     cfg.hpfilter='yes';
+%     cfg.hpfreq=25;
+%     cfg.demean='yes';
+%     datapca2=ft_preprocessing(cfg,datapca2);
+%     cleaned=cleaned+datapca2.trial{1};
+%     data=ft_preprocessing(cfg,data);
+%     sRate=data.fsample;
+    load Ipeaks
+    Ipeaks=Ipeaks(Ipeaks<98*sRate);
+    %HBtimes=HBtimes(2:find(HBtimes>98,1));
+    for wini=1:length(win0)
+        S=[];
+        for HBi=1:length(HBtimes)
+            beg=Ipeaks(HBi)+win0(wini)-step;
+            sto=Ipeaks(HBi)+win0(wini)+step;
+            S=[S,beg:sto];
+        end
+        rrhb=corr(data.trial{1}(:,S)');
+        rrhb(logical(eye(length(rrhb))))=nan;
+        posCorrRaw(subi,wini)=nanmean(nanmean(rrhb));
+        rrhb=corr(cleaned(:,S)');
+        rrhb(logical(eye(length(rrhb))))=nan;
+        posCorrICA10(subi,wini)=nanmean(nanmean(rrhb));
+        rrhb=corr(datapca2.trial{1}(:,S)');
+        rrhb(logical(eye(length(rrhb))))=nan;
+        posCorrICA1(subi,wini)=nanmean(nanmean(rrhb));
+    end
+    clear data*
+    disp(['XXXXXXXXXXX ',num2str(subi),' XXXXXXXXXXXXXX'])
