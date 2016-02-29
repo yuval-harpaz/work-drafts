@@ -126,12 +126,6 @@ for subi=1:length(DIR)
     load HBdata
     HBdata.trial{1}=HBdata.trial{1}(:,1:HBdata.fsample*100);
     HBdata.time{1}=HBdata.time{1}(:,1:HBdata.fsample*100);
-%     cfg=[];
-%     cfg.demean='yes';
-%     cfg.bpfilter='yes';
-%     cfg.bpfreq=[1 70];
-    %cfg.channel={'MEG','-A2'};
-    %cfg.trl=[1,203450,0];
     cleaned=HBdata;
     load HBdata
     HBdata.trial{1}=[];
@@ -144,18 +138,12 @@ for subi=1:length(DIR)
     end
     clear ctf
     data.time{1}=data.time{1}(1:data.fsample*100);
-
 %     cfg=[];
 %     cfg.method='pca';
 %     comp=ft_componentanalysis(cfg,data);
 %     compg2=g2loop(comp.trial{1}(1:40,:),round(comp.fsample/4));
-%     This approach failed, PCA cannot reliably seperate the HB for ctf
-
-        
-        
-        
-    load Rtopo
-    
+%     This approach failed, PCA cannot reliably seperate the HB for ctf   
+    load Rtopo    
     cfg = [];
     cfg.unmixing=pinv(Rtopo);
     cfg.topolabel = data.label;
@@ -190,18 +178,18 @@ for subi=1:length(DIR)
         rrhb(logical(eye(length(rrhb))))=nan;
         posCorrTopo(subi,wini)=nanmean(nanmean(rrhb));
     end
-    Ncomp(subi)=length(compi);
+    %Ncomp(subi)=length(compi);
     clear data*
     disp(['XXXXXXXXXXX ',num2str(subi),' XXXXXXXXXXXXXX'])
     clear compi compii
 end
 cd /home/yuval/Data/OMEGA
 save posCorrTopo posCorrTopo
-
-bars=[mean(posCorrSSP);mean(posCorrHB);mean(posCorrICA1);mean(posCorrRaw)];
+load posCorr
+bars=[mean(posCorrSSP);mean(posCorrHB);mean(posCorrICA1);mean(posCorrRaw);mean(posCorrTopo)];
 figure;
 % plot(time,HB./max(HB).*max(mean(posCorrRaw(1:8,1))),'r')
 % hold on
 bar(win0t,bars');
-legend('SSP','Template','ICA','Raw')
+legend('SSP','Template','ICA','Raw','Topo')
 
