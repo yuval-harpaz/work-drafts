@@ -17,8 +17,8 @@ for subi=1:length(Subs)
     trl(:,3)=-512;
     cfg.trl=trl;
     cfg.channel={'all','-Status','-EXG8'};
-    cfg.reref         = 'yes';
-    cfg.refchannel    = [69 70];
+    %cfg.reref         = 'yes';
+    %cfg.refchannel    = [69 70];
     cfg.demean='yes';
     cfg.baselinewindow=[-0.25 -0.15];
     cfg.bpfilter='yes';
@@ -27,6 +27,23 @@ for subi=1:length(Subs)
     avg=ft_timelockanalysis([],data);
     badChanI=std(avg.avg')>5;
     badChan=data.label(badChanI);
+    
+    cfg=[];
+    cfg.dataset=DIR.name;
+    cfg.trl=trl;
+    cfg.channel={'all','-Status','-EXG8'};
+    cfg.demean='yes';
+    cfg.baselinewindow=[-0.25 -0.15];
+    cfg.bpfilter='yes';
+    cfg.bpfreq=[1 40];
+    cfg.reref         = 'yes';
+    cfg.refchannel    = 'all';
+    data=ft_preprocessing(cfg);
+    avg=ft_timelockanalysis([],data);
+    
+    
+    
+    
     cfg=[];
     cfg.badChan=badChan;
     trials=badTrials(cfg,data,0);
@@ -44,8 +61,11 @@ figure;plot(time,squeeze(mean(AVG,3)))
 gavg=ft_timelockanalysis([],data);
 gavg.avg=squeeze(mean(AVG,3));
 gavg.label=gavg.label(1:64);
+
 cfg=[];
 cfg.xlim=[0.1 0.1];
 cfg.interactive='yes';
 cfg.layout='biosemi64';
+cfg.zlim=[-3.5 3.5];
+figure;
 ft_topoplotER(cfg,gavg)
