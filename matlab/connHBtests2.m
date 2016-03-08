@@ -56,7 +56,7 @@ for subi=1:length(Subs)
             data=ft_resampledata([],data);
             cfg=[];
             cfg.channel={'MEG','-A2'};
-            cfg.channel={'MEG','-A2','-A246'};
+            %cfg.channel={'MEG','-A2','-A246'};
             comp=ft_componentanalysis(cfg,data);
             save([pref{filei},'comp.mat'],'comp');
         end

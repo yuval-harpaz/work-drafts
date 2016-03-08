@@ -186,3 +186,4 @@ for subi=1:length(DIR)
     end
     clear data*
     disp(['XXXXXXXXXXX ',num2str(subi),' XXXXXXXXXXXXXX'])
+end

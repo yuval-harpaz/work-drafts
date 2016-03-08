@@ -17,8 +17,14 @@ connHBplot2
 % corrHBsspMNE
 connHBfft
 
+% fix bug in filtering order
+connHBomega1
 
+connHBplot3 % also runs ttests
 
+% to assess cleaning don't hp 25Hz
+connHBomega2
+connHB1_70
 
 
 
