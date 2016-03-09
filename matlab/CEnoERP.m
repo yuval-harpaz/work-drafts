@@ -1,5 +1,5 @@
 cd /home/yuval/Data/Daniel
-DIR=dir('6*')
+DIR=dir('*.bdf')
 Subs={DIR(:).name}';
 for subi=1:length(Subs)
     cd /home/yuval/Data/Daniel
