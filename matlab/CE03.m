@@ -42,11 +42,19 @@ cfg.bpfilter='yes';
 cfg.bpfreq=[1 40];
 cfg.trials=trialshp;
 data=ft_preprocessing(cfg,data);
+% R=zeros(4,4);
+% for triali=1:length(comp.trial)
+%     r=corr(datars.trial{triali}([65:67,71],:)');
+%     r(r>-0.65)=0;
+%     R=R+r;
+% end
+% R=R./triali;
+
 data.label{72}='HEOG';
 data.label{73}='VEOG';
 for triali=1:length(data.trial)
-    data.trial{triali}(72,:)=data.trial{triali}(1,:)-data.trial{triali}(2,:);
-    data.trial{triali}(73,:)=data.trial{triali}(3,:)-data.trial{triali}(7,:);
+    data.trial{triali}(72,:)=data.trial{triali}(64+1,:)-data.trial{triali}(64+2,:);
+    data.trial{triali}(73,:)=data.trial{triali}(64+3,:)-data.trial{triali}(64+7,:);
 end
 save([sub,'bp.mat'],'data','cfg1','badChan','trialshp')
 cfg=[];
@@ -55,8 +63,8 @@ cfg.detrend    = 'no';
 %   cfg.demean     = 'no'
 datars=ft_resampledata(cfg,data);
 cfg=[];
-cfg.channel={'EEG','VEOG','HEOG'};
-%cfg.method='pca';
+cfg.channel={'EEG','VEOG','HEOG',badChan{1}};
+cfg.method='pca';
 comp=ft_componentanalysis(cfg,datars);
 % find horizontal component
 R=zeros(20,1);
@@ -64,6 +72,8 @@ for triali=1:length(comp.trial)
     R=R+corr(comp.trial{triali}(1:length(R),:)',datars.trial{triali}(73,:)');
 end
 R=R./triali;
+
+topoplotB64(comp.topo(:,1))
 
 cfg=[];
 cfg.layout='biosemi64.lay';
