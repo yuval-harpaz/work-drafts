@@ -56,9 +56,14 @@ cfg.detrend    = 'no';
 datars=ft_resampledata(cfg,data);
 cfg=[];
 cfg.channel={'EEG','VEOG','HEOG'};
-cfg.method='pca';
+%cfg.method='pca';
 comp=ft_componentanalysis(cfg,datars);
-
+% find horizontal component
+R=zeros(20,1);
+for triali=1:length(comp.trial)
+    R=R+corr(comp.trial{triali}(1:length(R),:)',datars.trial{triali}(73,:)');
+end
+R=R./triali;
 
 cfg=[];
 cfg.layout='biosemi64.lay';
