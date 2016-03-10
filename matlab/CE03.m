@@ -57,13 +57,24 @@ for triali=1:length(data.trial)
     data.trial{triali}(73,:)=data.trial{triali}(64+3,:)-data.trial{triali}(64+7,:);
 end
 save([sub,'bp.mat'],'data','cfg1','badChan','trialshp')
+
+
+
 cfg=[];
 %cfg.resamplefs = ;
 cfg.detrend    = 'no';
 %   cfg.demean     = 'no'
 datars=ft_resampledata(cfg,data);
+
 cfg=[];
-cfg.channel={'EEG','VEOG','HEOG',badChan{1}};
+cfg.method='summary';
+cfg.channel='EEG';
+cfg.keepchannel='yes';
+datars=ft_rejectvisual(cfg,datars)
+
+
+cfg=[];
+cfg.channel={'EEG','VEOG','HEOG',['-',badChan{1}]};
 cfg.method='pca';
 comp=ft_componentanalysis(cfg,datars);
 % find horizontal component
@@ -72,8 +83,12 @@ for triali=1:length(comp.trial)
     R=R+corr(comp.trial{triali}(1:length(R),:)',datars.trial{triali}(73,:)');
 end
 R=R./triali;
-
-topoplotB64(comp.topo(:,1))
+[~,compi]=max(abs(R))
+%badChanI=find(ismember(data.label,badChan{1}));
+topo=nan(64,1);
+[~,chani]=ismember(comp.topolabel,data.label);
+topo(chani)=comp.topo(:,1);
+topoplotB64(topo)
 
 cfg=[];
 cfg.layout='biosemi64.lay';
