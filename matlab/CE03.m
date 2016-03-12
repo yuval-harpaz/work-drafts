@@ -1,99 +1,130 @@
 %% define trials
-cd Data/Daniel
+try
+    cd ~/Data/Daniel
+catch
+    cd /media/yuval/a599eaa1-cc66-4429-9604-79d874cb2efc/home/yuval/Data/Daniel/609
+end
 sub='609';
-DIR=dir([sub,'*.bdf']);
-cfg1=[];
-cfg1.dataset=DIR.name; %change for each subject
-cfg1.trialdef.pre = 0.5;
-cfg1.trialdef.post = 1.5;
-cfg1.trialdef.offset = -0.5;
-cfg1.trl=CEcreateTRL(cfg1);
-
-%% find muscle artifacts
-% preprocess data, filter 50Hz and 1Hz hp
-cfg1.continuous='yes';
-cfg1.channel={'all','-Status','-EXG8'};
-cfg1.reref         = 'yes';
-cfg1.refchannel    = [69 70];
-cfg1.demean='yes';
-cfg1.baselinewindow=[-0.25 -0.15];
-cfg1.hpfreq=1;
-cfg1.hpfilter='yes';
-cfg1.dftfilter='yes';
-data=ft_preprocessing(cfg1);
-% check bad channels
-for triali=1:length(data.trial)
-    SD(1:64,triali)=std(data.trial{triali}(1:64,:),[],2);
+if ~exist([sub,'/bp.mat'],'file')
+    DIR=dir([sub,'/*.bdf']);
+    cfg1=[];
+    cfg1.dataset=[sub,'/',DIR.name]; %change for each subject
+    cfg1.trialdef.pre = 0.5;
+    cfg1.trialdef.post = 1.5;
+    cfg1.trialdef.offset = -0.5;
+    cfg1.trl=CEcreateTRL(cfg1);
+    
+    %% find muscle artifacts
+    % preprocess data, filter 50Hz and 1Hz hp
+    cfg1.continuous='yes';
+    cfg1.channel={'all','-Status','-EXG8'};
+    cfg1.reref         = 'yes';
+    cfg1.refchannel    = [69 70];
+    cfg1.demean='yes';
+    cfg1.baselinewindow=[-0.25 -0.15];
+    cfg1.hpfreq=1;
+    cfg1.hpfilter='yes';
+    cfg1.dftfilter='yes';
+    data=ft_preprocessing(cfg1);
+    % check bad channels
+    for triali=1:length(data.trial)
+        SD(1:64,triali)=std(data.trial{triali}(1:64,:),[],2);
+    end
+    SD=mean(SD,2);
+    badChanI=find(SD>2*median(SD));
+    badChan=data.label(badChanI);
+    cfg=[];
+    cfg.bpfilter='yes';
+    cfg.bpfreq=[110 140];
+    cfg.channel=1:64;
+    datahp=ft_preprocessing(cfg,data);
+    cfg=[];
+    cfg.badChan=badChan;
+    trialshp=badTrials(cfg,datahp,1);
+    clear datahp
+    cfg=[];
+    cfg.bpfilter='yes';
+    cfg.bpfreq=[1 40];
+    cfg.trials=trialshp;
+    data=ft_preprocessing(cfg,data);
+    % R=zeros(4,4);
+    % for triali=1:length(comp.trial)
+    %     r=corr(datars.trial{triali}([65:67,71],:)');
+    %     r(r>-0.65)=0;
+    %     R=R+r;
+    % end
+    % R=R./triali;
+    
+    data.label{72}='HEOG';
+    data.label{73}='VEOG';
+    for triali=1:length(data.trial)
+        data.trial{triali}(72,:)=data.trial{triali}(64+1,:)-data.trial{triali}(64+2,:);
+        data.trial{triali}(73,:)=data.trial{triali}(64+3,:)-data.trial{triali}(64+7,:);
+    end
+    save([sub,'/bp.mat'],'data','cfg1','badChan','trialshp')
+else
+    load([sub,'/bp.mat'])
 end
-SD=median(SD,2);
-badChanI=find(SD>3*median(SD));
-badChan=data.label(badChanI);
-cfg=[];
-cfg.bpfilter='yes';
-cfg.bpfreq=[110 140];
-cfg.channel=1:64;
-datahp=ft_preprocessing(cfg,data);
-cfg=[];
-cfg.badChan=badChan;
-trialshp=badTrials(cfg,datahp,1);
-clear datahp
-cfg=[];
-cfg.bpfilter='yes';
-cfg.bpfreq=[1 40];
-cfg.trials=trialshp;
-data=ft_preprocessing(cfg,data);
-% R=zeros(4,4);
-% for triali=1:length(comp.trial)
-%     r=corr(datars.trial{triali}([65:67,71],:)');
-%     r(r>-0.65)=0;
-%     R=R+r;
-% end
-% R=R./triali;
 
-data.label{72}='HEOG';
-data.label{73}='VEOG';
-for triali=1:length(data.trial)
-    data.trial{triali}(72,:)=data.trial{triali}(64+1,:)-data.trial{triali}(64+2,:);
-    data.trial{triali}(73,:)=data.trial{triali}(64+3,:)-data.trial{triali}(64+7,:);
-end
-save([sub,'bp.mat'],'data','cfg1','badChan','trialshp')
-
-
-
+if ~exist([sub,'/comp.mat'],'file')
 cfg=[];
 %cfg.resamplefs = ;
 cfg.detrend    = 'no';
 %   cfg.demean     = 'no'
 datars=ft_resampledata(cfg,data);
+% list the channels to be used
+channel={'EEG'};
+if ~isempty(badChanI)
+    for chani=1:length(badChanI)
+        channel{1,chani+1}=['-',badChan{chani}];
+    end
+end
+% cfg=[];
+% cfg.method='summary';
+% cfg.channel=channel;
+% cfg.keepchannel='yes';
+% datars=ft_rejectvisual(cfg,datars)
+goodTrials=badTrials([],datars,1);
 
 cfg=[];
-cfg.method='summary';
-cfg.channel='EEG';
-cfg.keepchannel='yes';
-datars=ft_rejectvisual(cfg,datars)
-
-
-cfg=[];
-cfg.channel={'EEG','VEOG','HEOG',['-',badChan{1}]};
+cfg.channel=channel;
+%cfg.channel{end+1}='VEOG';
+%cfg.channel{end+1}='EXG3';
 cfg.method='pca';
+cfg.trials=goodTrials;
 comp=ft_componentanalysis(cfg,datars);
+save([sub,'/comp'],'comp')
+else
+    load([sub,'/comp.mat'])
+end
 % find horizontal component
+% check which component is most correlted with the eog channel
 R=zeros(20,1);
 for triali=1:length(comp.trial)
     R=R+corr(comp.trial{triali}(1:length(R),:)',datars.trial{triali}(73,:)');
 end
 R=R./triali;
-[~,compi]=max(abs(R))
-%badChanI=find(ismember(data.label,badChan{1}));
+[~,compi1]=max(abs(R));
+% the blink should be all positive or all negative component
+[~,compi2]=max(abs(sum(comp.topo(:,1:20)./abs(comp.topo(:,1:20)))));
+if compi1==compi2
+    compi=compi1;
+else
+    error('which is blink?')
+end
+
 topo=nan(64,1);
-[~,chani]=ismember(comp.topolabel,data.label);
-topo(chani)=comp.topo(:,1);
+[~,chani]=ismember(comp.topolabel(1:end-2),data.label);
+topo(chani)=comp.topo(1:end-2,compi);
 topoplotB64(topo)
 
-cfg=[];
-cfg.layout='biosemi64.lay';
-cfg.channel=comp.label(1:5);
-ft_databrowser(cfg,comp)
+% cfg=[];
+% cfg.layout='biosemi64.lay';
+% cfg.channel=comp.label(1:5);
+% ft_databrowser(cfg,comp)
+
+%FIXME - fix data bad channels trial by trial, correct blinks, reject more trials and average
+
 
 cfg=[];
 cfg.badChan=badChan;
