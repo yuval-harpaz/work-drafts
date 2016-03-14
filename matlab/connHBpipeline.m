@@ -26,6 +26,8 @@ connHBplot3 % also runs ttests
 connHBomega2
 connHB1_70
 
+connHBfig1
+
 
 
 

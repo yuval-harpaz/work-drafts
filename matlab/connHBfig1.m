@@ -37,6 +37,8 @@ for compi=3:-1:1
     C=colormap;
     colormap(flipud(C))
     %saveas(fig1,['/home/yuval/Dropbox/MEGpaper/fig1_',num2str(compi),'.png'])
+    %ylabel('Normalized amplitude','fontsize',20)
+    
     
 end
 %set(
@@ -47,3 +49,6 @@ hold on
 for compi=1:3
     plot(comp.time{1}(1:20345),comp.trial{1}(compi,1:20345)+(4-compi)*2e-13,'k','linewidth',2)
 end
+
+set(gca,'fontweight','bold','fontsize',20)
+xlabel('Time (s)')
