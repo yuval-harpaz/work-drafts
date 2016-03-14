@@ -2,9 +2,9 @@
 try
     cd ~/Data/Daniel
 catch
-    cd /media/yuval/a599eaa1-cc66-4429-9604-79d874cb2efc/home/yuval/Data/Daniel/609
+    cd /media/yuval/a599eaa1-cc66-4429-9604-79d874cb2efc/home/yuval/Data/Daniel
 end
-sub='609';
+sub='610';
 if ~exist([sub,'/bp.mat'],'file')
     DIR=dir([sub,'/*.bdf']);
     cfg1=[];
@@ -106,6 +106,7 @@ if ~exist([sub,'/comp.mat'],'file')
         compi=compi1;
         save([sub,'/comp'],'comp','compi')
     else
+        % FIXME ask which component is blink with figures
         error('which is blink?')
     end
 else
@@ -113,35 +114,98 @@ else
 end
 % find horizontal component
 % check which component is most correlted with the eog channel
-
-topo=nan(64,1);
-[~,chani]=ismember(comp.topolabel(1:end-2),data.label);
-topo(chani)=comp.topo(1:end-2,compi);
-topoplotB64(topo)
-
-% cfg=[];
-% cfg.layout='biosemi64.lay';
-% cfg.channel=comp.label(1:5);
-% ft_databrowser(cfg,comp)
-
-%FIXME - fix data bad channels trial by trial, correct blinks, reject more trials and average
-cfg=[];
-cfg.layout='biosemi64.lay';
-lay = ft_prepare_layout(cfg);
-sens = [];
-sens.label = lay.label;
-sens.pnt = lay.pos;
-sens.pnt(:,3) = 0;
-
-dataint=data;
-dataint.elec=sens;
-
-cfg.neighbourdist=0.15;
-cfg.badchannel={'T7'}; %check if it took the right channels around!
-cfg.trials=[1];   % the number of the channel might change
-intUNIT833=ft_channelrepair(cfg, intUNIT833);
-
-
+if ~exist([sub,'/datafinal.mat'],'file')
+    topo=nan(64,1);
+    [~,chani]=ismember(comp.topolabel,data.label);
+    topo(chani)=comp.topo(:,compi);
+    % topoplotB64(topo)
+    
+    % cfg=[];
+    % cfg.layout='biosemi64.lay';
+    % cfg.channel=comp.label(1:5);
+    % ft_databrowser(cfg,comp)
+    
+    %FIXME - fix data bad channels trial by trial, correct blinks, reject more trials and average
+    
+    % fix blink topography map
+    bad=find(isnan(topo));
+    topo(bad)=0;
+    load sens
+    load neib
+    
+    
+    data.elec=sens;
+    dataclean=data;
+    % make blink timecourse, not so good because of bad channels
+    for triali=1:length(data.trial)
+        blink(triali,1:size(data.trial{1},2))=topo'*data.trial{triali}(1:64,:);
+    end
+    % assess in which trials there are blink
+    for triali=1:length(data.trial)
+        bnk(triali,1)=sum(blink(triali,:)>200)>0;
+    end
+    % clean the data from blinks crudely, despite bad channels
+    for triali=1:length(data.trial)
+        if bnk(triali)
+            dataclean.trial{triali}(1:64,:)=data.trial{triali}(1:64,:)-topo*blink(triali,:);
+        end
+    end
+    topo(bad)=nan;
+    % fix blink topo
+    for badi=bad'
+        neibi=find(ismember(data.label(1:64),neib(badi).neighblabel));
+        topo(badi)=nanmean(topo(neibi));
+    end
+    % fix permanently bad channels
+    cfg=[];
+    cfg.neighbours=neib;
+    cfg.badchannel=data.label(bad); %check if it took the right channels around!
+    dataclean1=ft_channelrepair(cfg, data); % this is going to be the really clean data
+    badThreshold=150;
+    for chani=1:64
+        for triali=1:length(data.trial)
+            SDchan(chani,triali)=std(dataclean.trial{triali}(chani,:)');
+            %check if it took the right channels around!
+            %cfg.trials=[1];
+        end
+        badTrl=find(SDchan(chani,:)>badThreshold);
+        if ~isempty(badTrl);
+            %BAD=unique(bad,
+            cfg.badchannel=data.label(chani);
+            cfg.trials=badTrl;
+            dataclean2=ft_channelrepair(cfg, dataclean1); % this has few fixed trials
+            dataclean1.trial(badTrl)=data.trial; % plant the fixed trials in dataclean1
+        end
+    end
+    figure;plot(SDchan');
+    
+    % correct blinks again, on repaired data
+    for triali=1:length(data.trial)
+        blink(triali,1:size(dataclean1.trial{1},2))=topo'*dataclean1.trial{triali}(1:64,:);
+    end
+    % assess in which trials there are blink
+    % for triali=1:length(dataclean1.trial)
+    %     bnk(triali,1)=sum(blink(triali,:)>200)>0;
+    % end
+    dataclean2=dataclean1;
+    for triali=1:length(data.trial)
+        if bnk(triali)
+            dataclean2.trial{triali}(1:64,:)=dataclean1.trial{triali}(1:64,:)-topo*blink(triali,:);
+        end
+    end
+    
+    cfg=[];
+    cfg.reref='yes';
+    cfg.refchannel=1:64;
+    cfg.channel=1:64;
+    datafinal=ft_preprocessing(cfg,dataclean2);
+    trials=badTrials([],datafinal,1)
+    cfg=[];
+    cfg.trials=trials;
+    avg=ft_timelockanalysis(cfg,datafinal);
+    figure;plot(avg.time,avg.avg(1:64,:)','b')
+    save ([sub,'/datafinal.mat'],'datafinal')
+end
 % cfg=[];
 % cfg.badChan=badChan;
 % trials=badTrials(cfg,data,1);
