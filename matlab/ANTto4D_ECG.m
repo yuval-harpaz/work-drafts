@@ -34,7 +34,7 @@ if ~exist('eeg.mat','file')
     eeg=readCNT(cfg);
     display('saving eeg ft structure')
     save eeg eeg
-else   
+else
     display('loading eeg.mat')
     load eeg.mat
 end
@@ -124,52 +124,54 @@ end
 pdf=pdf4D([run,'/',megFN]);
 header = get(pdf, 'Header');
 chi=channel_index(pdf,'ECG','label');
-chn = channel_name(pdf, chi);
-config = get(pdf, 'config');
-
-chan_no = header.channel_data{chi}.chan_no;
-scale = config.channel_data{chan_no}.units_per_bit; %#ok<AGROW>
-
-scFac=round(log10(median(scale)));
-rsEEGsc=rsEEG*10^scFac;
-% scale according to range of data (quartiles) to fit short format
-qrtl=quantile(rsEEG',[0.25 0.75]);
-qrScale=10*mean(abs(median(qrtl')));
-fac=(2^15-1)./qrScale;
-facP=floor(log10(fac)-1);
-rsEEGsc=rsEEGsc*10^facP;
-% cleanup and writing to file
-clear eeg mMat 
-display('writing eeg to a new MEG file')
-rewritePDF(rsEEGsc,chn,[run,'/',megFN]);
-clear rsEEGsc rsEEG
-%% comparing eeg and meg
-display('plotting')
-cfg=[];
-cfg.channel= chn; 
-cfg.dataset=[run,'/rw_',megFN];
-cfg.trl=[1, hdrMEG.nSamples ,0]; %
-% if hdrMEG.nSamples>1017250
-%     cfg.trl=[1,1017250,0]; %take 1000sec or else RAM overflows
-%     display('only taking 1000sec')
-% end
-cfg.demean='yes';
-cfg.feedback='none';
-% cfg.bpfilter='yes';
-% cfg.bpfreq=[1 40];
-ECG=ft_preprocessing(cfg);
-
-ECG = ECG.trial{1,1};
-
-cfg.channel = {'MEG'};
-meg=ft_preprocessing(cfg);
-time=meg.time{1,1};
-megECG=mean(meg.trial{1,1});
-clear meg
-% check sync of EEG and MEG
-figure;
-plot(time,ECG/max(abs(ECG)),'g');hold on;plot(time,megECG/max(abs(megECG)))
-legend('ECG', 'mean MEG')
-
-corrEcgMeg = corrcoef(ECG(1:10000), megECG(1:10000));
+if ~isempty(chi)
+    chn = channel_name(pdf, chi);
+    config = get(pdf, 'config');
+    
+    chan_no = header.channel_data{chi}.chan_no;
+    scale = config.channel_data{chan_no}.units_per_bit; %#ok<AGROW>
+    
+    scFac=round(log10(median(scale)));
+    rsEEGsc=rsEEG*10^scFac;
+    % scale according to range of data (quartiles) to fit short format
+    qrtl=quantile(rsEEG',[0.25 0.75]);
+    qrScale=10*mean(abs(median(qrtl')));
+    fac=(2^15-1)./qrScale;
+    facP=floor(log10(fac)-1);
+    rsEEGsc=rsEEGsc*10^facP;
+    % cleanup and writing to file
+    clear eeg mMat
+    display('writing eeg to a new MEG file')
+    rewritePDF(rsEEGsc,chn,[run,'/',megFN]);
+    clear rsEEGsc rsEEG
+    %% comparing eeg and meg
+    display('plotting')
+    cfg=[];
+    cfg.channel= chn;
+    cfg.dataset=[run,'/rw_',megFN];
+    cfg.trl=[1, hdrMEG.nSamples ,0]; %
+    % if hdrMEG.nSamples>1017250
+    %     cfg.trl=[1,1017250,0]; %take 1000sec or else RAM overflows
+    %     display('only taking 1000sec')
+    % end
+    cfg.demean='yes';
+    cfg.feedback='none';
+    % cfg.bpfilter='yes';
+    % cfg.bpfreq=[1 40];
+    ECG=ft_preprocessing(cfg);
+    
+    ECG = ECG.trial{1,1};
+    
+    cfg.channel = {'MEG'};
+    meg=ft_preprocessing(cfg);
+    time=meg.time{1,1};
+    megECG=mean(meg.trial{1,1});
+    clear meg
+    % check sync of EEG and MEG
+    figure;
+    plot(time,ECG/max(abs(ECG)),'g');hold on;plot(time,megECG/max(abs(megECG)))
+    legend('ECG', 'mean MEG')
+    
+    corrEcgMeg = corrcoef(ECG(1:10000), megECG(1:10000));
+end
 
