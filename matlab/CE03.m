@@ -4,7 +4,7 @@ try
 catch
     cd /media/yuval/a599eaa1-cc66-4429-9604-79d874cb2efc/home/yuval/Data/Daniel
 end
-sub='610';
+sub='602';
 if ~exist([sub,'/bp.mat'],'file')
     DIR=dir([sub,'/*.bdf']);
     cfg1=[];
@@ -174,7 +174,7 @@ if ~exist([sub,'/datafinal.mat'],'file')
             cfg.badchannel=data.label(chani);
             cfg.trials=badTrl;
             dataclean2=ft_channelrepair(cfg, dataclean1); % this has few fixed trials
-            dataclean1.trial(badTrl)=data.trial; % plant the fixed trials in dataclean1
+            dataclean1.trial(badTrl)=dataclean2.trial; % plant the fixed trials in dataclean1
         end
     end
     figure;plot(SDchan');
