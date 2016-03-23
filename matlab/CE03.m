@@ -1,10 +1,12 @@
 %% define trials
+clear
+close all
 try
     cd ~/Data/Daniel
 catch
     cd /media/yuval/a599eaa1-cc66-4429-9604-79d874cb2efc/home/yuval/Data/Daniel
 end
-sub='602';
+sub='604';
 if ~exist([sub,'/bp.mat'],'file')
     DIR=dir([sub,'/*.bdf']);
     cfg1=[];
@@ -64,8 +66,12 @@ if ~exist([sub,'/bp.mat'],'file')
     save([sub,'/bp.mat'],'data','cfg1','badChan','trialshp')
 else
     load([sub,'/bp.mat'])
+    if isempty(badChan)
+        badChanI=[];
+    else
+        badChanI=find(ismember(data.label,badChan));
+    end
 end
-
 if ~exist([sub,'/comp.mat'],'file')
     cfg=[];
     %cfg.resamplefs = ;
@@ -93,21 +99,35 @@ if ~exist([sub,'/comp.mat'],'file')
     cfg.method='pca';
     cfg.trials=goodTrials;
     comp=ft_componentanalysis(cfg,datars);
-    
+    % find correlation between VEOG and components
     R=zeros(20,1);
     for triali=1:length(comp.trial)
         R=R+corr(comp.trial{triali}(1:length(R),:)',datars.trial{triali}(73,:)');
     end
     R=R./triali;
     [~,compi1]=max(abs(R));
+    % now for HEOG
+    R1=zeros(20,1);
+    for triali=1:length(comp.trial)
+        R1=R1+corr(comp.trial{triali}(1:length(R1),:)',datars.trial{triali}(72,:)');
+    end
+    R1=R1./triali;
+    
     % the blink should be all positive or all negative component
     [~,compi2]=max(abs(sum(comp.topo(:,1:20)./abs(comp.topo(:,1:20)))));
     if compi1==compi2
         compi=compi1;
         save([sub,'/comp'],'comp','compi')
     else
-        % FIXME ask which component is blink with figures
-        error('which is blink?')
+        
+        disp('which is blink?')
+        cfg=[];
+        cfg.layout='biosemi64.lay';
+        cfg.channel=comp.label(1:5);
+        ft_databrowser(cfg,comp)
+        str=inputdlg('which comp is blink?');
+        compi=str2num(str);
+        save([sub,'/comp'],'comp','compi')
     end
 else
     load([sub,'/comp.mat'])
