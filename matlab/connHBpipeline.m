@@ -26,8 +26,10 @@ connHBplot3 % also runs ttests
 connHBomega2
 connHB1_70
 
-connHBfig1
-
-
-
+connHBfig1 % ICA
+connHBfig2 % accelerometers
+connHBfig3 % small / large
+connHBfig4 % xcorr
+connHBfig5 % 25-70Hz
+connHBfig6 % 1-70Hz
 
