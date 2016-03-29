@@ -1,5 +1,5 @@
 %% define trials
-sub='601';
+sub='603';
 DIR=dir([sub,'*.bdf']);
 cfg1=[];
 cfg1.dataset=[DIR.name]; %change for each subject
@@ -100,7 +100,7 @@ goodTrials=badTrials(cfg,datars,1);
 % run component analysis
 cfg=[];
 cfg.channel=channel;
-cfg.method='pca';
+%cfg.method='pca';
 cfg.trials=goodTrials;
 comp=ft_componentanalysis(cfg,datars);
 
@@ -110,7 +110,7 @@ cfg.layout='biosemi64.lay';
 cfg.channel=comp.label(1:5);
 ft_databrowser(cfg,comp)
 % choose which component (or components) to reject
-compi=[2];
+compi=[1];
 save comp comp compi
 
 %% correct bad channels for single trials (and later blinks)
