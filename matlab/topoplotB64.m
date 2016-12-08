@@ -6,7 +6,9 @@ if ~exist ('cfg','var')
 end
 cfg.layout='biosemi64.lay';
 cfg.interactive='yes';
-load ~/work-drafts/matlab/bios64
+pth=which('topoplotB64');
+pth=pth(1:length(pth)-length('topoplotB64.m'));
+load ([pth,'bios64'])
 bios64.avg(:,1)=vec;
 nans=find(isnan(vec));
 if ~isempty(nans)
