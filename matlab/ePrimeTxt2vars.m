@@ -7,7 +7,8 @@ function [T,headervars]=eprimetxt2vars(ifile,xlsxFile)
 % you can get your RT like this: Wait1__RT=cell2mat(T.Wait1__RT)
 % headervars is a cell array with subject, session etc. If you write xlsx
 % it should appear as a seperate sheet
- 
+% Author - Yuval Harpaz, 2016
+% see on here https://github.com/yuval-harpaz/
 T=[];
 % get header variables
 fid = fopen(ifile);
