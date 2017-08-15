@@ -7,8 +7,7 @@ function [T,headervars]=eprimetxt2vars(ifile,xlsxFile)
 % you can get your RT like this: Wait1__RT=cell2mat(T.Wait1__RT)
 % headervars is a cell array with subject, session etc. If you write xlsx
 % it should appear as a seperate sheet
-% Author - Yuval Harpaz, 2016
-% see on here https://github.com/yuval-harpaz/
+ 
 T=[];
 % get header variables
 fid = fopen(ifile);
@@ -121,7 +120,8 @@ end
 eval(['T=table(',str(2:end),');'])
 % convert numeric strings
 try
-    disp('converting numbers')
+    disp(['converting numbers, pass 1 of 2, (',num2str(size(T,2)),' vars):  '])
+    fprintf('\b')
     for vari=1:size(T,2)
         rowMark=[];
         for rowi=1:size(T,1)
@@ -129,8 +129,11 @@ try
             rowMark(rowi)=numCell | isempty(T{rowi,vari}{1});
         end
         varIsNumeric(vari)=all(rowMark);
+        prog(vari)
     end
-    
+    fprintf('\n')
+    disp(['converting numbers, pass 2 of 2, (',num2str(size(T,2)),' vars):  '])
+    fprintf('\b')
     for vari=find(varIsNumeric)
         var={};
         for rowi=1:size(T,1)
@@ -141,14 +144,19 @@ try
             end
         end
         T(:,vari)=var;
+        prog(vari)
     end
 catch
     disp('failed converting numbers')
 end
 % get rid of returns
 try
-    disp('removing returns and first char spaces')
+    fprintf('\n')
+    disp(['removing returns and first char spaces (',num2str(length(find(~varIsNumeric))),'):  '])
+    fprintf('\b')
+    count=0;
     for vari=find(~varIsNumeric)
+        count=count+1;
         var={};
         for rowi=1:size(T,1)
             if isempty(T{rowi,vari}{1})
@@ -162,6 +170,7 @@ try
             var(rowi,1)={str1};
         end
         T(:,vari)=var;
+        prog(count);
     end
 catch
     disp('failed removing returns and spaces')
@@ -181,4 +190,14 @@ if nargin>1
     end
     warning on
 end
+fprintf('\n')
 disp('done')
+
+function prog(ii)
+% display progress of a loop, uses backspace  \b to stay on one line
+if ii==1
+    fprintf(num2str(ii))
+else
+    txt=[repmat('\b',1,length(num2str(ii-1))),num2str(ii)];
+    fprintf(txt)
+end
